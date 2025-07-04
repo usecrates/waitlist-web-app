@@ -180,64 +180,67 @@ export default function Home() {
           </div>
         </div>
       </header>
+      <section className="w-full flex-1 flex items-center justify-center px-6 pt-32 pb-16 border-t border-gray-800">
+  <div className="grid md:grid-cols-2 gap-10 max-w-6xl w-full items-center  rounded-lg p-8">
+    
+    <motion.div
+      initial={{ opacity: 0, x: -40 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.6 }}
+      className="border-r border-gray-700 pr-6"
+    >
+      <h1 className="text-7xl md:text-7xl font-chakra font-semibold leading-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">
+        Invest Like the <br /> Insiders
+      </h1>
+      <p className="text-gray-400 text-xl mt-4 mb-6 font-ropa">
+        Buy curated crates of US stocks based on real politician holdings.
+      </p>
 
-      <section className=" w-full flex-1 flex items-center justify-center px-6 pt-32 pb-16">
-        <div className="grid md:grid-cols-2 gap-10 max-w-6xl w-full items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h1 className="text-7xl md:text-7xl font-chakra font-semibold leading-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">
-              Invest Like the <br /> Insiders
-            </h1>
-            <p className="text-gray-400 text-xl mt-4 mb-6 font-ropa">
-              Buy curated crates of US stocks based on real politician holdings.
-            </p>
+      <div className="flex flex-col sm:flex-row items-center w-1/1 gap-3 sm:gap-0  rounded overflow-hidden">
+        <input
+          type="email"
+          placeholder="you@example.com"
+          name="email"
+          value={email}
+          onChange={handleEmailChange}
+          required
+          className="bg-[#1e1e1e] w-2/3 text-white placeholder-gray-500 px-4 py-3 font-chakra outline-none"
+        />
+        <button
+          onClick={handleWaitlistSubmit}
+          className="bg-white text-black px-6 py-3 font-medium font-ropa"
+        >
+          Join Waitlist
+        </button>
+      </div>
 
-            <div className="flex flex-col sm:flex-row items-center w-1/1 gap-3 sm:gap-0">
-              <input
-                type="email"
-                placeholder="you@example.com"
-                name="email"
-                value={email}
-                onChange={handleEmailChange}
-                required
-                className="bg-[#1e1e1e] w-2/3 text-white placeholder-gray-500 px-4 py-3 rounded-l sm:w-auto font-chakra outline-none"
-              />
-              <button
-                onClick={handleWaitlistSubmit}
-                className="bg-white text-black px-6 py-3 rounded-r font-medium font-ropa"
-              >
-                Join Waitlist
-              </button>
-            </div>
+      <p className="text-md text-gray-400 mt-3 font-ropa">
+        Already have invite code?
+        <span
+          onClick={handleInviteCodeModalOpen}
+          className="text-blue-500 mx-2 cursor-pointer"
+        >
+          Click here
+        </span>
+      </p>
+    </motion.div>
 
-            <p className="text-md text-gray-400 mt-3 font-ropa">
-              Already have invite code?{" "}
-              <span
-                onClick={handleInviteCodeModalOpen}
-                className="text-blue-500 mx-2 cursor-pointer"
-              >
-                Click here
-              </span>
-            </p>
-          </motion.div>
+    {/* RIGHT: Image */}
+    <motion.div
+      initial={{ opacity: 0, x: 40 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.6, delay: 0.2 }}
+      className="flex justify-center"
+    >
+      <img
+        src="/assets/logo.jpg"
+        alt="crate visual"
+        className="w-full max-w-md  rounded-lg"
+      />
+    </motion.div>
+  </div>
+</section>
 
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex justify-center"
-          >
-            <img
-              src="/assets/logo.jpg"
-              alt="crate visual"
-              className="w-full max-w-md"
-            />
-          </motion.div>
-        </div>
-      </section>
 
       <AnimatePresence mode="wait">
         {isInviteCodeModalOpen && (
@@ -248,7 +251,7 @@ export default function Home() {
           >
             <motion.div
               {...modalVariants}
-              className="bg-black dark:transparent backdrop-blur-lg  p-8 max-w-md w-full shadow-2xl border border-gray-700"
+              className="bg-black dark:transparent backdrop-blur-lg  p-8 max-w-md w-full shadow-2xl "
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-end mb-6">
