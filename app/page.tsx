@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { useWaitlist } from "@/hooks/useWaitlist";
 import { useCheckWaitlist } from "@/hooks/useCheckWaitlist";
 import Navbar from "@/components/commons/navbar";
+import  Footer  from "@/components/commons/footer";
 // Memoized components
 const MemoizedAnimatedBackground = React.memo(AnimatedBackground);
 
@@ -241,6 +242,7 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
+      <Footer/>
     </main>
   );
 }

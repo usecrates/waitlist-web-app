@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/commons/navbar";
+import Footer from "@/components/commons/footer";
 
 export default function LaunchPage() {
   const [search, setSearch] = useState("");
@@ -132,7 +133,6 @@ export default function LaunchPage() {
           />
         </div>
 
-        {/* Crates List */}
         <div className="grid md:grid-cols-3 gap-6">
           {crates.map((crate, i) => (
             <motion.div
@@ -186,8 +186,7 @@ export default function LaunchPage() {
           ))}
         </div>
 
-        {/* Coming Soon */}
-        <div className="text-center mt-20">
+        <div className="text-center mt-20 mb-10">
           <h3 className="text-lg font-ropa text-white">
             More Crates Coming Soon
           </h3>
@@ -196,6 +195,7 @@ export default function LaunchPage() {
             investors and influencers
           </p>
         </div>
+        <Footer/>
       </section>
     </main>
   );
