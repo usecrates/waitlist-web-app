@@ -1,15 +1,26 @@
-// context/UserContext.tsx
-import { createContext, useContext, useState, useEffect } from "react";
+"use client";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-const UserContext = createContext(null);
+interface UserContextType {
+  user: any;
+  setUser: React.Dispatch<React.SetStateAction<any>>;
+}
 
-export function UserProvider({ children }) {
+const UserContext = createContext<UserContextType | undefined>(undefined);
+
+interface UserProviderProps {
+  children: ReactNode;
+}
+
+export function UserProvider({ children }: UserProviderProps) {
   const [user, setUser] = useState(null);
+
   const fetchUser = async () => {
     const res = await fetch("/api/user");
     const data = await res.json();
     setUser(data);
   };
+
   useEffect(() => {
     fetchUser();
   }, []);
@@ -21,4 +32,10 @@ export function UserProvider({ children }) {
   );
 }
 
-export const useUser = () => useContext(UserContext);
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (!context) {
+    throw new Error("useUser must be used within a UserProvider");
+  }
+  return context;
+};

@@ -9,7 +9,7 @@ function PrivyProviderWrapper({ children }: { children: ReactNode }) {
     <StrictMode>
       <PrivyProvider
         appId={
-          process.env.NEXT_PUBLIC_PRIVY_APP_ID
+          process.env.NEXT_PUBLIC_PRIVY_APP_ID!
         }
         config={{
           appearance: {

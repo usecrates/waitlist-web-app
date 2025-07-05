@@ -1,7 +1,7 @@
-import axios, {  AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 // Base URL for the backend (Update with your actual backend URL)
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1/";
+  process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8080/api/v1/";
 // Create a default Axios instance for normal JSON requests
 const api = axios.create({
   baseURL: BASE_URL,
