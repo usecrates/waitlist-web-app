@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import Navbar from "@/components/commons/navbar";
+import Navbar from "@/components/commons/launch-navbar";
 import Footer from "@/components/commons/footer";
 
 export default function LaunchPage() {
