@@ -5,17 +5,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
 import { AnimatedBackground } from "@/components/animated-background";
-import { MobileMenu } from "@/components/mobile-menu";
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
-import LoginButton from "@/components/LoginButton";
 import { toast } from "sonner";
 import { useWaitlist } from "@/hooks/useWaitlist";
 import { useCheckWaitlist } from "@/hooks/useCheckWaitlist";
+import Navbar from "@/components/commons/navbar";
 // Memoized components
 const MemoizedAnimatedBackground = React.memo(AnimatedBackground);
-const MemoizedMobileMenu = React.memo(MobileMenu);
+
 
 // Animation variants
 const fadeInVariants = {
@@ -151,35 +151,8 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-start bg-black ">
       <MemoizedAnimatedBackground />
 
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 flex items-center justify-between px-6 py-4 z-10 bg-black  backdrop-blur-sm">
-        <div className="flex-1 flex items-center justify-start">
-          <Link href="/">
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-xl font-ropa font-semibold uppercase bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-200"
-            >
-              Use Crates
-            </motion.div>
-          </Link>
-        </div>
-
-        <div className="flex-1 flex items-center justify-end space-x-4">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="hidden md:flex items-center space-x-1 px-4 py-2 backdrop-blur-sm"
-          >
-            <LoginButton />
-          </motion.div>
-          <div className="md:hidden">
-            <MemoizedMobileMenu />
-          </div>
-        </div>
-      </header>
+      <Navbar />
+     
       <section className="w-full flex-1 flex items-center justify-center px-6 pt-32 pb-16 border-t border-gray-800">
   <div className="grid md:grid-cols-2 gap-10 max-w-6xl w-full items-center  rounded-lg p-8">
     
