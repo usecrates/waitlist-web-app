@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
-
 export default function SingleCrate() {
   return (
     <main className="px-6 py-20 max-w-6xl mx-auto text-white space-y-10">

@@ -49,7 +49,7 @@ export function MobileMenu() {
                   <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
                     <User className="w-4 h-4 text-green-800 dark:text-green-200" />
                   </div>
-                  <span className="font-medium text-gray-900 dark:text-white">Euclid User</span>
+                  <span className="font-medium text-gray-900 dark:text-white">Crate User</span>
                 </div>
                 <div className="flex items-center gap-2">
                   {/* <ThemeToggle /> */}
