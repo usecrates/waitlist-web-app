@@ -3,17 +3,14 @@ import { Copy } from "lucide-react";
 import { toast } from "sonner";
 
 export default function LoginButton() {
-  const { login, logout, address, authenticated, loading } = usePrivyAuth();
-
+  const { customizeLogin, logout, address, authenticated, loading } = usePrivyAuth();
   const shortAddress = address ? `${address.slice(0, 4)}...${address.slice(-4)}` : "";
-
   const copyToClipboard = async () => {
     if (address) {
       await navigator.clipboard.writeText(address);
       toast("Address Copied!", { className: "font-ropa", duration: 5000 });
     }
   };
-
   return (
     <div className="flex flex-col items-center gap-2">
       {authenticated && address ? (
@@ -26,7 +23,7 @@ export default function LoginButton() {
           </button>
         </div>
       ) : (
-        <button onClick={login} disabled={loading} className="bg-black dark:bg-white font-ropa text-white px-4 py-2 font-medium text-md">
+        <button onClick={customizeLogin} disabled={loading} className="bg-black dark:bg-white font-ropa text-white px-4 py-2 font-medium text-md">
           {loading ? "Logging in..." : "Wallet Connect"}
         </button>
       )}

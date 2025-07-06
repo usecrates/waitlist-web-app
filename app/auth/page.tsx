@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback, useMemo } from "react";
+import React, { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
@@ -12,6 +12,7 @@ import { X } from "lucide-react";
 import { toast } from "sonner";
 import { useWaitlist } from "@/hooks/useWaitlist";
 import { useCheckWaitlist } from "@/hooks/useCheckWaitlist";
+import { useRouter } from "next/router";
 // Memoized components
 
 // Animation variants
@@ -38,6 +39,17 @@ export default function Home() {
   const { checkWaitlist } = useCheckWaitlist();
   const [inviteCode, setInviteCode] = useState(["", "", "", ""]);
   const [isInviteCodeModalOpen, setIsInviteCodeModalOpen] = useState(false);
+
+  const router = useRouter();
+  useEffect(() => {
+    const isVerified = localStorage.getItem("isVerified");
+    console.log(isVerified, address, "address");
+    if (isVerified === "true" && address) {
+      router.push("/launch");
+    } else {
+      router.push("/auth");
+    }
+  }, [address])
   const handleCodeInput = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number

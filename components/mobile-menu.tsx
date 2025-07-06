@@ -5,14 +5,11 @@ import Link from "next/link"
 import { AnimatePresence, motion } from "framer-motion"
 import { Menu, X, ChevronRight, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
 const menuItems = [
   { href: "/", label: "Home" },
 ]
-
 export function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false)
-
   const toggleMenu = () => setIsOpen(!isOpen)
   const closeMenu = () => setIsOpen(false)
 

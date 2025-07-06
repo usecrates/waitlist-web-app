@@ -1,5 +1,8 @@
 "use client";
+
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { usePrivy } from "@privy-io/react-auth";
+import axios from "axios";
 
 interface UserContextType {
   user: any;
@@ -14,16 +17,29 @@ interface UserProviderProps {
 
 export function UserProvider({ children }: UserProviderProps) {
   const [user, setUser] = useState(null);
+  const { user: privyUser, ready, authenticated } = usePrivy();
 
   const fetchUser = async () => {
-    const res = await fetch("/api/user");
-    const data = await res.json();
-    setUser(data);
+    try {
+      if (!ready || !authenticated || !privyUser?.wallet?.address) return;
+
+      const wallet = privyUser.wallet.address;
+      const res = await axios.get(
+        `http://localhost:8080/api/v1/waitlist/check?wallet=${wallet}`
+      );
+      setUser(res.data?.data);
+
+      if (res.data?.data?.isVerified) {
+        localStorage.setItem("isVerified", "true");
+      }
+    } catch (err) {
+      console.error("Failed to fetch waitlist user:", err);
+    }
   };
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [ready, authenticated, privyUser]);
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
