@@ -53,8 +53,8 @@ export default function RootLayout({
               {" "}
               <PrivyProviderWrapper>
                 <PrivyAuthProvider>
-                  {" "}
-                  {children}{" "}
+                  
+                  {children}
                   <Toaster
                     position="top-center"
                     toastOptions={{
@@ -65,7 +65,7 @@ export default function RootLayout({
                         borderRadius:"0px"
                       },
                     }}
-                  />{" "}
+                  />
                 </PrivyAuthProvider>
               </PrivyProviderWrapper>
             </Suspense>
