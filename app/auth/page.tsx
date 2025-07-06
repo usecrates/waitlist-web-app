@@ -12,8 +12,8 @@ import { X } from "lucide-react";
 import { toast } from "sonner";
 import { useWaitlist } from "@/hooks/useWaitlist";
 import { useCheckWaitlist } from "@/hooks/useCheckWaitlist";
-import { useRouter } from "next/router";
-// Memoized components
+import { useRouter } from "next/navigation";
+
 
 // Animation variants
 const fadeInVariants = {
