@@ -28,7 +28,7 @@ export function MobileMenu() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-sm z-40"
+              className="fixed inset-0 bg-[#0e0e0e]/20 dark:bg-[#0e0e0e]/40 backdrop-blur-sm z-40"
               onClick={closeMenu}
             />
 
@@ -73,7 +73,7 @@ export function MobileMenu() {
               <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <Button
                   onClick={closeMenu}
-                  className="w-full bg-black dark:bg-white dark:text-black text-white py-6 rounded-xl text-base font-medium transition-all duration-200 hover:scale-[0.98] active:scale-[0.97] hover:bg-gray-800 dark:hover:bg-gray-200"
+                  className="w-full bg-[#0e0e0e] dark:bg-white dark:text-black text-white py-6 rounded-xl text-base font-medium transition-all duration-200 hover:scale-[0.98] active:scale-[0.97] hover:bg-gray-800 dark:hover:bg-gray-200"
                 >
                   Join Beta Waitlist
                 </Button>

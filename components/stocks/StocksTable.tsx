@@ -56,7 +56,7 @@ const stocks: Stock[] = [
 
 export function StocksTable() {
   return (
-    <div className="mt-8 rounded-xl border border-gray-700 font-ropa bg-black">
+    <div className="mt-8 rounded-xl border border-gray-700 font-ropa bg-[#0e0e0e]">
       <DataTable columns={columns} data={stocks} />
     </div>
   );

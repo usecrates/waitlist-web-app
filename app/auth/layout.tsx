@@ -10,7 +10,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-start bg-black ">
+    <main className="flex min-h-screen flex-col items-center justify-start bg-[#0e0e0e] ">
       <MemoizedAnimatedBackground />
       <Navbar />
       {children}

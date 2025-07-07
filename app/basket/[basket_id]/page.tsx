@@ -43,7 +43,7 @@ export default function SingleCrate() {
 
       <div className="w-full flex gap-10 mt-0">
         <div className="w-2/3 flex flex-col space-y-6">
-          <Tabs defaultValue="overview" className="bg-black">
+          <Tabs defaultValue="overview" className="bg-[#0e0e0e]">
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="stocks">Stocks & ETFs</TabsTrigger>

@@ -123,7 +123,7 @@ export default function LaunchPage() {
          value={search}
          onChange={(e) => setSearch(e.target.value)}
          placeholder="Search crates"
-         className="ml-auto w-64 bg-black border border-gray-700 text-white"
+         className="ml-auto w-64 bg-[#0e0e0e] border border-gray-700 text-white"
        />
      </div>
 

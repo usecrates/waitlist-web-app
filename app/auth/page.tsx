@@ -220,12 +220,12 @@ export default function Home() {
         {isInviteCodeModalOpen && (
           <motion.div
             {...fadeInVariants}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-[#0e0e0e] bg-opacity-50 flex items-center justify-center p-4 z-50"
             onClick={handleInviteCodeModalOpen}
           >
             <motion.div
               {...modalVariants}
-              className="bg-black dark:transparent backdrop-blur-lg  p-8 max-w-md w-full shadow-2xl "
+              className="bg-[#0e0e0e] dark:transparent backdrop-blur-lg  p-8 max-w-md w-full shadow-2xl "
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-end mb-6">

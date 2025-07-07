@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const MemoizedMobileMenu = React.memo(MobileMenu);
 const Navbar = () => {
   return (
-    <header className="fixed top-0 left-0 right-0 flex items-center justify-between px-6 py-4 z-10 bg-black  backdrop-blur-sm">
+    <header className="fixed top-0 left-0 right-0 flex items-center justify-between px-6 py-4 z-10 bg-[#0e0e0e]  backdrop-blur-sm">
     <div className="flex-1 flex items-center justify-start">
       <Link href="/">
         <motion.div

@@ -37,7 +37,7 @@ export function DataTable<TData, TValue>({
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody className="bg-black">
+        <TableBody className="bg-[#0e0e0e]">
           {table.getRowModel().rows.map((row) => (
             <TableRow key={row.id} className="hover:bg-gray-900 transition">
               {row.getVisibleCells().map((cell) => (

@@ -11,7 +11,7 @@ import { Suspense } from "react"
 
 export default function NotFound() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-start bg-black font-ropa dark:bg-gray-900">
+    <main className="flex min-h-screen flex-col items-center justify-start bg-[#0e0e0e] font-ropa dark:bg-gray-900">
       <AnimatedBackground />
     
       <header className="fixed top-0 left-0 right-0 flex items-center justify-between px-6 py-4 z-10 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-sm">
@@ -68,7 +68,7 @@ export default function NotFound() {
             >
               <Link href="/">
                 <Button
-                  className="bg-black dark:bg-white dark:text-black text-white px-8 py-6 rounded-2xl text-xl font-medium transition-all duration-300 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] hover:bg-gray-800 dark:hover:bg-gray-200 flex items-center gap-3"
+                  className="bg-[#0e0e0e] dark:bg-white dark:text-black text-white px-8 py-6 rounded-2xl text-xl font-medium transition-all duration-300 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] hover:bg-gray-800 dark:hover:bg-gray-200 flex items-center gap-3"
                 >
                   <Home className="w-6 h-6" />
                   Back to Home
