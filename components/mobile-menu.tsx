@@ -38,7 +38,12 @@ export function MobileMenu() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="fixed top-4 right-4 left-4 bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 z-50 border border-gray-200/50 dark:border-gray-700/50"
+              className="fixed top-4 right-4 left-4 bg-[#181C2A] rounded-2xl shadow-xl p-6 z-50 border"
+              style={{
+                borderWidth: '3px',
+                borderStyle: 'solid',
+                borderImage: 'linear-gradient(180deg, #2B00FF 0%, #FFFFFF 7.09%, #2B00FF 16.02%, #FF4C4C 29.77%, #FFFFFF 42.52%, #FF4C4C 54.15%, #FFFFFF 64.67%) 1',
+              }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-6">
@@ -73,7 +78,10 @@ export function MobileMenu() {
               <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <Button
                   onClick={closeMenu}
-                  className="w-full bg-[#0e0e0e] dark:bg-white dark:text-black text-white py-6 rounded-xl text-base font-medium transition-all duration-200 hover:scale-[0.98] active:scale-[0.97] hover:bg-gray-800 dark:hover:bg-gray-200"
+                  className="w-full text-white font-bold rounded-xl text-base py-6 px-0 border-none shadow-none transition-all duration-200 hover:scale-[0.98] active:scale-[0.97]"
+                  style={{
+                    background: 'linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)',
+                  }}
                 >
                   Join Beta Waitlist
                 </Button>

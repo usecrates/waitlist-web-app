@@ -156,30 +156,29 @@ export default function Home() {
 
   return (
     <>
-      <section className="w-full  flex-1 flex items-center justify-center pt-32 pb-16 border-gray-800">
-        <div className="grid md:grid-cols-2 gap-10 max-w-6xl w-full items-center rounded-lg p-8 mx-auto px-8">
+      <section className="w-full flex-1 flex items-center justify-center sm:pt-5 pt-20 pb-5 border-gray-800">
+        <div className="flex flex-col-reverse md:grid md:grid-cols-2 gap-8 md:gap-10 max-w-6xl w-full items-center rounded-lg p-4 sm:p-8 mx-auto">
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="border-r border-gray-700 pr-6"
+            className="pr-0 md:pr-6"
           >
             <h1
-              className="font-chakra font-semibold text-[72px] leading-[100%] tracking-[-0.02em] bg-clip-text text-transparent"
+              className="font-chakra font-semibold text-4xl sm:text-5xl md:text-[72px] leading-[110%] tracking-[-0.02em] bg-clip-text text-transparent"
               style={{
                 background: 'linear-gradient(94.58deg, #7B7B7B 0.8%, #EBEBEB 27.81%, #7B7B7B 44.32%, #EBEBEB 64.8%, #7B7B7B 86.02%)',
-
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}
             >
               Invest Like the <br /> Insiders
             </h1>
-            <p className="text-[#A0A0A0] text-xl mt-4 mb-6 font-chakra">
+            <p className="text-[#A0A0A0] text-base sm:text-lg md:text-xl mt-4 mb-6 font-chakra">
               Buy curated crates of US stocks based on real politician holdings.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center w-1/1 gap-3 sm:gap-0  rounded overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-center w-full gap-3 sm:gap-0 rounded overflow-hidden mt-4">
               <input
                 type="email"
                 placeholder="you@example.com"
@@ -187,11 +186,11 @@ export default function Home() {
                 value={email}
                 onChange={handleEmailChange}
                 required
-                className="bg-[#1e1e1e] w-2/3 text-white placeholder-gray-500 px-4 py-3 font-chakra outline-none"
+                className="bg-[#1e1e1e] w-full sm:w-2/3 text-white placeholder-gray-500 px-4 py-3 font-chakra outline-none"
               />
               <button
                 onClick={handleWaitlistSubmit}
-                className="bg-white text-black px-6 py-3 font-medium font-ropa"
+                className="bg-white text-black w-full sm:w-auto px-6 py-3 font-medium font-ropa mt-2 sm:mt-0"
               >
                 Join Waitlist
               </button>
@@ -213,12 +212,12 @@ export default function Home() {
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex justify-center"
+            className="flex justify-center mt-8 md:mt-0"
           >
             <img
               src="/assets/auth_hero.svg"
               alt="crate visual"
-              className="w-full max-w-md  rounded-lg"
+              className="w-full max-w-[190px] sm:max-w-md md:max-w-md rounded-lg"
             />
           </motion.div>
         </div>
@@ -228,12 +227,12 @@ export default function Home() {
         {isInviteCodeModalOpen && (
           <motion.div
             {...fadeInVariants}
-            className="fixed inset-0 bg-[#0e0e0e] bg-opacity-50 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-[#0e0e0e] bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50"
             onClick={handleInviteCodeModalOpen}
           >
             <motion.div
               {...modalVariants}
-              className="bg-[#0e0e0e] dark:transparent backdrop-blur-lg  p-8 max-w-md w-full shadow-2xl "
+              className="bg-[#0e0e0e] dark:transparent backdrop-blur-lg p-4 sm:p-8 max-w-xs sm:max-w-md w-full shadow-2xl "
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-end mb-6">
