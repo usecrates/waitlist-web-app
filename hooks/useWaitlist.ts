@@ -3,9 +3,8 @@ import { api } from "@/config";
 import { toast } from "sonner";
 
 export function useWaitlist() {
-  const joinWaitlist = async (wallet: string, email: string) => {
+  const joinWaitlist = async ( email: string) => {
     const promise = api.post("/waitlist/join", {
-      wallet,
       email,
     });
 

@@ -110,7 +110,7 @@ export default function Home() {
       toast.error("Please Enter Email Address.");
       return;
     }
-    await joinWaitlist(address, email);
+    await joinWaitlist(email);
   };
 
   const invitecodeModal = useMemo(
