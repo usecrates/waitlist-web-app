@@ -8,7 +8,7 @@ const MemoizedMobileMenu = React.memo(MobileMenu);
 const Navbar = () => {
   const pathname = usePathname();
   return (
-    <header className="fixed top-0 left-0 right-0 flex items-center justify-between py-4 z-10 bg-black backdrop-blur-sm">
+    <header className="fixed top-0 left-0 right-0 flex items-center justify-between py-4 z-10 bg-[#252525] backdrop-blur-sm">
       <div className="max-w-6xl mx-auto w-full flex items-center justify-between px-8">
         <div className="flex items-center gap-10">
           <Link href="/" className="text-sm tracking-wide flex items-center gap-2 font-ropa text-white">
