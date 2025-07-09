@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import axios from "axios";
+import { backendUrl } from "@/utils/client";
 
 interface UserContextType {
   user: any;
@@ -25,7 +26,7 @@ export function UserProvider({ children }: UserProviderProps) {
 
       const wallet = privyUser.wallet.address;
       const res = await axios.get(
-        `http://localhost:8080/api/v1/waitlist/check?wallet=${wallet}`
+        `${backendUrl}/waitlist/check?wallet=${wallet}`
       );
       setUser(res.data?.data);
 

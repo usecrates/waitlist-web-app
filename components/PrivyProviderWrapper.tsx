@@ -1,8 +1,7 @@
 "use client";
-import React, { type ReactNode } from 'react'
+import React, { type ReactNode, StrictMode } from "react";
 import { PrivyProvider } from "@privy-io/react-auth";
-import { monadTestnet } from "viem/chains";
-import { StrictMode } from "react";
+import { toSolanaWalletConnectors } from "@privy-io/react-auth/solana";
 
 function PrivyProviderWrapper({ children }: { children: ReactNode }) {
   return (
@@ -13,14 +12,25 @@ function PrivyProviderWrapper({ children }: { children: ReactNode }) {
         }
         config={{
           appearance: {
-            theme: "light",
-            walletChainType: "ethereum-only",
+            theme: "dark",
+            walletChainType: "solana-only", // Solana only
+            showWalletLoginFirst: true,
           },
-          defaultChain: monadTestnet,
-          supportedChains: [monadTestnet],
-          loginMethods: ["google", "passkey", "wallet","twitter"],
+          solanaClusters: [
+            { name: "devnet", rpcUrl: "https://api.devnet.solana.com" },
+            { name: "mainnet-beta", rpcUrl: "https://api.mainnet-beta.solana.com" },
+            { name: "testnet", rpcUrl: "https://api.testnet.solana.com" },
+          ],
+          loginMethods: ["google", "passkey", "wallet", "twitter", "email"],
           embeddedWallets: {
-            ethereum: { createOnLogin: "all-users" },
+            solana: {
+              createOnLogin: "users-without-wallets",
+            },
+          },
+          externalWallets: {
+            solana: {
+              connectors: toSolanaWalletConnectors(),
+            },
           },
         }}
       >

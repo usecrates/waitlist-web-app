@@ -48,12 +48,13 @@ export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) =
   useEffect(() => {
     if (!user) return setAddress("");
     const wallet = user.linkedAccounts.find(
-      (account) => account.type === "wallet" && account.walletClientType === "privy"
+      (account) => account.type === "wallet" && (account.walletClientType === "privy" || account.walletClientType === "phantom") && account.chainType==="solana" 
     );
 
     setAddress((wallet as any)?.address || "");
   
   }, [user]);
+  
   const value = useMemo(
     () => ({
       user,

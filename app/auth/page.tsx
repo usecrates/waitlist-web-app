@@ -156,18 +156,26 @@ export default function Home() {
 
   return (
     <>
-      <section className="w-full flex-1 flex items-center justify-center px-6 pt-32 pb-16 border-t border-gray-800">
-        <div className="grid md:grid-cols-2 gap-10 max-w-6xl w-full items-center  rounded-lg p-8">
+      <section className="w-full  flex-1 flex items-center justify-center pt-32 pb-16 border-gray-800">
+        <div className="grid md:grid-cols-2 gap-10 max-w-6xl w-full items-center rounded-lg p-8 mx-auto px-8">
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
             className="border-r border-gray-700 pr-6"
           >
-            <h1 className="text-7xl md:text-7xl font-chakra font-semibold leading-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">
+            <h1
+              className="font-sans font-semibold text-[72px] leading-[100%] tracking-[-0.02em] bg-clip-text text-transparent"
+              style={{
+                background: 'linear-gradient(94.58deg, #7B7B7B 0.8%, #EBEBEB 27.81%, #7B7B7B 44.32%, #EBEBEB 64.8%, #7B7B7B 86.02%)',
+              
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
               Invest Like the <br /> Insiders
             </h1>
-            <p className="text-gray-400 text-xl mt-4 mb-6 font-ropa">
+            <p className="text-[#A0A0A0] text-xl mt-4 mb-6 font-chakra">
               Buy curated crates of US stocks based on real politician holdings.
             </p>
 
@@ -189,7 +197,7 @@ export default function Home() {
               </button>
             </div>
 
-            <p className="text-md text-gray-400 mt-3 font-ropa">
+            <p className="text-xl text-white mt-3 font-chakra">
               Already have invite code?
               <span
                 onClick={handleInviteCodeModalOpen}
@@ -208,7 +216,7 @@ export default function Home() {
             className="flex justify-center"
           >
             <img
-              src="/assets/logo.jpg"
+              src="/assets/auth_hero.svg"
               alt="crate visual"
               className="w-full max-w-md  rounded-lg"
             />

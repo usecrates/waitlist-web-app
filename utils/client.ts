@@ -12,3 +12,5 @@ export const publicClient = createPublicClient({
     chain: monadTestnet,
     transport: http(rpc),
 });
+
+export const backendUrl = "https://use-crates-backend.up.railway.app/api/v1";
