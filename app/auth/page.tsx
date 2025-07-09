@@ -40,16 +40,16 @@ export default function Home() {
   const [inviteCode, setInviteCode] = useState(["", "", "", ""]);
   const [isInviteCodeModalOpen, setIsInviteCodeModalOpen] = useState(false);
 
-  const router = useRouter();
-  useEffect(() => {
-    const isVerified = localStorage.getItem("isVerified");
-    console.log(isVerified, address, "address");
-    if (isVerified === "true" && address) {
-      router.push("/launch");
-    } else {
-      router.push("/auth");
-    }
-  }, [address])
+  // const router = useRouter();
+  // useEffect(() => {
+  //   const isVerified = localStorage.getItem("isVerified");
+  //   console.log(isVerified, address, "address");
+  //   if (isVerified === "true" && address) {
+  //     router.push("/launch");
+  //   } else {
+  //     router.push("/auth");
+  //   }
+  // }, [address])
   const handleCodeInput = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number
@@ -102,10 +102,10 @@ export default function Home() {
     setIsInviteCodeModalOpen(false);
   }, []);
   const handleWaitlistSubmit = async () => {
-    if (!address || !authenticated) {
-      toast.error("Please connect your wallet to join the waitlist.");
-      return;
-    }
+    // if (!address || !authenticated) {
+    //   toast.error("Please connect your wallet to join the waitlist.");
+    //   return;
+    // }
     if (!email) {
       toast.error("Please Enter Email Address.");
       return;
@@ -165,10 +165,10 @@ export default function Home() {
             className="border-r border-gray-700 pr-6"
           >
             <h1
-              className="font-sans font-semibold text-[72px] leading-[100%] tracking-[-0.02em] bg-clip-text text-transparent"
+              className="font-chakra font-semibold text-[72px] leading-[100%] tracking-[-0.02em] bg-clip-text text-transparent"
               style={{
                 background: 'linear-gradient(94.58deg, #7B7B7B 0.8%, #EBEBEB 27.81%, #7B7B7B 44.32%, #EBEBEB 64.8%, #7B7B7B 86.02%)',
-              
+
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}
@@ -196,7 +196,7 @@ export default function Home() {
                 Join Waitlist
               </button>
             </div>
-
+            {/* 
             <p className="text-xl text-white mt-3 font-chakra">
               Already have invite code?
               <span
@@ -205,7 +205,7 @@ export default function Home() {
               >
                 Click here
               </span>
-            </p>
+            </p> */}
           </motion.div>
 
           {/* RIGHT: Image */}
