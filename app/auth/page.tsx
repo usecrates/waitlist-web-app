@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { useWaitlist } from "@/hooks/useWaitlist";
 import { useCheckWaitlist } from "@/hooks/useCheckWaitlist";
 import { useRouter } from "next/navigation";
+import { useRive, Layout, Fit, Alignment } from "@rive-app/react-canvas";
 
 // Animation variants
 const fadeInVariants = {
@@ -132,6 +133,16 @@ export default function Home() {
     }
   };
 
+  // Rive animation for join success modal
+  const { RiveComponent: JoinSuccessRive } = useRive({
+    src: "animate.riv",
+    autoplay: true,
+    layout: new Layout({
+      fit: Fit.Contain,
+      alignment: Alignment.Center,
+    }),
+  });
+
   const invitecodeModal = useMemo(
     () => (
       <div className="space-y-6">
@@ -183,7 +194,9 @@ export default function Home() {
     () => (
       <div className="space-y-6">
         <div className="flex justify-center">
-          <img src="/assets/success.svg" alt="Success" className="max-w-[90px]" />
+          <div className="max-w-[90px] mb-4 w-full flex justify-center items-center">
+            <JoinSuccessRive /> || <img src="/assets/success.svg" alt="success" className="w-full max-w-[90px]" />
+          </div>
         </div>
         <div className="text-center">
           <h3
@@ -203,12 +216,14 @@ export default function Home() {
         </div>
 
         <Button
-          onClick={handleJoinSuccessModalClose}
+          onClick={()=>{
+            window.open("https://x.com/use_crates", "_blank");
+          }}
           className={cn(
             "w-full bg-white text-black font-chakra hover:bg-white py-4  rounded-none mt-6 font-semibold transition-colors"
           )}
         >
-          Return
+          Follow Us on X
         </Button>
       </div>
     ),
@@ -316,12 +331,12 @@ export default function Home() {
         {isJoinSuccessModalOpen && (
           <motion.div
             {...fadeInVariants}
-            className="fixed inset-0 bg-[#0e0e0e] bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50"
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50"
             onClick={handleJoinSuccessModalOpen}
           >
             <motion.div
               {...modalVariants}
-              className="bg-[#0e0e0e] dark:transparent backdrop-blur-lg w-full max-w-xs sm:max-w-md flex flex-col justify-center items-center p-4 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto"
+              className="bg-black dark:transparent backdrop-blur-lg w-full max-w-xs sm:max-w-md flex flex-col justify-center items-center p-4 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-end mb-6 w-full">

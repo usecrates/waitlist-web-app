@@ -7,7 +7,7 @@ const Footer = () => {
         <p className="font-chakra text-base text-[#474747] ">&copy; 2025 Crates. All rights reserved.</p>
 
         <div className="flex space-x-6 font-chakra text-base text-[#474747]">
-          <a
+          {/* <a
             href="https://discord.com"
             target="_blank"
             rel="noopener noreferrer"
@@ -22,7 +22,7 @@ const Footer = () => {
             className="hover:text-white transition-colors"
           >
             Telegram
-          </a>
+          </a> */}
           <a
             href="https://x.com/use_crates"
             target="_blank"
