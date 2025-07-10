@@ -1,10 +1,15 @@
 "use client";
 
-import React, { useState, useRef, useCallback, useMemo, useEffect } from "react";
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  useEffect,
+} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
-
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -13,7 +18,6 @@ import { toast } from "sonner";
 import { useWaitlist } from "@/hooks/useWaitlist";
 import { useCheckWaitlist } from "@/hooks/useCheckWaitlist";
 import { useRouter } from "next/navigation";
-
 
 // Animation variants
 const fadeInVariants = {
@@ -39,7 +43,7 @@ export default function Home() {
   const { checkWaitlist } = useCheckWaitlist();
   const [inviteCode, setInviteCode] = useState(["", "", "", ""]);
   const [isInviteCodeModalOpen, setIsInviteCodeModalOpen] = useState(false);
-
+  const [isJoinSuccessModalOpen, setIsJoinSuccessModalOpen] = useState(false);
   // const router = useRouter();
   // useEffect(() => {
   //   const isVerified = localStorage.getItem("isVerified");
@@ -95,6 +99,12 @@ export default function Home() {
     },
     []
   );
+  const handleJoinSuccessModalOpen = useCallback(() => {
+    setIsJoinSuccessModalOpen(true);
+  }, []);
+  const handleJoinSuccessModalClose = useCallback(() => {
+    setIsJoinSuccessModalOpen(false);
+  }, []);
   const handleInviteCodeModalOpen = useCallback(() => {
     setIsInviteCodeModalOpen(true);
   }, []);
@@ -110,17 +120,32 @@ export default function Home() {
       toast.error("Please Enter Email Address.");
       return;
     }
-    await joinWaitlist(email);
+    try {
+      const joinWaitlistResponse = await joinWaitlist(email);
+      if (joinWaitlistResponse) {
+        setIsJoinSuccessModalOpen(true);
+      }else{
+        throw new Error("Failed to join waitlist");
+      }
+    } catch (err) {
+      // error toast is already shown by the hook
+    }
   };
 
   const invitecodeModal = useMemo(
     () => (
       <div className="space-y-6">
         <div className="text-center">
-          <h3 className="text-5xl font-bold text-white font-ropa mb-2">
+          <h3  className="font-chakra text-2xl sm:text-4xl  font-bold leading-tight tracking-[-0.02em] bg-clip-text text-transparent text-center"
+            style={{
+              background:
+                "linear-gradient(94.58deg, #7B7B7B 0.8%, #EBEBEB 27.81%, #7B7B7B 44.32%, #EBEBEB 64.8%, #7B7B7B 86.02%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}>
             Enter Invite Code
           </h3>
-          <p className="text-md text-gray-400 font-chakra">
+          <p className="text-md text-[#A0A0A0] font-chakra mt-2 text-center ">
             Enter your 4-digit invite code
           </p>
         </div>
@@ -143,7 +168,7 @@ export default function Home() {
           onClick={handleInviteCodeCheck}
           disabled={isLoading || inviteCode.join("").length < 4}
           className={cn(
-            "w-full bg-white text-black font-chakra hover:bg-white py-4 rounded-lg mt-6 font-semibold transition-colors",
+            "w-full bg-white text-black font-chakra hover:bg-white py-4  rounded-none mt-6 font-semibold transition-colors",
             isLoading && "opacity-70 cursor-not-allowed"
           )}
         >
@@ -154,22 +179,59 @@ export default function Home() {
     [inviteCode, error, isLoading]
   );
 
+  const joinSuccessModal = useMemo(
+    () => (
+      <div className="space-y-6">
+        <div className="flex justify-center">
+          <img src="/assets/success.svg" alt="Success" className="max-w-[90px]" />
+        </div>
+        <div className="text-center">
+          <h3
+            className="font-chakra text-2xl sm:text-4xl  font-bold leading-tight tracking-[-0.02em] bg-clip-text text-transparent text-center"
+            style={{
+              background:
+                "linear-gradient(94.58deg, #7B7B7B 0.8%, #EBEBEB 27.81%, #7B7B7B 44.32%, #EBEBEB 64.8%, #7B7B7B 86.02%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            You have been added to our waitlist
+          </h3>
+          <p className="text-md text-[#A0A0A0] font-chakra mt-2 text-center ">
+            Thank you for joining, you’ll be the first to know when we are ready
+          </p>
+        </div>
+
+        <Button
+          onClick={handleJoinSuccessModalClose}
+          className={cn(
+            "w-full bg-white text-black font-chakra hover:bg-white py-4  rounded-none mt-6 font-semibold transition-colors"
+          )}
+        >
+          Return
+        </Button>
+      </div>
+    ),
+    [inviteCode, error, isLoading]
+  );
+
   return (
     <>
       <section className="w-full flex-1 flex items-center justify-center sm:pt-5 pt-20 pb-5 border-gray-800">
-        <div className="flex flex-col-reverse md:grid md:grid-cols-2 gap-8 md:gap-10 max-w-6xl w-full items-center rounded-lg p-4 sm:p-8 mx-auto">
+        <div className="flex flex-col-reverse md:grid md:grid-cols-2 gap-8 md:gap-10 max-w-6xl w-full items-center rounded-lg p-8 sm:p-8 mx-auto  ">
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="pr-0 md:pr-6"
+            className="pr-0 md:pr-6 border border-t-2  border-b-2 border-l-0 border-r-0 py-6 pb-10 border-dashed border-[#272727] "
           >
             <h1
               className="font-chakra font-semibold text-4xl sm:text-5xl md:text-[72px] leading-[110%] tracking-[-0.02em] bg-clip-text text-transparent"
               style={{
-                background: 'linear-gradient(94.58deg, #7B7B7B 0.8%, #EBEBEB 27.81%, #7B7B7B 44.32%, #EBEBEB 64.8%, #7B7B7B 86.02%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                background:
+                  "linear-gradient(94.58deg, #7B7B7B 0.8%, #EBEBEB 27.81%, #7B7B7B 44.32%, #EBEBEB 64.8%, #7B7B7B 86.02%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
               }}
             >
               Invest Like the <br /> Insiders
@@ -212,12 +274,12 @@ export default function Home() {
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex justify-center mt-8 md:mt-0"
+            className="flex justify-center "
           >
             <img
-              src="/assets/auth_hero.svg"
+              src="/assets/auth_main.svg"
               alt="crate visual"
-              className="w-full max-w-[190px] sm:max-w-md md:max-w-md rounded-lg"
+              className="w-full max-w-xs sm:max-w-3xl md:max-w-4xl rounded-lg"
             />
           </motion.div>
         </div>
@@ -245,6 +307,32 @@ export default function Home() {
               </div>
 
               {invitecodeModal}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence mode="wait">
+        {isJoinSuccessModalOpen && (
+          <motion.div
+            {...fadeInVariants}
+            className="fixed inset-0 bg-[#0e0e0e] bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50"
+            onClick={handleJoinSuccessModalOpen}
+          >
+            <motion.div
+              {...modalVariants}
+              className="bg-[#0e0e0e] dark:transparent backdrop-blur-lg w-full max-w-xs sm:max-w-md flex flex-col justify-center items-center p-4 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-end mb-6 w-full">
+                <button
+                  onClick={handleJoinSuccessModalClose}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              {joinSuccessModal}
             </motion.div>
           </motion.div>
         )}

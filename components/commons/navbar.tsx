@@ -12,8 +12,8 @@ const Navbar = () => {
       <div className="max-w-6xl mx-auto w-full flex items-center justify-between px-8">
         <div className="flex items-center gap-10">
           <Link href="/" className="text-sm tracking-wide flex items-center gap-2 font-ropa text-white">
-            <img src="/assets/crates.png" alt="Use Crates Logo" className="h-10 w-auto" />
-            <span className="text-white text-xl font-chakra">Crates</span>
+            <img src="/assets/crates.png" alt="Use Crates Logo" className="h-16 w-auto" />
+            <span className="text-white text-2xl font-chakra">Crates</span>
           </Link>
           {/* <nav className="flex items-center gap-8 text-sm font-ropa">
             <Link href="/crates" className={pathname === "/crates" ? "text-white" : "text-gray-400 hover:text-white transition-colors"}>

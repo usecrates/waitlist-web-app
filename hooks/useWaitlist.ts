@@ -20,8 +20,9 @@ export function useWaitlist() {
 
     try {
       await promise;
+      return true;
     } catch (err: any) {
-    } finally {
+      throw err;
     }
   };
 
