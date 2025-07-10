@@ -135,7 +135,7 @@ export default function Home() {
 
   // Rive animation for join success modal
   const { RiveComponent: JoinSuccessRive } = useRive({
-    src: "animate.riv",
+    src: "/animate.riv",
     autoplay: true,
     layout: new Layout({
       fit: Fit.Contain,
