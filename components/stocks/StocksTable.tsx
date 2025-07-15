@@ -8,55 +8,55 @@ const stocks: Stock[] = [
     name: "Apple",
     logo: "/assets/apple.png",
     address: "XxHt...vUL7",
-    share: "$124.23",
+    weight: "23%",
   },
   {
     symbol: "ABBV",
     name: "AbbVie",
     logo: "/assets/apple.png",
     address: "XxHt...vUL7",
-    share: "$1214.23",
+    weight: "12%",
   },
   {
     symbol: "AMZN",
     name: "Amazon",
     logo: "/assets/apple.png",
     address: "XxHt...vUL7",
-    share: "$823.23",
+    weight: "8%",
   },
   {
     symbol: "NVDA",
     name: "Nvidia Corporation",
     logo: "/assets/apple.png",
     address: "XxHt...vUL7",
-    share: "$3212.23",
+    weight: "32%",
   },
   {
     symbol: "MSFT",
     name: "Microsoft Corporation",
     logo: "/assets/apple.png",
     address: "XxHt...vUL7",
-    share: "$34.23",
+    weight: "3%",
   },
   {
     symbol: "KO",
     name: "Coca-Cola",
     logo: "/assets/apple.png",
     address: "XxHt...vUL7",
-    share: "$423.23",
+    weight: "4%",
   },
   {
     symbol: "GME",
     name: "Gamestop",
     logo: "/assets/apple.png",
     address: "XxHt...vUL7",
-    share: "$324.23",
+    weight: "3%",
   },
 ];
 
 export function StocksTable() {
   return (
-    <div className="mt-8 rounded-xl border border-gray-700 font-ropa bg-[#0e0e0e]">
+    <div className="mt-8 font-ropa bg-[#0e0e0e]">
       <DataTable columns={columns} data={stocks} />
     </div>
   );

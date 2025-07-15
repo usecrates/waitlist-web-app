@@ -40,7 +40,7 @@ const renderLegend = () => {
 
 export function DonutChartWithLegend() {
   return (
-    <div className="grid md:grid-cols-2 gap-6 bg-[#121212] p-6 rounded-xl w-full max-w-3xl">
+    <div className="grid md:grid-cols-2 gap-6 bg-[#171717] p-6 rounded-xl w-full max-w-3xl">
       {/* Chart */}
       <div className="w-full h-[200px]">
         <ResponsiveContainer width="100%" height="100%">

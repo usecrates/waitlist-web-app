@@ -14,7 +14,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/public") || // optional if you route like /public/xyz.png
     pathname.match(/\.(png|jpg|jpeg|gif|svg|webp|ico)$/); // allow image file extensions
 
-  if (isAllowed) {
+  if (true) {
     return NextResponse.next();
   }
 

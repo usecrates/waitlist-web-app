@@ -24,13 +24,13 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="">
+    <div className="font-chakra">
       <Table>
-        <TableHeader className="bg-[#121212] text-muted-foreground">
+        <TableHeader className="bg-[#171717] text-muted-foreground">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <TableHead className="text-xl" key={header.id}>
+                <TableHead className="text-xl text-white" key={header.id}>
                   {flexRender(header.column.columnDef.header, header.getContext())}
                 </TableHead>
               ))}
@@ -39,7 +39,7 @@ export function DataTable<TData, TValue>({
         </TableHeader>
         <TableBody className="bg-[#0e0e0e]">
           {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id} className="hover:bg-gray-900 transition">
+            <TableRow key={row.id} className=" transition">
               {row.getVisibleCells().map((cell) => (
                 <TableCell key={cell.id}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}

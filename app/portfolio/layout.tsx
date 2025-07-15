@@ -9,7 +9,7 @@ export default function LaunchLayout({
   children: React.ReactNode;
 }) {
   return (
-   <main className="min-h-screen bg-[#0e0e0e] text-white font-ropa">
+   <main className="min-h-screen bg-[#0e0e0e] text-white font-chakra">
       <Navbar/>
       {children}
       <Footer />

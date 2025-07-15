@@ -24,8 +24,8 @@ export default function LoginButton() {
           </button>
         </div>
       ) : (
-        <button onClick={customizeLogin} disabled={loading} className="bg-[#0e0e0e] dark:bg-white font-ropa text-white px-4 py-2 font-medium text-md">
-          {loading ? "Logging in..." : "Wallet Connect"}
+        <button onClick={customizeLogin} disabled={loading} className="bg-white font-ropa text-black font-chakra px-4 py-2 font-medium text-md">
+          {loading ? "Logging in..." : "Connect Wallet"}
         </button>
       )}
     </div>

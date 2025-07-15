@@ -1,0 +1,196 @@
+"use client";
+import CrateChart from "@/components/CreateChart";
+import { DonutChartWithLegend } from "@/components/DonutChart";
+import { StocksTable } from "@/components/stocks/StocksTable";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Twitter,  Share, X } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+export default function SingleCrate() {
+  const [activeTab, setActiveTab] = useState("Crates");
+  // Simulate subscription state
+  const isSubscribed = true; // Change to false to show subscribe button
+
+  return (
+    <main className="px-6 py-20 max-w-6xl mx-auto text-white space-y-10">
+      <button className="mb-6 mt-4 flex items-center gap-2 text-gray-400 hover:text-white">
+        <ArrowLeft size={18} />
+        Back
+      </button>
+      <div className="flex flex-col md:flex-row justify-between gap-6">
+        <div className="flex gap-4 items-start w-1/2">
+          <Image src="/assets/image.png" width={80} height={80} alt="crate profile" className="rounded" />
+          <div>
+            <h2 className="text-2xl font-bold">Nancy Pelosi</h2>
+            <p className="text-sm text-gray-400">Democrat / House / California</p>
+            <p className="text-sm mt-2">Invest Like One of America’s Most Active Political Traders
+              Track and copy the portfolio inspired by Nancy Pelosi’s publicly disclosed stock trades.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-6 items-center text-sm">
+          <div>
+            <p className="text-green-500 text-xl font-semibold">+12.45%</p>
+            <p className="text-gray-400">Total Returns</p>
+          </div>
+          <div>
+            <p className="text-green-500 text-xl font-semibold">+2.45%</p>
+            <p className="text-gray-400">This Month</p>
+          </div>
+          <div>
+            <span className="px-3 py-1 rounded bg-[#2D2D2D]  text-red-500 font-semibold">High Volatility</span>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div className="w-full flex gap-10 mt-0">
+        <div className="w-2/3 flex flex-col space-y-6">
+          <Tabs defaultValue="Overview" className="bg-[#0e0e0e] w-full">
+            <TabsList className="flex gap-8 border-t pt-3 border-b border-[#232323] mb-0 bg-transparent p-0 h-auto text-base justify-start items-start w-full">
+              <TabsTrigger
+                value="Overview"
+                className="px-2 pb-2 text-base border-b-2 transition-all border-transparent text-gray-400 bg-transparent shadow-none data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:text-white data-[state=inactive]:border-transparent data-[state=inactive]:text-gray-400"
+              >
+                Overview
+              </TabsTrigger>
+              <TabsTrigger
+                value="Stocks & ETFs"
+                className="px-2 pb-2 text-base border-b-2 transition-all border-transparent text-gray-400 bg-transparent shadow-none data-[state=active]:border-b-2 data-[state=active]:border-white data-[state=active]:text-white data-[state=inactive]:border-transparent data-[state=inactive]:text-gray-400"
+              >
+                Stocks & ETFs
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="Overview">
+              <div className="flex p-5 mt-4">
+                <div className="w-1/2 space-y-4 ">
+                  <h3 className="text-xl font-semibold mb-2">About this crate</h3>
+                  <p className="text-gray-400 text-sm">
+                    This crate mirrors the stock holdings publicly disclosed by Nancy Pelosi, the longtime Democratic leader and former Speaker of the U.S. House of Representatives. Known for her high-profile tenure in Congress and her role at the center of U.S. political power, Pelosi has also become famous among retail traders for her timely stock picks revealed through mandatory congressional financial disclosures.
+                  </p>
+                  <p className="text-gray-400 text-sm" >All politician trades featured in this platform are based on publicly available congressional financial disclosures, which are legally required under the STOCK Act. This crate does not imply insider information or personal endorsement by Nancy Pelosi. Investing involves risk, and past performance is not indicative of future returns.</p>
+                </div>
+                <div className="w-1/2 text-sm p-6 text-gray-300">
+                  <div className="relative border-l border-gray-600 pl-2 space-y-8 text-sm text-gray-300">
+                    <div className="relative">
+                      <span className="absolute -left-3 top-1 w-2 h-2 bg-gray-300 rounded-full"></span>
+                      <p className="text-gray-400">2023–2024</p>
+                      <p className="text-white font-semibold">US Constitution Representative</p>
+                      <p className="text-gray-400">The purpose of lorem ipsum is to create a natural looking block of text</p>
+                    </div>
+
+                    <div className="relative">
+                      <span className="absolute -left-3 top-1 w-2 h-2 bg-gray-300 rounded-full"></span>
+                      <p className="text-gray-400">2024–2025</p>
+                      <p className="text-white font-semibold">Lorem ipsum dolor sit amet,</p>
+                      <p className="text-gray-400">The purpose of lorem ipsum is to create a natural looking block of text</p>
+                    </div>
+
+                    <div className="relative">
+                      <span className="absolute -left-3 top-1 w-2 h-2 bg-gray-300 rounded-full"></span>
+                      <p className="text-gray-400">2012–2024</p>
+                      <p className="text-white font-semibold">Lorem ipsum dolor sit amet,</p>
+                      <p className="text-gray-400">ut aliquip ex ea commodo consequat. Duis aute</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <hr className="border-[#383838] py-4"/>
+              <div>
+                <h3 className="text-lg mb-2">
+                  Live Performance vs <span className="text-[#FFC081]">Equity Smallcap</span>
+                </h3>
+                <p className="text-sm text-gray-500 mb-6">
+                  Current value of $100 invested once on Feb 5, 2024 would be
+                </p>
+                <CrateChart />
+              </div>
+
+            </TabsContent>
+              <TabsContent value="Stocks & ETFs">
+              <div className="flex flex-col mt-4">
+                <h3 className="text-xl font-semibold mb-2">Holding Distribution</h3>
+                <DonutChartWithLegend />
+                <StocksTable />
+              </div>
+            </TabsContent>
+          </Tabs>
+
+        </div>
+        <div className="border w-1/3 border-gray-700 bg-[#111 h-fit p-6 rounded-xl space-y-4 shadow-md">
+          {false ? (
+            <div className="flex flex-col items-center justify-center h-full w-full">
+              <div className="w-full max-w-xs rounded-xl shadow-md">
+                <div className="flex items-center mb-6">
+                  <span className="text-white font-semibold text-sm">Your Performance</span>
+                  <span className="flex-1 border-t border-[#383838] ml-4"></span>
+                </div>
+                <div className="grid grid-cols-2 gap-y-6 gap-x-8 mb-6">
+                  <div className="flex flex-col items-center">
+                    <span className="text-lg font-bold text-white">150$</span>
+                    <span className="text-gray-400 text-sm mt-1">Current Value</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <span className="text-lg font-bold text-white">100$</span>
+                    <span className="text-gray-400 text-sm mt-1">Current Investment</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <span className="text-lg font-bold text-white">200$</span>
+                    <span className="text-gray-400 text-sm mt-1">Money Put in</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <span className="text-lg font-bold text-white">$120 <span className="text-green-400 text-base font-semibold align-top">+50%</span></span>
+                    <span className="text-gray-400 text-sm mt-1">Total Returns</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <span className="text-lg font-bold text-white">50$ <span className="text-green-400 text-base font-semibold align-top">+50%</span></span>
+                    <span className="text-gray-400 text-sm mt-1">Current Returns</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <span className="text-lg font-bold text-green-400">$90</span>
+                    <span className="text-gray-400 text-sm mt-1">Realised Returns</span>
+                  </div>
+                </div>
+                <button
+                  className="w-full mt-2 py-2 rounded-lg font-bold text-lg text-black"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                    backgroundBlendMode: "normal, normal",
+                  }}
+                >
+                  Invest More
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex gap-2 items-center">
+                <p className="text-lg font-bold">$5.4/month</p>
+                <span className="bg-green-700  text-white px-4 py-1 text-sm rounded">Free</span>
+              </div>
+              <p className="text-sm text-white bg-[#202020] w-fit px-2 py-1 rounded-md">17,425 Subscribers</p>
+              <p className="text-sm text-gray-400">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
+              </p>
+              <Button className="w-full bg-white text-black"    style={{
+                  background:
+                    "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                  backgroundBlendMode: "normal, normal",
+                }}>Subscribe</Button>
+            </>
+          )}
+        </div>
+      
+     
+       
+
+      </div>
+
+    </main>
+  );
+}

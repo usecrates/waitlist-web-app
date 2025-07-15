@@ -9,7 +9,7 @@ export type Stock = {
   name: string;
   logo: string;
   address: string;
-  share: string;
+  weight: string;
 };
 
 export const columns: ColumnDef<Stock>[] = [
@@ -53,8 +53,8 @@ export const columns: ColumnDef<Stock>[] = [
     },
   },
   {
-    accessorKey: "share",
-    header: "Share",
-    cell: ({ row }) => <div>{row.original.share}</div>,
+    accessorKey: "weight",
+    header: "Weight",
+    cell: ({ row }) => <div>{row.original.weight}</div>,
   },
 ];

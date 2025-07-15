@@ -3,7 +3,7 @@ import Footer from "@/components/commons/footer";
 import Navbar from "@/components/commons/launch-navbar";
 import React from "react";
 
-export default function LaunchLayout({
+export default function DiscoverLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -15,4 +15,4 @@ export default function LaunchLayout({
       <Footer />
     </main>
   );
-}
+} 
