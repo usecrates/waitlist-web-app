@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@aws-sdk/credential-providers": "latest",
+    "@dinari/api-sdk": "^0.4.0",
     "@emotion/is-prop-valid": "latest",
     "@hookform/resolvers": "^3.9.1",
     "@mongodb-js/zstd": "latest",
