@@ -2,11 +2,8 @@ import { Eip155PrepareProxiedOrderResponse } from '@dinari/api-sdk/resources/v2/
 import { Eip155PrepareOrderResponse } from '@dinari/api-sdk/resources/v2/accounts/orders/stocks/eip155';
 import { createPublicClient, http, WalletClient, PublicClient, TypedData, Address, Account } from 'viem';
 import * as allChains from 'viem/chains';
+import { encodeFunctionData } from 'viem';
 
-/**
- * Resolves a CAIP-2 formatted chain ID (e.g., "eip155:421614") or a plain numeric string (e.g., "1")
- * to the corresponding viem chain object.
- */
 export function resolveViemChain(chain_id: string): allChains.Chain {
   // eg. Accepts "eip155:421614" or just "421614"
   const match = chain_id.match(/^eip155:(\d+)$/);
@@ -17,6 +14,75 @@ export function resolveViemChain(chain_id: string): allChains.Chain {
     throw new Error(`Chain with id ${numericChainId} not found in viem/chains`);
   }
   return chain;
+}
+
+
+
+export async function sendBatchOrderForViem(
+  walletClient: WalletClient,
+  chain_id: string,
+  orderResponses: Eip155PrepareOrderResponse[],
+  multicallContractAddress: `0x${string}`,
+  multicallAbi: any,
+  account?: Account,
+  publicClient?: PublicClient
+): Promise<{
+  txHash: `0x${string}`;
+}> {
+  const chain = resolveViemChain(chain_id);
+
+  let resolvedPublicClient = publicClient;
+  if (!resolvedPublicClient) {
+    resolvedPublicClient = createPublicClient({ transport: http(), chain });
+  }
+
+  // Collect all calldatas from all orderResponses
+  const calldatas: `0x${string}`[] = [];
+
+  for (const orderResponse of orderResponses) {
+    const txDatas = orderResponse.transaction_data;
+
+    if (!Array.isArray(txDatas) || txDatas.length === 0) {
+      throw new Error('One of the orderResponses has missing or empty transaction_data');
+    }
+
+    for (const tx of txDatas) {
+      if (!tx.data) {
+        throw new Error('Invalid txData item: missing calldata');
+      }
+      calldatas.push(tx.data as `0x${string}`);
+    }
+  }
+
+  if (calldatas.length === 0) {
+    throw new Error('No valid calldata found in orderResponses');
+  }
+
+  let resolvedAccount: Address | Account;
+  if (account) {
+    resolvedAccount = account;
+  } else {
+    [resolvedAccount] = await walletClient.requestAddresses();
+  }
+
+  // Encode the multicall function with the array of calldatas
+  const multicallData = encodeFunctionData({
+    abi: multicallAbi,
+    functionName: 'multicall', // your contract must match this
+    args: [calldatas],
+  });
+
+  // Send the multicall transaction
+  const txHash = await walletClient.sendTransaction({
+    to: multicallContractAddress,
+    data: multicallData,
+    account: resolvedAccount,
+    chain,
+  });
+
+  await resolvedPublicClient.waitForTransactionReceipt({ hash: txHash });
+
+  return { txHash };
 }
 
 /**

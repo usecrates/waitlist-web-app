@@ -20,11 +20,11 @@ export default function DinariTestPage() {
   // Form state
   const [formData, setFormData] = useState({
     accountId: '019814c3-64d2-7611-a4b7-dcc7c068f6ea',
-    chainId: 'eip155:421614',
+    chainId: 'eip155:11155111',
     orderSide: 'BUY',
     orderTif: 'DAY',
     orderType: 'MARKET',
-    stockId: '0196ea6d-b6df-7dcb-a1de-d7733e7bcc51',
+    stockId: '0196ea6d-b6de-70d5-ae41-9525959ef309',
     paymentToken: '0x665b099132d79739462DfDe6874126AFe840F7a3',
     paymentTokenQuantity: '10',
     limitPrice: '100.0',
@@ -53,64 +53,62 @@ export default function DinariTestPage() {
 
       setResults('Step 1: Preparing order...\n');
 
-      // Step 1: Prepare the Order
-      const orderParams = {
-        chain_id: formData.chainId as any,
-        order_side: formData.orderSide as 'BUY' | 'SELL',
-        order_tif: formData.orderTif as 'DAY' | 'GTC' | 'IOC' | 'FOK',
-        order_type: formData.orderType as 'MARKET' | 'LIMIT',
+      const preparedOrders: any[] = [];
+      const preparedOrder1 = await client.v2.accounts.orders.stocks.eip155.prepareOrder(formData.accountId, {
+        chain_id: formData.chainId,
+        order_side: 'BUY',
+        order_tif: 'DAY',
+        order_type: 'MARKET',
         stock_id: formData.stockId,
-        payment_token: formData.paymentToken as `0x${string}`,
-        // For market buy orders, use payment_token_quantity
-        // For other orders, use stock_quantity
-        // ...(formData.orderSide === 'BUY' && formData.orderType === 'MARKET' 
-        //   ? { payment_token_quantity: parseFloat(formData.paymentTokenQuantity) }
-        //   : { stock_quantity: parseFloat(formData.paymentTokenQuantity) }
-        // ),
-        // Add limit price for limit orders
-        limit_price: 1.5,
-        asset_token_quantity: 1,
-       
-      };
-
-      const preparedOrder = await client.v2.accounts.orders.stocks.eip155.prepareOrder(
-        formData.accountId,
-        orderParams
-      );
-
-      console.log(preparedOrder);
-
-      setResults(prev => prev + 'Order prepared successfully!\n');
-      setResults(prev => prev + `Transaction data: ${JSON.stringify(preparedOrder, null, 2)}\n\n`);
-
-      setResults(prev => prev + 'Step 2: Setting up wallet client...\n');
-
-      // Step 2: Sign and send the transaction data using viem
-      const walletClient = createWalletClient({
-        transport: custom((window as any).ethereum),
+        payment_token: formData.paymentToken,
+        payment_token_quantity: 10,
+      });
+      const preparedOrder2 = await client.v2.accounts.orders.stocks.eip155.prepareOrder(formData.accountId, {
+        chain_id: formData.chainId,
+        order_side: 'BUY',
+        order_tif: 'DAY',
+        order_type: 'MARKET',
+        stock_id: formData.stockId,
+        payment_token: formData.paymentToken,
+        payment_token_quantity: 10,
       });
 
-      setResults(prev => prev + 'Requesting user signature...\n');
+      preparedOrders.push(preparedOrder1);
+      preparedOrders.push(preparedOrder2);
 
-      const { txHashes } = await sendOrderForViem(
-        walletClient,
-        formData.chainId,
-        preparedOrder
-      );
+      console.log(preparedOrders,"orderrss");
 
-      setResults(prev => prev + 'Transactions completed successfully!\n');
-      setResults(prev => prev + `Transaction hashes: ${JSON.stringify(txHashes, null, 2)}\n`);
+      // setResults(prev => prev + 'Order prepared successfully!\n');
+      // setResults(prev => prev + `Transaction data: ${JSON.stringify(preparedOrder, null, 2)}\n\n`);
 
-      toast({
-        title: 'Success!',
-        description: 'Dinari order executed successfully',
-      });
+      // setResults(prev => prev + 'Step 2: Setting up wallet client...\n');
+
+      // // Step 2: Sign and send the transaction data using viem
+      // const walletClient = createWalletClient({
+      //   transport: custom((window as any).ethereum),
+      // });
+
+      // setResults(prev => prev + 'Requesting user signature...\n');
+
+      // const { txHashes } = await sendOrderForViem(
+      //   walletClient,
+      //   formData.chainId,
+      //   preparedOrder
+      // );
+
+      // setResults(prev => prev + 'Transactions completed successfully!\n');
+      // setResults(prev => prev + `Transaction hashes: ${JSON.stringify(txHashes, null, 2)}\n`);
+
+      // toast({
+      //   title: 'Success!',
+      //   description: 'Dinari order executed successfully',
+      // });
 
     } catch (error) {
       console.error('Error testing Dinari order:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       setResults(prev => prev + `Error: ${errorMessage}\n`);
-      
+
       toast({
         title: 'Error',
         description: errorMessage,
@@ -230,8 +228,8 @@ export default function DinariTestPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="paymentTokenQuantity">
-                  {formData.orderSide === 'BUY' && formData.orderType === 'MARKET' 
-                    ? 'Payment Token Quantity' 
+                  {formData.orderSide === 'BUY' && formData.orderType === 'MARKET'
+                    ? 'Payment Token Quantity'
                     : 'Stock Quantity'
                   }
                 </Label>
@@ -258,8 +256,8 @@ export default function DinariTestPage() {
                 </div>
               )}
 
-              <Button 
-                onClick={testDinariOrder} 
+              <Button
+                onClick={testDinariOrder}
                 disabled={isLoading}
                 className="w-full"
               >
@@ -301,7 +299,7 @@ export default function DinariTestPage() {
               <div>NEXT_PUBLIC_DINARI_API_SECRET_KEY=your_api_secret_key</div>
             </div>
             <p className="text-sm text-muted-foreground mt-2">
-              Note: These are exposed to the client for testing purposes. In production, 
+              Note: These are exposed to the client for testing purposes. In production,
               API calls should be made from the backend.
             </p>
           </CardContent>
