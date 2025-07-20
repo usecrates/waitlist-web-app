@@ -2,7 +2,10 @@ import { Eip155PrepareProxiedOrderResponse } from '@dinari/api-sdk/resources/v2/
 import { Eip155PrepareOrderResponse } from '@dinari/api-sdk/resources/v2/accounts/orders/stocks/eip155';
 import { createPublicClient, http, WalletClient, PublicClient, TypedData, Address, Account } from 'viem';
 import * as allChains from 'viem/chains';
+import {MulticallABI,tokenABI} from "@/constants";
 import { encodeFunctionData } from 'viem';
+
+
 
 export function resolveViemChain(chain_id: string): allChains.Chain {
   // eg. Accepts "eip155:421614" or just "421614"
@@ -16,14 +19,10 @@ export function resolveViemChain(chain_id: string): allChains.Chain {
   return chain;
 }
 
-
-
 export async function sendBatchOrderForViem(
   walletClient: WalletClient,
   chain_id: string,
   orderResponses: Eip155PrepareOrderResponse[],
-  multicallContractAddress: `0x${string}`,
-  multicallAbi: any,
   account?: Account,
   publicClient?: PublicClient
 ): Promise<{
@@ -53,6 +52,7 @@ export async function sendBatchOrderForViem(
       calldatas.push(tx.data as `0x${string}`);
     }
   }
+  console.log(calldatas)
 
   if (calldatas.length === 0) {
     throw new Error('No valid calldata found in orderResponses');
@@ -65,33 +65,28 @@ export async function sendBatchOrderForViem(
     [resolvedAccount] = await walletClient.requestAddresses();
   }
 
+  console.log(calldatas,"calldatas")
+
   // Encode the multicall function with the array of calldatas
   const multicallData = encodeFunctionData({
-    abi: multicallAbi,
+    abi: MulticallABI,
     functionName: 'multicall', // your contract must match this
     args: [calldatas],
   });
-
-  // Send the multicall transaction
+  console.log(multicallData,"multicalldata");
+  // // Send the multicall transaction
   const txHash = await walletClient.sendTransaction({
-    to: multicallContractAddress,
+    to:"0xd0d00Ee8457d79C12B4D7429F59e896F11364247",
     data: multicallData,
     account: resolvedAccount,
     chain,
   });
-
+  console.log(txHash,"txHash");
   await resolvedPublicClient.waitForTransactionReceipt({ hash: txHash });
 
   return { txHash };
 }
 
-/**
- * Sends all transactions in the given orderResponse sequentially using the provided viem WalletClient.
- * Waits for each transaction to be mined before sending the next.
- * Can be used in both frontend and backend environments.
- *
- * Backend requires that account is passed in
- */
 export async function sendOrderForViem(
   walletClient: WalletClient,
   chain_id: string,
@@ -142,12 +137,6 @@ export async function sendOrderForViem(
   return { txHashes };
 }
 
-/**
- * Prompts the user or backend signer to sign the permit and order typed data using the provided viem WalletClient.
- * Returns the signatures for both permit and order.
- *
- * Backend requires that account is passed in
- */
 export async function signTransferPermitAndOrderForViem(
   walletClient: WalletClient,
   orderResponse: Eip155PrepareProxiedOrderResponse,
@@ -193,3 +182,5 @@ export async function signTransferPermitAndOrderForViem(
     orderSignature,
   };
 }
+
+
