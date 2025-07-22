@@ -2,8 +2,19 @@
 import React, { type ReactNode, StrictMode } from "react";
 import { PrivyProvider } from "@privy-io/react-auth";
 import { toSolanaWalletConnectors } from "@privy-io/react-auth/solana";
+import { sepolia } from "viem/chains";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { createConfig, http, WagmiProvider } from 'wagmi'
+const queryClient = new QueryClient()
 
+// 1. Get projectId from https://cloud.reown.com
 function PrivyProviderWrapper({ children }: { children: ReactNode }) {
+  const wagmiConfig = createConfig({
+    chains: [sepolia],
+    transports: {
+      [sepolia.id]: http(process.env.NEXT_PUBLIC_RPC_URL!),
+    },
+  })
   return (
     <StrictMode>
       <PrivyProvider
@@ -13,28 +24,26 @@ function PrivyProviderWrapper({ children }: { children: ReactNode }) {
         config={{
           appearance: {
             theme: "dark",
-            walletChainType: "solana-only", // Solana only
+            walletChainType: "ethereum-only", // EVM only
             showWalletLoginFirst: true,
           },
-          solanaClusters: [
-            { name: "devnet", rpcUrl: "https://api.devnet.solana.com" },
-            { name: "mainnet-beta", rpcUrl: "https://api.mainnet-beta.solana.com" },
-            { name: "testnet", rpcUrl: "https://api.testnet.solana.com" },
-          ],
           loginMethods: ["google", "passkey", "wallet", "twitter", "email"],
           embeddedWallets: {
-            solana: {
+            ethereum: {
               createOnLogin: "users-without-wallets",
             },
           },
-          externalWallets: {
-            solana: {
-              connectors: toSolanaWalletConnectors(),
-            },
-          },
+          defaultChain:sepolia,
+          supportedChains:[sepolia],
+
+          // externalWallets removed for linter compliance
         }}
       >
-        {children}
+          <QueryClientProvider client={queryClient}>
+            <WagmiProvider config={wagmiConfig}>
+              {children}
+            </WagmiProvider>
+          </QueryClientProvider>
       </PrivyProvider>
     </StrictMode>
   );

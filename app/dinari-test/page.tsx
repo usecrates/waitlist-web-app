@@ -9,106 +9,50 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import Dinari from '@dinari/api-sdk';
-import { ethers } from "ethers";
-import orderProcessorData from "@/lib/sbt-deployments/v0.4.0/order_processor.json";
-import { createWalletClient, custom } from 'viem';
-import { resolveViemChain, sendBatchOrderForViem, sendOrderForViem } from '@/utils/dinari-client';
+import orderProcessorData from '@/lib/sbt-deployments/v0.4.0/order_processor.json';
+import { useAccount, useWalletClient, usePublicClient } from 'wagmi';
+import LoginButton from '@/components/LoginButton';
+import { encodeFunctionData, parseAbi, decodeEventLog } from 'viem';
+
 const permitTypes = {
   Permit: [
-    {
-      name: "owner",
-      type: "address"
-    },
-    {
-      name: "spender",
-      type: "address"
-    },
-    {
-      name: "value",
-      type: "uint256"
-    },
-    {
-      name: "nonce",
-      type: "uint256"
-    },
-    {
-      name: "deadline",
-      type: "uint256"
-    }
+    { name: 'owner', type: 'address' },
+    { name: 'spender', type: 'address' },
+    { name: 'value', type: 'uint256' },
+    { name: 'nonce', type: 'uint256' },
+    { name: 'deadline', type: 'uint256' },
   ],
 };
-const tokenAbi = [
-  "function name() external view returns (string memory)",
-  "function decimals() external view returns (uint8)",
-  "function version() external view returns (string memory)",
-  "function nonces(address owner) external view returns (uint256)",
-];
 
-async function getContractVersion(contract: ethers.Contract): Promise<string> {
+const tokenAbi = parseAbi([
+  'function name() view returns (string)',
+  'function decimals() view returns (uint8)',
+  'function version() view returns (string)',
+  'function nonces(address owner) view returns (uint256)',
+]);
+
+async function getContractVersion({ client, address, abi }: { client: any; address: string; abi: any }) {
   let contractVersion = '1';
   try {
-    contractVersion = await contract.version();
+    contractVersion = await client.readContract({
+      address,
+      abi,
+      functionName: 'version',
+    });
   } catch {
     // do nothing
   }
   return contractVersion;
 }
 
-// {
-//   chain_id: 'eip155:11155111',
-//   fee: '0.25',
-//   order_fee_contract_object: {
-//     chain_id: 11155111,
-//     fee_quote: {
-//       deadline: 1752929485,
-//       fee: '250000',
-//       orderId: '79947742091934140318961801769020851197796702555430663194951546521125246970297',
-//       requester: '0xdAF0182De86F904918Db8d07c7340A1EfcDF8244',
-//       timestamp: 1752929185
-//     },
-//     fee_quote_signature: '0x50104e06e359538b75e12808825c088a47f5d7e81b27316da132781c1342ece00cb8a5f772325a94b99777b1fed234d40b6c0411e6f157381be827db0abafdc01c',
-//     fees: [ [Object], [Object], [Object], [Object] ],
-//     payment_token: '0x665b099132d79739462DfDe6874126AFe840F7a3'
-//   }
-// }
-
-// const _order = {
-//   chain_id: 'eip155:11155111',
-//   order_side: 'BUY',
-//   order_tif: 'DAY',
-//   order_type: 'MARKET',
-//   stock_id: "0196ea6d-b6de-70d5-ae41-9525959ef309",
-//   payment_token: paymentTokenAddress,
-//   payment_token_quantity: 10,
-// }
-
-
-async function getSignerFromMetamask() {
-  if (!window.ethereum) {
-    throw new Error("MetaMask is not installed");
-  }
-
-  // Ask the user to connect their wallet
-  await window.ethereum.request({ method: "eth_requestAccounts" });
-
-  // Create an ethers provider using the injected provider (MetaMask)
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-
-  // Get signer (the currently selected account in MetaMask)
-  const signer = await provider.getSigner();
-
-  // Optional: Get their address
-  const address = await signer.getAddress();
-  console.log("Connected wallet address:", address);
-
-  return {signer,address};
-}
-
-
 export default function DinariTestPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<string>('');
   const { toast } = useToast();
+  const { address } = useAccount();
+  const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient();
+  
 
   // Form state
   const [formData, setFormData] = useState({
@@ -124,84 +68,34 @@ export default function DinariTestPage() {
   });
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const testDinariOrder = async () => {
     setIsLoading(true);
     setResults('');
-
     try {
-      // Check if MetaMask is available
-      if (typeof window === 'undefined' || !(window as any).ethereum) {
-        throw new Error('MetaMask is not installed. Please install MetaMask to test this functionality.');
+      if (!walletClient || !address || !publicClient) {
+        throw new Error('Wallet not connected. Please connect your wallet.');
       }
-
-
-      const privateKey = process.env.NEXT_PUBLIC_PRIVATE_KEY;
-      if (!privateKey) throw new Error("empty key");
       const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL;
-      if (!RPC_URL) throw new Error("empty rpc url");
-      const assetTokenAddress = process.env.NEXT_PUBLIC_ASSETTOKEN;
-      if (!assetTokenAddress) throw new Error("empty asset token address");
-      const paymentTokenAddress = process.env.NEXT_PUBLIC_PAYMENTTOKEN;
-      if (!paymentTokenAddress) throw new Error("empty payment token address");
+      if (!RPC_URL) throw new Error('empty rpc url');
+      const assetTokenAddress = process.env.NEXT_PUBLIC_ASSETTOKEN as `0x${string}`;
+      if (!assetTokenAddress) throw new Error('empty asset token address');
+      const paymentTokenAddress = process.env.NEXT_PUBLIC_PAYMENTTOKEN as `0x${string}`;
+      if (!paymentTokenAddress) throw new Error('empty payment token address');
       const orderProcessorAbi = orderProcessorData.abi;
-      // Initialize Dinari client
-      const client = new Dinari({
-        apiKeyID: process.env.NEXT_PUBLIC_DINARI_API_KEY_ID,
-        apiSecretKey: process.env.NEXT_PUBLIC_DINARI_API_SECRET_KEY,
-        environment: 'sandbox',
-      });
-
-      const provider = ethers.getDefaultProvider(RPC_URL);
-      const {signer,address} = await getSignerFromMetamask();
-      console.log(`Signer Address: ${address}`);
-      const chainId = Number((await provider.getNetwork()).chainId);
-      const orderProcessorAddress = orderProcessorData.networkAddresses[chainId];
-      console.log(`Order Processor Address: ${orderProcessorAddress}`);
-      console.log(orderProcessorAddress, "address");
+      // Get chainId from publicClient
+      const chainId = publicClient.chain.id;
+      // Use the original type and cast only at the point of use
+      const orderProcessorAddress = (orderProcessorData.networkAddresses as Record<string, string>)[String(chainId)] as `0x${string}`;
+      if (!orderProcessorAddress) throw new Error('No order processor address for this chain');
       setResults('Step 1: Preparing order...\n');
-
-      const orderProcessor = new ethers.Contract(
-        orderProcessorAddress,
-        orderProcessorAbi,
-        signer,
-      );
-      const assetToken = new ethers.Contract(
-        assetTokenAddress,
-        tokenAbi,
-        signer,
-      );
-
-      const paymentToken = new ethers.Contract(
-        paymentTokenAddress,
-        tokenAbi,
-        signer,
-      );
-
+      // Order params
       const orderAmount = BigInt(1_000_000);
-      // sell order amount (10 dShares)
-      // const orderAmount = BigInt(10_000_000_000_000_000_000);
-      // buy order (Change to true for Sell Order)
       const sellOrder = false;
-      // market order
-      const orderType = Number(0);
-      // limit price
-      const limitPrice = Number(0);
-
-      // check the order precision doesn't exceed max decimals
-      // applicable to sell orders only
-      if (sellOrder) {
-        const allowedDecimalReduction = await orderProcessor.orderDecimalReduction(assetTokenAddress);
-        const allowablePrecisionReduction = 10 ** allowedDecimalReduction;
-        if (Number(orderAmount) % allowablePrecisionReduction != 0) {
-          const assetTokenDecimals = await assetToken.decimals();
-          const maxDecimals = assetTokenDecimals - allowedDecimalReduction;
-          throw new Error(`Order amount precision exceeds max decimals of ${maxDecimals}`);
-        }
-      }
-
+      const orderType = 0;
+      const limitPrice = 0;
       const orderParams = {
         requestTimestamp: Date.now(),
         recipient: address,
@@ -209,162 +103,198 @@ export default function DinariTestPage() {
         paymentToken: paymentTokenAddress,
         sell: sellOrder,
         orderType: orderType,
-        assetTokenQuantity: 0, // Asset amount to sell. Ignored for buys. Fees will be taken from proceeds for sells.
-        paymentTokenQuantity: Number(10), // Payment amount to spend. Ignored for sells. Fees will be added to this amount for buys.
-        price: limitPrice, // Limit price unused for market orders
-        tif: 1, // GTC
+        assetTokenQuantity: 0,
+        paymentTokenQuantity: Number(10),
+        price: limitPrice,
+        tif: 1,
       };
-    
       const orderParams2 = {
         requestTimestamp: Date.now(),
         recipient: address,
-        assetToken: "0x92d95BCB50B83d488bBFA18776ADC1553d3a8914",
+        assetToken: '0x92d95BCB50B83d488bBFA18776ADC1553d3a8914' as `0x${string}`,
         paymentToken: paymentTokenAddress,
         sell: sellOrder,
         orderType: orderType,
-        assetTokenQuantity: 0, // Asset amount to sell. Ignored for buys. Fees will be taken from proceeds for sells.
-        paymentTokenQuantity: Number(10), // Payment amount to spend. Ignored for sells. Fees will be added to this amount for buys.
-        price: limitPrice, // Limit price unused for market orders
-        tif: 1, // GTC
+        assetTokenQuantity: 0,
+        paymentTokenQuantity: Number(10),
+        price: limitPrice,
+        tif: 1,
       };
       const _order = {
         chain_id: 'eip155:11155111',
         order_side: 'BUY',
         order_tif: 'DAY',
         order_type: 'MARKET',
-        stock_id: "0196ea6d-b6de-70d5-ae41-9525959ef309",
+        stock_id: '0196ea6d-b6de-70d5-ae41-9525959ef309',
         payment_token: paymentTokenAddress,
         payment_token_quantity: 10,
-      }
+      };
       const _order2 = {
         chain_id: 'eip155:11155111',
         order_side: 'BUY',
         order_tif: 'DAY',
         order_type: 'MARKET',
-        stock_id: "0196ea6d-b6df-7dcb-a1de-d7733e7bcc51",
+        stock_id: '0196ea6d-b6df-7dcb-a1de-d7733e7bcc51',
         payment_token: paymentTokenAddress,
         payment_token_quantity: 8,
-      }
-
-
-      const feeQuoteResponse1 = await client.v2.accounts.orders.stocks.eip155.getFeeQuote(formData.accountId, _order);
-      const feeQuoteResponse2 = await client.v2.accounts.orders.stocks.eip155.getFeeQuote(formData.accountId, _order2);
-
+      };
+      // Fee quotes
+      const client = new Dinari({
+        apiKeyID: process.env.NEXT_PUBLIC_DINARI_API_KEY_ID,
+        apiSecretKey: process.env.NEXT_PUBLIC_DINARI_API_SECRET_KEY,
+        environment: 'sandbox',
+      });
+      const feeQuoteResponse1 = await client.v2.accounts.orders.stocks.eip155.getFeeQuote(formData.accountId, { ..._order, order_side: _order.order_side as any, order_tif: _order.order_tif as any, order_type: _order.order_type as any, chain_id: _order.chain_id as any });
+      const feeQuoteResponse2 = await client.v2.accounts.orders.stocks.eip155.getFeeQuote(formData.accountId, { ..._order2, order_side: _order2.order_side as any, order_tif: _order2.order_tif as any, order_type: _order2.order_type as any, chain_id: _order2.chain_id as any });
       const fees1 = BigInt(feeQuoteResponse1.order_fee_contract_object.fee_quote.fee);
       const fees2 = BigInt(feeQuoteResponse2.order_fee_contract_object.fee_quote.fee);
       const totalSpendAmount = orderAmount + fees1 + fees2;
-      console.log(`fees: ${ethers.utils.formatUnits(fees1, 6)}`);
-      console.log(`fees: ${ethers.utils.formatUnits(fees2, 6)}`);
-
-      const nonce = await paymentToken.nonces(address);
-      // // 5 minute deadline from current blocktime
-      const blockNumber = await provider.getBlockNumber();
-      const blockTime = (await provider.getBlock(blockNumber))?.timestamp;
-      if (!blockTime) throw new Error("no block time");
-      const deadline = blockTime + 60 * 5;
-
-
+      // Get nonce, name, version, decimals from paymentToken
+      const nonce = await publicClient.readContract({
+        address: paymentTokenAddress,
+        abi: tokenAbi,
+        functionName: 'nonces',
+        args: [address],
+      });
+      const block = await publicClient.getBlock();
+      const blockTime = block.timestamp;
+      const deadline = Number(blockTime) + 60 * 5;
+      const tokenName = await publicClient.readContract({
+        address: paymentTokenAddress,
+        abi: tokenAbi,
+        functionName: 'name',
+      });
+      const tokenVersion = await getContractVersion({ client: publicClient, address: paymentTokenAddress, abi: tokenAbi });
       const permitDomain = {
-        name: await paymentToken.name(),
-        version: await getContractVersion(paymentToken),
-        chainId: (await provider.getNetwork()).chainId,
+        name: tokenName,
+        version: tokenVersion,
+        chainId: chainId,
         verifyingContract: paymentTokenAddress,
-      };
-
-      // permit message to sign
+      } as const;
       const permitMessage = {
         owner: address,
         spender: orderProcessorAddress,
         value: totalSpendAmount,
         nonce: nonce,
-        deadline: deadline
+        deadline: deadline,
       };
-
-
-      const permitSignatureBytes = await signer._signTypedData(permitDomain, permitTypes, permitMessage);
-      const permitSignature = ethers.utils.splitSignature(permitSignatureBytes);
-
-      console.log(permitSignature);
-
-      // // create selfPermit call data
-      const selfPermitData = orderProcessor.interface.encodeFunctionData("selfPermit", [
-        paymentTokenAddress,
-        permitMessage.owner,
-        permitMessage.value,
-        permitMessage.deadline,
-        permitSignature.v,
-        permitSignature.r,
-        permitSignature.s
-      ]);
-
-      console.log("self", selfPermitData)
-
-      const requestOrderData = orderProcessor.interface.encodeFunctionData("createOrder", [[
-        orderParams.requestTimestamp,
-        orderParams.recipient,
-        orderParams.assetToken,
-        orderParams.paymentToken,
-        orderParams.sell,
-        orderParams.orderType,
-        orderParams.assetTokenQuantity,
-        orderParams.paymentTokenQuantity,
-        orderParams.price,
-        orderParams.tif,
-      ], [
-        feeQuoteResponse1.order_fee_contract_object.fee_quote.orderId,
-        feeQuoteResponse1.order_fee_contract_object.fee_quote.requester,
-        feeQuoteResponse1.order_fee_contract_object.fee_quote.fee,
-        feeQuoteResponse1.order_fee_contract_object.fee_quote.timestamp,
-        feeQuoteResponse1.order_fee_contract_object.fee_quote.deadline,
-      ], feeQuoteResponse1.order_fee_contract_object.fee_quote_signature]);
-    
-      const requestOrderData2 = orderProcessor.interface.encodeFunctionData("createOrder", [[
-        orderParams2.requestTimestamp,
-        orderParams2.recipient,
-        orderParams2.assetToken,
-        orderParams2.paymentToken,
-        orderParams2.sell,
-        orderParams2.orderType,
-        orderParams2.assetTokenQuantity,
-        orderParams2.paymentTokenQuantity,
-        orderParams2.price,
-        orderParams2.tif,
-      ], [
-        feeQuoteResponse2.order_fee_contract_object.fee_quote.orderId,
-        feeQuoteResponse2.order_fee_contract_object.fee_quote.requester,
-        feeQuoteResponse2.order_fee_contract_object.fee_quote.fee,
-        feeQuoteResponse2.order_fee_contract_object.fee_quote.timestamp,
-        feeQuoteResponse2.order_fee_contract_object.fee_quote.deadline,
-      ], feeQuoteResponse2.order_fee_contract_object.fee_quote_signature]);
-
-
-      const tx = await orderProcessor.multicall([
-        selfPermitData,
-        requestOrderData,
-        requestOrderData2
-      ]);
-      const receipt = await tx.wait();
-      console.log(`tx hash: ${tx.hash}`);
-
-      const orderEvent = receipt.logs.filter((log: any) => log.topics[0] === orderProcessor.interface.getEventTopic("OrderCreated")).map((log: any) => orderProcessor.interface.parseLog(log))[0];
-      if (!orderEvent) throw new Error("no order event");
-      const orderId = orderEvent.args[0];
-      const orderAccount = orderEvent.args[1];
-    
-    
-      // use order id to get order status (ACTIVE, FULFILLED, CANCELLED)
-      const orderStatus = await orderProcessor.getOrderStatus(orderId);
-      console.log(`Order Status: ${orderStatus}`);
-      setResults(prev => prev + 'Order prepared successfully!\n');
-      setResults(prev => prev + `Transaction data: ${orderId}\n`);
-      setResults(prev => prev + `Tx hash: ${tx.hash}\n`);
-      setResults(prev => prev + `Order Account: ${orderAccount}\n`);
-
+      // Sign permit
+      const permitSignature = await walletClient.signTypedData({
+        domain: permitDomain,
+        types: permitTypes,
+        primaryType: 'Permit',
+        message: permitMessage,
+        account: address,
+      });
+      // viem returns a hex signature, split it
+      const v = parseInt(permitSignature.slice(-2), 16);
+      const r = `0x${permitSignature.slice(2, 66)}` as `0x${string}`;
+      const s = `0x${permitSignature.slice(66, 130)}` as `0x${string}`;
+      // Encode multicall data
+      const selfPermitData = encodeFunctionData({
+        abi: orderProcessorAbi,
+        functionName: 'selfPermit',
+        args: [
+          paymentTokenAddress,
+          permitMessage.owner,
+          permitMessage.value,
+          permitMessage.deadline,
+          v,
+          r,
+          s,
+        ],
+      });
+      const requestOrderData = encodeFunctionData({
+        abi: orderProcessorAbi,
+        functionName: 'createOrder',
+        args: [
+          [
+            orderParams.requestTimestamp,
+            orderParams.recipient,
+            orderParams.assetToken,
+            orderParams.paymentToken,
+            orderParams.sell,
+            orderParams.orderType,
+            orderParams.assetTokenQuantity,
+            orderParams.paymentTokenQuantity,
+            orderParams.price,
+            orderParams.tif,
+          ],
+          [
+            feeQuoteResponse1.order_fee_contract_object.fee_quote.orderId,
+            feeQuoteResponse1.order_fee_contract_object.fee_quote.requester,
+            feeQuoteResponse1.order_fee_contract_object.fee_quote.fee,
+            feeQuoteResponse1.order_fee_contract_object.fee_quote.timestamp,
+            feeQuoteResponse1.order_fee_contract_object.fee_quote.deadline,
+          ],
+          feeQuoteResponse1.order_fee_contract_object.fee_quote_signature,
+        ],
+      });
+      const requestOrderData2 = encodeFunctionData({
+        abi: orderProcessorAbi,
+        functionName: 'createOrder',
+        args: [
+          [
+            orderParams2.requestTimestamp,
+            orderParams2.recipient,
+            orderParams2.assetToken,
+            orderParams2.paymentToken,
+            orderParams2.sell,
+            orderParams2.orderType,
+            orderParams2.assetTokenQuantity,
+            orderParams2.paymentTokenQuantity,
+            orderParams2.price,
+            orderParams2.tif,
+          ],
+          [
+            feeQuoteResponse2.order_fee_contract_object.fee_quote.orderId,
+            feeQuoteResponse2.order_fee_contract_object.fee_quote.requester,
+            feeQuoteResponse2.order_fee_contract_object.fee_quote.fee,
+            feeQuoteResponse2.order_fee_contract_object.fee_quote.timestamp,
+            feeQuoteResponse2.order_fee_contract_object.fee_quote.deadline,
+          ],
+          feeQuoteResponse2.order_fee_contract_object.fee_quote_signature,
+        ],
+      });
+      // Send multicall transaction
+      const txHash = await walletClient.writeContract({
+        address: orderProcessorAddress,
+        abi: orderProcessorAbi,
+        functionName: 'multicall',
+        args: [[selfPermitData, requestOrderData, requestOrderData2]],
+        account: address,
+      });
+      setResults((prev) => prev + `Tx sent: ${txHash}\n`);
+      // Wait for receipt
+      const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+      // Find OrderCreated event
+      const orderCreatedEvent = receipt.logs
+        .map((log) => {
+          try {
+            return decodeEventLog({
+              abi: orderProcessorAbi,
+              data: log.data,
+              topics: log.topics,
+            });
+          } catch {
+            return null;
+          }
+        })
+        .find((e) => e && e.eventName === 'OrderCreated');
+      let orderId = '';
+      let orderAccount = '';
+      if (orderCreatedEvent && orderCreatedEvent.args) {
+        orderId = String(orderCreatedEvent.args[0]);
+        orderAccount = String(orderCreatedEvent.args[1]);
+      }
+      setResults((prev) => prev + 'Order prepared successfully!\n');
+      setResults((prev) => prev + `Transaction data: ${orderId}\n`);
+      setResults((prev) => prev + `Tx hash: ${txHash}\n`);
+      setResults((prev) => prev + `Order Account: ${orderAccount}\n`);
     } catch (error) {
       console.error('Error testing Dinari order:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      setResults(prev => prev + `Error: ${errorMessage}\n`);
-
+      setResults((prev) => prev + `Error: ${errorMessage}\n`);
       toast({
         title: 'Error',
         description: errorMessage,
@@ -378,13 +308,16 @@ export default function DinariTestPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-4xl mx-auto">
+        {/* Add Privy Connect Wallet Button here */}
+        <div className="mb-6 flex justify-end">
+          <LoginButton />
+        </div>
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Dinari API Test</h1>
           <p className="text-muted-foreground">
             Test the Dinari API integration for stock orders
           </p>
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Form Section */}
           <Card>
@@ -404,7 +337,6 @@ export default function DinariTestPage() {
                   placeholder="Enter your account ID"
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="chainId">Chain ID</Label>
                 <Select value={formData.chainId} onValueChange={(value) => handleInputChange('chainId', value)}>
@@ -418,7 +350,6 @@ export default function DinariTestPage() {
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="orderSide">Order Side</Label>
@@ -432,7 +363,6 @@ export default function DinariTestPage() {
                     </SelectContent>
                   </Select>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="orderType">Order Type</Label>
                   <Select value={formData.orderType} onValueChange={(value) => handleInputChange('orderType', value)}>
@@ -446,7 +376,6 @@ export default function DinariTestPage() {
                   </Select>
                 </div>
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="orderTif">Time in Force</Label>
                 <Select value={formData.orderTif} onValueChange={(value) => handleInputChange('orderTif', value)}>
@@ -461,7 +390,6 @@ export default function DinariTestPage() {
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="stockId">Stock ID</Label>
                 <Input
@@ -471,7 +399,6 @@ export default function DinariTestPage() {
                   placeholder="Enter stock ID"
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="paymentToken">Payment Token Address</Label>
                 <Input
@@ -481,13 +408,11 @@ export default function DinariTestPage() {
                   placeholder="0x..."
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="paymentTokenQuantity">
                   {formData.orderSide === 'BUY' && formData.orderType === 'MARKET'
                     ? 'Payment Token Quantity'
-                    : 'Stock Quantity'
-                  }
+                    : 'Stock Quantity'}
                 </Label>
                 <Input
                   id="paymentTokenQuantity"
@@ -497,7 +422,6 @@ export default function DinariTestPage() {
                   placeholder="10"
                 />
               </div>
-
               {formData.orderType === 'LIMIT' && (
                 <div className="space-y-2">
                   <Label htmlFor="limitPrice">Limit Price</Label>
@@ -511,7 +435,6 @@ export default function DinariTestPage() {
                   />
                 </div>
               )}
-
               <Button
                 onClick={testDinariOrder}
                 disabled={isLoading}
@@ -521,7 +444,6 @@ export default function DinariTestPage() {
               </Button>
             </CardContent>
           </Card>
-
           {/* Results Section */}
           <Card>
             <CardHeader>
@@ -540,7 +462,6 @@ export default function DinariTestPage() {
             </CardContent>
           </Card>
         </div>
-
         {/* Environment Variables Info */}
         <Card className="mt-8">
           <CardHeader>
