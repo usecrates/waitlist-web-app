@@ -75,6 +75,8 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
     }
   }, [open]);
 
+  const disabled = !amount || parseFloat(amount) <= 0;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md text-white w-full bg-[#181818] p-0 rounded-2xl font-chakra">
@@ -89,7 +91,9 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
           {/* Crate Info */}
           {step !== 'success' && (
             <div className="flex items-center text-white border-[#484848] border bg-[#232323] rounded-md p-3 my-4">
-              <img src={crate?.image || "/public/placeholder-user.jpg"} className="w-12 h-12 rounded-lg mr-4 object-cover" alt="crate" />
+              <div className="p-[2px] rounded-lg" style={{ background: "linear-gradient(180deg, #8B8B8B 0%, #E9E9E9 50%, #8B8B8B 100%)" }}>
+                <img src={crate?.image || "/public/placeholder-user.jpg"} className="w-12 h-12 rounded-lg object-cover" alt="crate" />
+              </div>
               <div>
                 <div className="text-lg font-semibold">{crate?.name || 'Nancy Pelosi'}</div>
                 <div className="text-xs text-[#A1A1A1]">{crate?.meta || 'Democrat/House/California'}</div>
@@ -141,9 +145,19 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
                 Choose the amount you'd like to invest into the {crate?.name || 'Nancy Pelosi'} crate
               </div>
               <button
-                className="w-full bg-gradient-to-b from-[#7B7B7B] to-[#EBEBEB] text-black font-bold py-3 rounded"
+                className={`w-full font-bold py-3 rounded text-lg${disabled ? ' cursor-not-allowed' : ''}`}
+                style={disabled ? {
+                  background: "linear-gradient(180deg, #444 0%, #888 100%)",
+                  color: "#222",
+                  boxShadow: "0 2px 8px 0 #00000040, 0 1.5px 0 #222 inset",
+                  opacity: 0.7
+                } : {
+                  background: "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                  backgroundBlendMode: "normal, normal",
+                  color: "#000"
+                }}
                 onClick={() => setStep('review')}
-                disabled={!amount || parseFloat(amount) <= 0}
+                disabled={disabled}
               >
                 Preview
               </button>
@@ -195,8 +209,19 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
             <span className="font-bold text-white">${totalSpend}</span>
             </div>
                   <button
-                className="w-1/2 mt-4 bg-gradient-to-b from-[#7B7B7B] to-[#EBEBEB] text-black font-bold py-3 rounded text-sm"
+                className={`w-1/2 mt-4 font-bold py-3 rounded text-lg${disabled ? ' cursor-not-allowed' : ''}`}
+                style={disabled ? {
+                  background: "linear-gradient(180deg, #444 0%, #888 100%)",
+                  color: "#222",
+                  boxShadow: "0 2px 8px 0 #00000040, 0 1.5px 0 #222 inset",
+                  opacity: 0.7
+                } : {
+                  background: "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                  backgroundBlendMode: "normal, normal",
+                  color: "#000"
+                }}
                 onClick={() => setStep('status')}
+                disabled={disabled}
               >
                 Confirm
               </button>
@@ -254,7 +279,21 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
                 </div>
                 <div className="flex gap-4">
                   <button className="flex-1 bg-[#232323] text-white py-3 rounded">View Portfolio</button>
-                  <button className="flex-1 bg-gradient-to-b from-[#7B7B7B] to-[#EBEBEB] text-black font-bold py-3 rounded">Buy More</button>
+                  <button
+                    className={`flex-1 font-bold py-3 rounded text-lg${disabled ? ' cursor-not-allowed' : ''}`}
+                    style={disabled ? {
+                      background: "linear-gradient(180deg, #444 0%, #888 100%)",
+                      color: "#222",
+                      boxShadow: "0 2px 8px 0 #00000040, 0 1.5px 0 #222 inset",
+                      opacity: 0.7
+                    } : {
+                      background: "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                      backgroundBlendMode: "normal, normal",
+                      color: "#000"
+                    }}
+                  >
+                    Buy More
+                  </button>
                   {/* Demo: Simulate error */}
                   {orderStatus === 'waiting' && (
                     <button className="ml-2 px-4 py-2 bg-red-500 text-white rounded text-xs" onClick={() => setOrderStatus('error')}>Simulate Error</button>
@@ -285,7 +324,9 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
                 </div>
               </div>
               <div className="flex items-center text-white border-[#484848] border bg-[#232323] rounded-md p-3 my-2">
-                <img src={crate?.image || "/public/placeholder-user.jpg"} className="w-12 h-12 rounded-lg mr-4 object-cover" alt="crate" />
+                <div className="p-[2px] rounded-lg" style={{ background: "linear-gradient(180deg, #8B8B8B 0%, #E9E9E9 50%, #8B8B8B 100%)" }}>
+                  <img src={crate?.image || "/public/placeholder-user.jpg"} className="w-12 h-12 rounded-lg object-cover" alt="crate" />
+                </div>
                 <div>
                   <div className="text-lg font-semibold">{crate?.name || 'Nancy Pelosi'}</div>
                   <div className="text-xs text-[#A1A1A1]">{crate?.meta || 'Democrat/House/California'}</div>
@@ -315,7 +356,21 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
               </div>
               <div className="flex gap-4">
                 <button className="flex-1 bg-[#232323] text-white py-3 rounded">View Portfolio</button>
-                <button className="flex-1 bg-gradient-to-b from-[#7B7B7B] to-[#EBEBEB] text-black font-bold py-3 rounded">Buy More</button>
+                <button
+                  className={`flex-1 font-bold py-3 rounded text-lg${disabled ? ' cursor-not-allowed' : ''}`}
+                  style={disabled ? {
+                    background: "linear-gradient(180deg, #444 0%, #888 100%)",
+                    color: "#222",
+                    boxShadow: "0 2px 8px 0 #00000040, 0 1.5px 0 #222 inset",
+                    opacity: 0.7
+                  } : {
+                    background: "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                    backgroundBlendMode: "normal, normal",
+                    color: "#000"
+                  }}
+                >
+                  Buy More
+                </button>
               </div>
             </>
           )}

@@ -8,11 +8,12 @@ import { ArrowLeft, Twitter,  Share, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { BuyCrateModal } from "@/components/BuyCrateModal";
+import { ExitCrateModal } from "@/components/ExitCrateModal";
 export default function SingleCrate() {
-  const [activeTab, setActiveTab] = useState("Crates");
   // Simulate subscription state
-  const isSubscribed = false; // Change to false to show subscribe button
+  const isSubscribed = true; // Change to false to show subscribe button
   const [buyModalOpen, setBuyModalOpen] = useState(false);
+  const [exitModalOpen, setExitModalOpen] = useState(false);
 
   return (
     <main className="px-6 py-20 max-w-6xl mx-auto text-white space-y-10">
@@ -214,6 +215,7 @@ export default function SingleCrate() {
                       "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
                     backgroundBlendMode: "normal, normal",
                   }}
+                  onClick={() => setExitModalOpen(true)}
                 >
                   Invest More
                 </button>
@@ -252,7 +254,15 @@ export default function SingleCrate() {
             </>
           )}
         </div>
-      
+      <ExitCrateModal
+        open={exitModalOpen}
+        onOpenChange={setExitModalOpen}
+        crate={{
+          name: "Nancy Pelosi",
+          meta: "Democrat/House/California",
+          image: "/assets/image.png"
+        }}
+      />
      
        
 

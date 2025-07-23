@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+// Remove: import { Toggle } from "@/components/ui/toggle";
+import { StocksTable } from "@/components/stocks/StocksTable";
 
 export default function PortfolioPage() {
   const [activeTab, setActiveTab] = useState("Crates");
@@ -49,6 +51,91 @@ export default function PortfolioPage() {
     },
   ];
 
+  const [copyTradeToggles, setCopyTradeToggles] = useState(crates.map(() => false));
+  const handleToggleCopyTrade = (idx: number) => {
+    setCopyTradeToggles(toggles => toggles.map((on, i) => i === idx ? !on : on));
+  };
+
+  const stocksData = [
+    {
+      logo: "/assets/apple.png",
+      symbol: "AAPL",
+      name: "Apple Inc",
+      address: "XsHt...vULr7",
+      price: "$211.16",
+      holdings: "$8,614",
+      owned: "2,926",
+      netGain: "+14.67%",
+      netGainColor: "text-green-400",
+    },
+    {
+      logo: "/assets/apple.png",
+      symbol: "NVIDIA",
+      name: "NVIDIA Corporation",
+      address: "XsHt...vULr7",
+      price: "$164.92",
+      holdings: "$6,553",
+      owned: "4,672",
+      netGain: "+12.07%",
+      netGainColor: "text-green-400",
+    },
+    {
+      logo: "/assets/apple.png",
+      symbol: "MSFT",
+      name: "Microsoft Corporation",
+      address: "XsHt...vULr7",
+      price: "$503.32",
+      holdings: "$4,525",
+      owned: "4,617",
+      netGain: "-1.23%",
+      netGainColor: "text-red-400",
+    },
+    {
+      logo: "/assets/apple.png",
+      symbol: "WMT",
+      name: "Walmart Inc.",
+      address: "XsHt...vULr7",
+      price: "$94.40",
+      holdings: "$9,014",
+      owned: "719",
+      netGain: "-2.90%",
+      netGainColor: "text-red-400",
+    },
+    {
+      logo: "/assets/apple.png",
+      symbol: "TSLA",
+      name: "Tesla",
+      address: "XsHt...vULr7",
+      price: "$313.51",
+      holdings: "$6,568",
+      owned: "2,567",
+      netGain: "-8.34%",
+      netGainColor: "text-red-400",
+    },
+    {
+      logo: "/assets/apple.png",
+      symbol: "META",
+      name: "META Inc",
+      address: "XsHt...vULr7",
+      price: "$717.51",
+      holdings: "$2,012",
+      owned: "7,192",
+      netGain: "+6.44%",
+      netGainColor: "text-green-400",
+    },
+    {
+      logo: "/assets/apple.png",
+      symbol: "GOOG",
+      name: "Alphabet Inc [Google]",
+      address: "XsHt...vULr7",
+      price: "$181.31",
+      holdings: "$6,666",
+      owned: "9,947",
+      netGain: "-4.82%",
+      netGainColor: "text-red-400",
+    },
+  ];
+
   return (
     <div className="min-h-screen pt-32 flex flex-col bg-[#0e0e0e] text-white font-chakra">
       <main className="flex-1 flex flex-col items-center pb-16">
@@ -87,7 +174,7 @@ export default function PortfolioPage() {
               </div>
 
               {/* Stats Bar */}
-              <div className="flex border-b border-[#232323] py-3 mb-6">
+              <div className="flex border-b border-[#232323]">
                 <div className="flex w-full">
                   {/* Current Value */}
                   <div className="w-1/2 flex flex-col items-start justify-center px-4">
@@ -106,89 +193,156 @@ export default function PortfolioPage() {
                 </div>
               </div>
 
-              {/* Crate Cards */}
-              <div>
-                {crates.map((crate, i) => (
-                  <motion.div
-                    key={i}
-                    className="relative flex items-center py-6 mb-0 border-b border-[#232323] last:border-b-0 bg-transparent rounded-none shadow-none"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: i * 0.08 }}
-                  >
-                    {/* Avatar with blue shadow and border, square */}
-                    <div className="relative mr-8 flex-shrink-0" style={{ width: 48, height: 48 }}>
-                      {/* Blue radial glow, larger than the image */}
-                      <div
-                        className="absolute left-1/2 top-1/2"
-                        style={{
-                          width: 64, // larger than image
-                          height: 64,
-                          transform: "translate(-50%, -50%)",
-                          background: "radial-gradient(circle, #2563eb 60%, transparent 100%)",
-                          filter: "blur(6px)",
-                          opacity: 0.8,
-                          zIndex: 0,
-                          borderRadius: "16px",
-                        }}
-                      />
-                      {/* Avatar image */}
-                      <img
-                        src={crate.avatar}
-                        alt="avatar"
-                        className="w-12 h-12 object-cover rounded-xl border-2 border-white relative z-10"
-                        style={{ display: "block" }}
-                      />
-                    </div>
-                    {/* Info and Button */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-4 mb-0.5">
-                        <span className="font-semibold text-base truncate">{crate.name}</span>
-                        {crate.notification && (
-                          <span className="ml-2 w-2 h-2 rounded-full bg-orange-400 inline-block" title="Needs rebalance" />
-                        )}
-                        <button className="ml-4 bg-transparent border border-gray-500 text-white px-4 py-1 rounded text-xs font-medium hover:bg-gray-800 transition">
-                          Rebalance
-                        </button>
+              {/* Crate Cards or Stocks Table */}
+              {activeTab === "Crates" ? (
+                <div className="mt-5">
+                  {crates.map((crate, i) => (
+                    <motion.div
+                      key={i}
+                      className="relative flex items-center py-6 mb-0 border-b border-[#232323] last:border-b-0 bg-transparent rounded-none shadow-none"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: i * 0.08 }}
+                    >
+                      {/* Avatar + Info in same row */}
+                      <div className="flex items-start gap-8 flex-1 min-w-0">
+                        {/* Avatar with blue shadow and border, square */}
+                        <div className="relative flex-shrink-0" style={{ width: 48, height: 48 }}>
+                          {/* Blue radial glow, larger than the image */}
+                          <div
+                            className="absolute left-1/2 top-1/2"
+                            style={{
+                              width: 64, // larger than image
+                              height: 64,
+                              transform: "translate(-50%, -50%)",
+                              background: "radial-gradient(circle, #2563eb 60%, transparent 100%)",
+                              filter: "blur(6px)",
+                              opacity: 0.8,
+                              zIndex: 0,
+                              borderRadius: "16px",
+                            }}
+                          />
+                          {/* Avatar image */}
+                          <img
+                            src={crate.avatar}
+                            alt="avatar"
+                            className="w-12 h-12 object-cover rounded-xl border-2 border-white relative z-10"
+                            style={{ display: "block" }}
+                          />
+                        </div>
+                        {/* Info */}
+                        <div className="flex-1 min-w-0 mt-0.5">
+                          <div className="flex items-center gap-4 mb-0.5">
+                            <span className="font-semibold text-base truncate">{crate.name}</span>
+                            {crate.notification && (
+                              <span className="ml-2 w-2 h-2 rounded-full bg-orange-400 inline-block" title="Needs rebalance" />
+                            )}
+                          </div>
+                          <div className="text-gray-400 text-xs mb-1 truncate">{crate.party}</div>
+                          <div className="flex gap-20 mt-5 text-sm">
+                            <div>
+                              <div className="font-semibold text-xl">{crate.currentValue}</div>
+                              <div className="text-gray-400 text-xs">Current Value</div>
+                            </div>
+                            <div>
+                              <div className="font-semibold text-xl">{crate.invested}</div>
+                              <div className="text-gray-400 text-xs">Total Invested</div>
+                            </div>
+                            <div>
+                              <div className="text-green-400 font-semibold text-xl">{crate.returns}</div>
+                              <div className="text-gray-400 text-xs">Total Returns</div>
+                            </div>
+                            <div>
+                              <div className="text-green-400 font-semibold text-xl">{crate.month}</div>
+                              <div className="text-gray-400 text-xs">This month</div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-gray-400 text-xs mb-1 truncate">{crate.party}</div>
-                      <div className="flex gap-20 text-sm">
-                        <div>
-                          <div className="font-semibold">{crate.currentValue}</div>
-                          <div className="text-gray-400 text-xs">Current Value</div>
+                      {/* Right side: Rebalance + Copy Trade + menu */}
+                      <div className="flex flex-row items-end gap-2 absolute right-2 top-1/2 -translate-y-10">
+                        <div className="flex gap-2">
+                          <button className="bg-[#FFDBAC1A] border border-[#595959] text-[#FFDBAC] px-4 py-[0.3rem] rounded text-xs font-medium transition">
+                            Rebalance
+                          </button>
+                          <button className="bg-[#232323]  text-white px-4 py-[0.3rem] rounded text-xs font-medium flex items-center gap-1  transition">
+                            Copy Trade
+                            <CustomToggle isOn={copyTradeToggles[i]} onToggle={() => handleToggleCopyTrade(i)} />
+                          </button>
                         </div>
-                        <div>
-                          <div className="font-semibold">{crate.invested}</div>
-                          <div className="text-gray-400 text-xs">Total Invested</div>
-                        </div>
-                        <div>
-                          <div className="text-green-400 font-semibold">{crate.returns}</div>
-                          <div className="text-gray-400 text-xs">Total Returns</div>
-                        </div>
-                        <div>
-                          <div className="text-green-400 font-semibold">{crate.month}</div>
-                          <div className="text-gray-400 text-xs">This month</div>
-                        </div>
+                        <div className="text-gray-500 cursor-pointer text-lg ">&#8942;</div>
                       </div>
-                    </div>
-                    {/* Three-dot menu */}
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer text-lg">
-                      &#8942;
-                    </div>
-                  </motion.div>
-                ))}
-                
-                <div className="mt-8">
-                  <button className="border border-gray-600 px-6 py-2 rounded text-gray-300 hover:bg-gray-800 transition">
-                    Discover more crates
-                  </button>
+                    </motion.div>
+                  ))}
+                  
+                  <div className="mt-8 flex justify-center">
+                    <button className="border border-gray-600 px-6 py-2 rounded text-gray-300 transition">
+                      Discover more crates
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div>
+                  <div className="overflow-x-auto rounded-lg ">
+                    <table className="w-full text-left text-white">
+                      <thead>
+                        <tr className="text-[#A1A1A1] text-sm">
+                          <th className="py-3 px-2 font-medium">Stock</th>
+                          <th className="py-3 px-2 font-medium">SOL Address</th>
+                          <th className="py-3 px-2 font-medium">Price</th>
+                          <th className="py-3 px-2 font-medium">Holdings</th>
+                          <th className="py-3 px-2 font-medium">Owned</th>
+                          <th className="py-3 px-2 font-medium">Net gain</th>
+                          <th className="py-3 px-2 font-medium"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {stocksData.map((stock, i) => (
+                          <tr key={i} className="border-t border-[#232323] text-base">
+                            <td className="py-3 px-2">
+                              <div className="flex items-center gap-3">
+                                <img src={stock.logo} alt={stock.symbol} className="w-8 h-8 rounded" />
+                                <div>
+                                  <div className="font-semibold text-base">{stock.symbol}</div>
+                                  <div className="text-xs text-[#B6B6B6]">{stock.name}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-3 px-2">
+                              <div className="flex items-center gap-2">
+                                <span>{stock.address}</span>
+                                <button className="ml-1" onClick={() => navigator.clipboard.writeText(stock.address)}>
+                                  <img src="/assets/copy.svg" alt="copy" className="w-4 h-4 opacity-60" />
+                                </button>
+                              </div>
+                            </td>
+                            <td className="py-3 px-2">{stock.price}</td>
+                            <td className="py-3 px-2">{stock.holdings}</td>
+                            <td className="py-3 px-2">{stock.owned}</td>
+                            <td className={`py-3 px-2 font-semibold ${stock.netGainColor}`}>{stock.netGain}</td>
+                            <td className="py-3 px-2">
+                            
+                                <img src="/assets/circle-info.svg" alt="info" className="w-4 h-4 opacity-70" />
+                             
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="mt-8 flex justify-center">
+                    <button className="border border-gray-600 px-6 py-2 rounded text-gray-300 transition">
+                      Discover more crates
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
+        
 
             {/* Right Side - Profile Card */}
             <motion.div
-              className="lg:pt-[52px]"
+  
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
@@ -230,6 +384,21 @@ export default function PortfolioPage() {
           </motion.div>
         </section>
       </main>
+    </div>
+  );
+}
+
+function CustomToggle({ isOn, onToggle }: { isOn: boolean, onToggle: () => void }) {
+  return (
+    <div
+      onClick={onToggle}
+      className={`ml-1 w-10 h-5 rounded-md cursor-pointer flex items-center transition-colors duration-200 ${isOn ? '' : 'bg-[#232323]'}`}
+      style={{ background: isOn ? 'linear-gradient(90deg, #f472b6 0%, #fde68a 100%)' : '#232323', border: '1px solid #595959', position: 'relative' }}
+    >
+      <div
+        className={`bg-white w-4 h-4 rounded-md shadow transition-transform duration-200`}
+        style={{ transform: isOn ? 'translateX(20px)' : 'translateX(2px)' }}
+      />
     </div>
   );
 }
