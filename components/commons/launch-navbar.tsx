@@ -8,7 +8,7 @@ export default function Navbar() {
   const pathname = usePathname();
   return (
     <header className="fixed top-0 left-0 font-chakra right-0 z-50 bg-black border-b border-[#272727] py-4">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-8">
+      <div className="max-w-6xl mx-auto flex items-center justify-between ">
         {/* Left: Logo + Nav Links */}
         <div className="flex items-center gap-10">
           <Link href="/" className="text-sm tracking-wide flex items-center gap-2 text-white">

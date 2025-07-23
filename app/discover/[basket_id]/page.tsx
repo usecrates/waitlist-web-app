@@ -9,11 +9,14 @@ import Image from "next/image";
 import { useState } from "react";
 import { BuyCrateModal } from "@/components/BuyCrateModal";
 import { ExitCrateModal } from "@/components/ExitCrateModal";
+import { KycModal } from "@/components/KycModal";
 export default function SingleCrate() {
   // Simulate subscription state
-  const isSubscribed = true; // Change to false to show subscribe button
+  const isSubscribed = false; // Change to false to show subscribe button
   const [buyModalOpen, setBuyModalOpen] = useState(false);
   const [exitModalOpen, setExitModalOpen] = useState(false);
+  const [kycModalOpen, setKycModalOpen] = useState(false);
+  const isKyced = false; // mock: set to true if user is KYCed
 
   return (
     <main className="px-6 py-20 max-w-6xl mx-auto text-white space-y-10">
@@ -238,13 +241,28 @@ export default function SingleCrate() {
                     "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
                   backgroundBlendMode: "normal, normal",
                 }}
-                onClick={() => setBuyModalOpen(true)}
+                onClick={() => {
+                  if (isKyced) {
+                    setBuyModalOpen(true);
+                  } else {
+                    setKycModalOpen(true);
+                  }
+                }}
               >
                 Subscribe
               </Button>
               <BuyCrateModal
                 open={buyModalOpen}
                 onOpenChange={setBuyModalOpen}
+                crate={{
+                  name: "Nancy Pelosi",
+                  meta: "Democrat/House/California",
+                  image: "/assets/image.png"
+                }}
+              />
+              <KycModal
+                open={kycModalOpen}
+                onOpenChange={setKycModalOpen}
                 crate={{
                   name: "Nancy Pelosi",
                   meta: "Democrat/House/California",

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 // Remove: import { Toggle } from "@/components/ui/toggle";
 import { StocksTable } from "@/components/stocks/StocksTable";
+import { RebalanceModal } from "@/components/RebalanceModal";
 
 export default function PortfolioPage() {
   const [activeTab, setActiveTab] = useState("Crates");
@@ -55,6 +56,9 @@ export default function PortfolioPage() {
   const handleToggleCopyTrade = (idx: number) => {
     setCopyTradeToggles(toggles => toggles.map((on, i) => i === idx ? !on : on));
   };
+
+  const [rebalanceModalOpen, setRebalanceModalOpen] = useState(false);
+  const [selectedCrate, setSelectedCrate] = useState<any>(null);
 
   const stocksData = [
     {
@@ -137,9 +141,9 @@ export default function PortfolioPage() {
   ];
 
   return (
-    <div className="min-h-screen pt-32 flex flex-col bg-[#0e0e0e] text-white font-chakra">
+    <div className="min-h-screen pt-32 max-w-6xl w-full mx-auto flex flex-col bg-[#0e0e0e] text-white font-chakra">
       <main className="flex-1 flex flex-col items-center pb-16">
-        <section className="max-w-6xl mx-auto px-6 w-full">
+        <section className=" w-full">
           {/* Main Grid - Tabs and Profile Card at same level */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -262,7 +266,10 @@ export default function PortfolioPage() {
                       {/* Right side: Rebalance + Copy Trade + menu */}
                       <div className="flex flex-row items-end gap-2 absolute right-2 top-1/2 -translate-y-10">
                         <div className="flex gap-2">
-                          <button className="bg-[#FFDBAC1A] border border-[#595959] text-[#FFDBAC] px-4 py-[0.3rem] rounded text-xs font-medium transition">
+                          <button
+                            className="bg-[#FFDBAC1A] border border-[#595959] text-[#FFDBAC] px-4 py-[0.3rem] rounded text-xs font-medium transition"
+                            onClick={() => { setSelectedCrate(crate); setRebalanceModalOpen(true); }}
+                          >
                             Rebalance
                           </button>
                           <button className="bg-[#232323]  text-white px-4 py-[0.3rem] rounded text-xs font-medium flex items-center gap-1  transition">
@@ -382,6 +389,12 @@ export default function PortfolioPage() {
               </div>
             </motion.div>
           </motion.div>
+          {/* Rebalance Modal (moved outside the map and tab content) */}
+          <RebalanceModal
+            open={rebalanceModalOpen}
+            onOpenChange={setRebalanceModalOpen}
+            crate={selectedCrate}
+          />
         </section>
       </main>
     </div>

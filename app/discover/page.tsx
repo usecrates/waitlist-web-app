@@ -69,7 +69,7 @@ export default function DiscoverPage() {
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] pt-24 pb-8 px-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Filter and Search Bar */}
         <div className=" mb-8 sticky pt-2 top-[4.5rem] z-30 bg-[#0e0e0e]">
           <div className="absolute left-1/2 -translate-x-1/2 translate-y-[3.4rem] w-screen border-b border-[#272727] pb-4 top-0" style={{zIndex: 0}} />

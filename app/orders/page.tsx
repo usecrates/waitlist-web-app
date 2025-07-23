@@ -165,8 +165,8 @@ const page = () => {
   const hasTransactions = mockData.length > 0;
 
   return (
-    <div className="p-8 min-h-screen pt-24 bg-[#0E0E0E] text-white">
-      <h1 className="text-2xl font-semibold mb-8">Transactions</h1>
+    <div className=" min-h-screen pt-24 max-w-6xl w-full mx-auto  text-white">
+      <h1 className="text-2xl font-semibold mb-4">Transactions</h1>
       {hasTransactions ? (
         <>
           <div className="flex flex-wrap gap-4 items-center mb-6">
