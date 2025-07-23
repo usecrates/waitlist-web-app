@@ -2,6 +2,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import LoginButton from "@/components/LoginButton";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -34,7 +35,9 @@ export default function Navbar() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
+          className="flex items-center gap-4"
         >
+          <Image src="/assets/bell.svg" alt="Use Crates Logo" height={24} width={24} />
           <LoginButton />
         </motion.div>
       </div>

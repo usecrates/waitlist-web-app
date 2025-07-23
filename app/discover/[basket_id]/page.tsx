@@ -7,10 +7,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Twitter,  Share, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { BuyCrateModal } from "@/components/BuyCrateModal";
 export default function SingleCrate() {
   const [activeTab, setActiveTab] = useState("Crates");
   // Simulate subscription state
-  const isSubscribed = true; // Change to false to show subscribe button
+  const isSubscribed = false; // Change to false to show subscribe button
+  const [buyModalOpen, setBuyModalOpen] = useState(false);
 
   return (
     <main className="px-6 py-20 max-w-6xl mx-auto text-white space-y-10">
@@ -32,15 +34,19 @@ export default function SingleCrate() {
 
         <div className="flex gap-6 items-center text-sm">
           <div>
-            <p className="text-green-500 text-xl font-semibold">+12.45%</p>
+            <p className="text-green-400
+             text-xl font-semibold">+12.45%</p>
             <p className="text-gray-400">Total Returns</p>
           </div>
           <div>
-            <p className="text-green-500 text-xl font-semibold">+2.45%</p>
+            <p className="text-green-400
+             text-xl font-semibold">+2.45%</p>
             <p className="text-gray-400">This Month</p>
           </div>
           <div>
-            <span className="px-3 py-1 rounded bg-[#2D2D2D]  text-red-500 font-semibold">High Volatility</span>
+            <span className="px-4 py-2 flex items-center gap-2 rounded bg-[#2D2D2D]  text-red-400 font-semibold">
+              <Image src="/assets/volatile.svg" alt="volatility" height={16} width={16} />
+              High Volatility</span>
           </div>
         </div>
       </div>
@@ -64,6 +70,22 @@ export default function SingleCrate() {
                 Stocks & ETFs
               </TabsTrigger>
             </TabsList>
+
+            {/* Stats Bar */}
+            <div className=" border-b border-[#282828] p-4 mt-4  flex justify-between font-chakra">
+              <div>
+                <div className="text-white text-xl">12</div>
+                <div className="text-[#898989] text-xs">Total No.of Stocks</div>
+              </div>
+              <div>
+                <div className="text-white text-xl">Jun 1, 2025</div>
+                <div className="text-[#898989] text-xs">Last Rebalance</div>
+              </div>
+              <div>
+                <div className="text-white text-xl">Quarterly</div>
+                <div className="text-[#898989] text-xs">Rebalance Frequency</div>
+              </div>
+            </div>
 
             <TabsContent value="Overview">
               <div className="flex p-5 mt-4">
@@ -114,15 +136,45 @@ export default function SingleCrate() {
               <TabsContent value="Stocks & ETFs">
               <div className="flex flex-col mt-4">
                 <h3 className="text-xl font-semibold mb-2">Holding Distribution</h3>
-                <DonutChartWithLegend />
-                <StocksTable />
+                <div className="relative w-full h-[300px]">
+                  <DonutChartWithLegend />
+                  {!isSubscribed && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm rounded-lg border border-[#232323] z-10">
+                      <img src="/assets/lock.svg" alt="Locked" className="mb-4" width={54} height={54} />
+                      <div className="text-white text-3xl w-1/2 text-center font-semibold mb-2">
+                        Subscribe to see stocks of this crate
+                      </div>
+                      <button className="bg-gradient-to-b from-[#7B7B7B] to-[#EBEBEB] text-black font-bold px-8 py-2 rounded mt-2">
+                        Subscribe
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="mt-8">
+                  <div className="relative w-full">
+                    <div className="rounded-lg overflow-x-auto">
+                      <StocksTable />
+                      {!isSubscribed && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm rounded-lg border border-[#232323] z-10">
+                          <img src="/assets/lock.svg" alt="Locked" className="mb-4" width={54} height={54} />
+                          <div className="text-white text-3xl w-1/2 text-center font-semibold mb-2">
+                            Subscribe to see stocks of this crate
+                          </div>
+                          <button className="bg-gradient-to-b from-[#7B7B7B] to-[#EBEBEB] text-black font-bold px-8 py-2 rounded mt-2">
+                            Subscribe
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             </TabsContent>
           </Tabs>
 
         </div>
         <div className="border w-1/3 border-gray-700 bg-[#111 h-fit p-6 rounded-xl space-y-4 shadow-md">
-          {false ? (
+          {isSubscribed ? (
             <div className="flex flex-col items-center justify-center h-full w-full">
               <div className="w-full max-w-xs rounded-xl shadow-md">
                 <div className="flex items-center mb-6">
@@ -143,11 +195,11 @@ export default function SingleCrate() {
                     <span className="text-gray-400 text-sm mt-1">Money Put in</span>
                   </div>
                   <div className="flex flex-col items-center">
-                    <span className="text-lg font-bold text-white">$120 <span className="text-green-400 text-base font-semibold align-top">+50%</span></span>
+                    <span className="text-lg font-bold text-white">$120 <span className="text-green-400 text-xs font-semibold align-bottom">+50%</span></span>
                     <span className="text-gray-400 text-sm mt-1">Total Returns</span>
                   </div>
                   <div className="flex flex-col items-center">
-                    <span className="text-lg font-bold text-white">50$ <span className="text-green-400 text-base font-semibold align-top">+50%</span></span>
+                    <span className="text-lg font-bold text-white">50$ <span className="text-green-400 text-xs font-semibold align-bottom">+50%</span></span>
                     <span className="text-gray-400 text-sm mt-1">Current Returns</span>
                   </div>
                   <div className="flex flex-col items-center">
@@ -170,18 +222,33 @@ export default function SingleCrate() {
           ) : (
             <>
               <div className="flex gap-2 items-center">
-                <p className="text-lg font-bold">$5.4/month</p>
-                <span className="bg-green-700  text-white px-4 py-1 text-sm rounded">Free</span>
+                <p className="text-lg font-bold text-[#989898]">$5.4/month</p>
+                <span className="bg-green-600  text-white px-4 py-1 text-sm rounded">Free</span>
               </div>
               <p className="text-sm text-white bg-[#202020] w-fit px-2 py-1 rounded-md">17,425 Subscribers</p>
               <p className="text-sm text-gray-400">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
+              Follow Nancy Pelosi's crates and copy trade her automatically
               </p>
-              <Button className="w-full bg-white text-black"    style={{
+              <Button
+                className="w-full !font-bold bg-white text-black"
+                style={{
                   background:
                     "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
                   backgroundBlendMode: "normal, normal",
-                }}>Subscribe</Button>
+                }}
+                onClick={() => setBuyModalOpen(true)}
+              >
+                Subscribe
+              </Button>
+              <BuyCrateModal
+                open={buyModalOpen}
+                onOpenChange={setBuyModalOpen}
+                crate={{
+                  name: "Nancy Pelosi",
+                  meta: "Democrat/House/California",
+                  image: "/assets/image.png"
+                }}
+              />
             </>
           )}
         </div>

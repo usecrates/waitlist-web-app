@@ -26,7 +26,7 @@ export function DataTable<TData, TValue>({
   return (
     <div className="font-chakra">
       <Table>
-        <TableHeader className="bg-[#171717] text-muted-foreground">
+        <TableHeader className="bg-[#171717] ">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
