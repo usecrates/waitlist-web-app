@@ -206,13 +206,7 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
             </>
           ) : step === 'status' ? (
             <>
-                <div className="flex items-center text-white border-[#484848] border bg-[#232323] rounded-md p-3 my-4">
-                  <img src={crate?.image || "/public/placeholder-user.jpg"} className="w-12 h-12 rounded-lg mr-4 object-cover" alt="crate" />
-                  <div>
-                    <div className="text-lg font-semibold">{crate?.name || 'Nancy Pelosi'}</div>
-                    <div className="text-xs text-[#A1A1A1]">{crate?.meta || 'Democrat/House/California'}</div>
-                  </div>
-                </div>
+               
                 {orderStatus === 'completed' && (
                   <div className="flex items-center gap-2 text-green-400 text-xl font-semibold mb-2">
                     <span className="w-6 h-6 rounded-full bg-green-400 flex items-center justify-center">
