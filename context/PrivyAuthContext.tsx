@@ -27,6 +27,7 @@ export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) =
   useEffect(() => {
     if (!user) return setAddress("");
     const wallet = user.linkedAccounts.find(
+
       (account) => account.type === "wallet" && (account.walletClientType === "privy" || account.walletClientType === "metamask") && account.chainType==="ethereum" 
     );
     setAddress((wallet as any)?.address || "");
