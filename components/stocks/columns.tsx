@@ -3,6 +3,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import Image from "next/image";
 
 export type Stock = {
   symbol: string;
@@ -23,7 +24,7 @@ export const columns: ColumnDef<Stock>[] = [
           <img src={stock.logo} alt={stock.symbol} className="w-6 h-6 rounded" />
           <div>
             <p className="font-semibold">{stock.symbol}</p>
-            <p className="text-xs text-muted-foreground">{stock.name}</p>
+            <p className="text-xs text-[#B6B6B6]">{stock.name}</p>
           </div>
         </div>
       );
@@ -46,7 +47,7 @@ export const columns: ColumnDef<Stock>[] = [
               toast("Address copied!");
             }}
           >
-            <Copy className="w-3 h-3" />
+            <Image src="/assets/copy.svg" alt="copy" height={16} width={16} />
           </Button>
         </div>
       );

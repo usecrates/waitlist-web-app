@@ -45,18 +45,12 @@ const stocks: Stock[] = [
     address: "XxHt...vUL7",
     weight: "4%",
   },
-  {
-    symbol: "GME",
-    name: "Gamestop",
-    logo: "/assets/apple.png",
-    address: "XxHt...vUL7",
-    weight: "3%",
-  },
+
 ];
 
 export function StocksTable() {
   return (
-    <div className="mt-8 font-ropa bg-[#0e0e0e]">
+    <div className="mt-8 font-chakra bg-[#0e0e0e]">
       <DataTable columns={columns} data={stocks} />
     </div>
   );

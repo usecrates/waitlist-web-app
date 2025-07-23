@@ -2,12 +2,13 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import LoginButton from "@/components/LoginButton";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 export default function Navbar() {
   const pathname = usePathname();
   return (
     <header className="fixed top-0 left-0 font-chakra right-0 z-50 bg-black border-b border-[#272727] py-4">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-8">
+      <div className="max-w-6xl mx-auto flex items-center justify-between ">
         {/* Left: Logo + Nav Links */}
         <div className="flex items-center gap-10">
           <Link href="/" className="text-sm tracking-wide flex items-center gap-2 text-white">
@@ -34,7 +35,9 @@ export default function Navbar() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
+          className="flex items-center gap-4"
         >
+          <Image src="/assets/bell.svg" alt="Use Crates Logo" height={24} width={24} />
           <LoginButton />
         </motion.div>
       </div>
