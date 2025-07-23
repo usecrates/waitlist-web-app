@@ -1,8 +1,9 @@
 "use client";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, use, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useLogin, useLogout, usePrivy } from "@privy-io/react-auth";
 import { api } from "@/config";
 import { useRouter } from "next/navigation";
+import { useEnrichedUser } from "@/hooks/user-hooks";
 import { toast } from "sonner";
 interface AuthContextValue {
   address: string;
@@ -20,6 +21,9 @@ export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) =
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  console.log(address,"useraddress");
+  const { data: userData } = useEnrichedUser(address, authenticated);
+  console.log(userData, "userData");
   const customizeLogin = useCallback(async () => {
     try {
       setLoading(true);
@@ -28,6 +32,7 @@ export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) =
           `/waitlist/check?wallet=${address}`
         );
         const isVerified = response?.data?.data?.isVerified;
+        console.log(isVerified, "isVerified");
         if (isVerified) {
           localStorage.setItem("isVerified", "true");
           toast.dismiss();
@@ -48,9 +53,8 @@ export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) =
   useEffect(() => {
     if (!user) return setAddress("");
     const wallet = user.linkedAccounts.find(
-      (account) => account.type === "wallet" && (account.walletClientType === "privy" || account.walletClientType === "phantom") && account.chainType==="solana" 
+      (account) => account.type === "wallet" && (account.walletClientType === "privy" || account.walletClientType === "metamask") && account.chainType==="ethereum" 
     );
-
     setAddress((wallet as any)?.address || "");
   
   }, [user]);

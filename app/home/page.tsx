@@ -3,10 +3,14 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import CrateCard, { Crate } from "@/components/CrateCard";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
+import { usePrivyAuth } from "@/context/PrivyAuthContext";
+
 
 export default function LaunchPage() {
   const [search, setSearch] = useState("");
+  const { address, } = usePrivyAuth();
+  console.log(address,"address")
   const crates = [
     {
       name: "John Hickenlooper",

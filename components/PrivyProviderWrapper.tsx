@@ -1,43 +1,29 @@
 "use client";
-import React, { type ReactNode, StrictMode } from "react";
-import { PrivyProvider } from "@privy-io/react-auth";
-import { toSolanaWalletConnectors } from "@privy-io/react-auth/solana";
 
-function PrivyProviderWrapper({ children }: { children: ReactNode }) {
+import { PrivyProvider } from "@privy-io/react-auth";
+import { ReactNode, StrictMode, useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+export default function PrivyProviderWrapper({ children }: { children: ReactNode }) {
+  const [queryClient] = useState(() => new QueryClient());
+
   return (
     <StrictMode>
-      <PrivyProvider
-        appId={
-          process.env.NEXT_PUBLIC_PRIVY_APP_ID!
-        }
-        config={{
-          appearance: {
-            theme: "dark",
-            walletChainType: "solana-only", // Solana only
-            showWalletLoginFirst: true,
-          },
-          solanaClusters: [
-            { name: "devnet", rpcUrl: "https://api.devnet.solana.com" },
-            { name: "mainnet-beta", rpcUrl: "https://api.mainnet-beta.solana.com" },
-            { name: "testnet", rpcUrl: "https://api.testnet.solana.com" },
-          ],
-          loginMethods: ["google", "passkey", "wallet", "twitter", "email"],
-          embeddedWallets: {
-            solana: {
-              createOnLogin: "users-without-wallets",
+      <QueryClientProvider client={queryClient}>
+        <PrivyProvider
+          appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
+          config={{
+            appearance: {
+              theme: "dark",
+              walletChainType: "ethereum-and-solana",
+              showWalletLoginFirst: true,
             },
-          },
-          externalWallets: {
-            solana: {
-              connectors: toSolanaWalletConnectors(),
-            },
-          },
-        }}
-      >
-        {children}
-      </PrivyProvider>
+            loginMethods: ["google", "passkey", "wallet", "twitter", "email"],
+          }}
+        >
+          {children}
+        </PrivyProvider>
+      </QueryClientProvider>
     </StrictMode>
   );
 }
-
-export default PrivyProviderWrapper;
