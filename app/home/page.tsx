@@ -5,11 +5,13 @@ import CrateCard, { Crate } from "@/components/CrateCard";
 import { Button } from "@/components/ui/button";
 
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
+import { useEnrichedUser } from "@/hooks/user-hooks";
 
 
 export default function LaunchPage() {
-  const [search, setSearch] = useState("");
-  const { address, userData } = usePrivyAuth();
+
+  const { address,authenticated } = usePrivyAuth();
+  const { data: userData, isLoading, error } = useEnrichedUser(address, authenticated);
   console.log(userData, "address")
   const crates = [
     {

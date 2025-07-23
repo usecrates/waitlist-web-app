@@ -5,7 +5,10 @@ export interface Stock {
     weight: number;
     price: number;
   }
-  
+  export interface RegisterUserInput {
+    wallet: string;
+    name?: string;
+  }
   export interface StockHolding {
     stockId: string;
     price: number;
@@ -38,7 +41,7 @@ export interface Stock {
   }
   
   export interface EnrichedUser {
-    _id?: string; // optional, MongoDB ObjectId string
+    _id?: string; 
     wallet: string;
     email?: string;
     name?: string;
@@ -51,7 +54,6 @@ export interface Stock {
     entity_id?: string;
     nationality?: string | null;
     is_kyc_complete?: boolean;
-  
     subscribedCrates?: Crate[]; 
     transactions?: string[]; 
     totalInvested?: number;
@@ -59,7 +61,4 @@ export interface Stock {
     totalUniqueStocks?: number;
     totalReturnPercent?: number;
     currentValidateAccounts?: string[];
-  
-    createdAt?: string; // or Date if you're converting dates
-    updatedAt?: string; // or Date
   }

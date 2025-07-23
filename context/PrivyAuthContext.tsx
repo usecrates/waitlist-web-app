@@ -1,11 +1,6 @@
 "use client";
 import { createContext, use, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useLogin, useLogout, usePrivy } from "@privy-io/react-auth";
-import { api } from "@/config";
-import { useRouter } from "next/navigation";
-import { useEnrichedUser } from "@/hooks/user-hooks";
-import { toast } from "sonner";
-import { EnrichedUser } from "@/lib/interfaces";
 interface AuthContextValue {
   address: string;
   user: any;
@@ -13,7 +8,6 @@ interface AuthContextValue {
   customizeLogin: () => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
-  userData: EnrichedUser | undefined;
 }
 const PrivyAuthContext = createContext<AuthContextValue | undefined>(undefined);
 export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -21,7 +15,6 @@ export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) =
   const { logout } = useLogout();
   const { user, authenticated } = usePrivy();
   const [address, setAddress] = useState("");
-  const { data: userData } = useEnrichedUser(address, authenticated);
   const customizeLogin = useCallback(async () => {
     try {
         await login();
@@ -42,13 +35,12 @@ export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) =
   const value = useMemo(
     () => ({
       user,
-      userData,
       address,
       authenticated,
       customizeLogin,
       logout,
     }),
-    [user,userData, address, authenticated, customizeLogin, logout]
+    [user, address, authenticated, customizeLogin, logout]
   );
 
   return (
