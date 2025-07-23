@@ -3,7 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/config";
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from "react";
-
+interface LinkWalletPayload {
+    wallet: string;
+    nonceResp: any;
+    signature: any;
+}
 export function useHasMounted() {
     const [hasMounted, setHasMounted] = useState(false);
     useEffect(() => {
@@ -12,10 +16,15 @@ export function useHasMounted() {
     return hasMounted;
 }
 
+
+const linkWallet = async (payload: LinkWalletPayload) => {
+    const res = await api.post('/user/link-wallet', payload);
+    return res.data;
+};
 const createKYCLink = async (entity_id: string) => {
     try {
         const res = await api.get(`/user/kyc/${entity_id}`);
-       
+
         if (!res.data.success) {
             throw new Error(res.data.message || "Failed to fetch user");
         }
@@ -68,3 +77,8 @@ export const useCreateKYCLink = () => {
     });
 };
 
+export const useLinkWallet = () => {
+    return useMutation({
+        mutationFn: linkWallet,
+    });
+};
