@@ -5,6 +5,7 @@ import { api } from "@/config";
 import { useRouter } from "next/navigation";
 import { useEnrichedUser } from "@/hooks/user-hooks";
 import { toast } from "sonner";
+import { EnrichedUser } from "@/lib/interfaces";
 interface AuthContextValue {
   address: string;
   user: any;
@@ -12,6 +13,7 @@ interface AuthContextValue {
   customizeLogin: () => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
+  userData: EnrichedUser | undefined;
 }
 const PrivyAuthContext = createContext<AuthContextValue | undefined>(undefined);
 export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -19,32 +21,11 @@ export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) =
   const { logout } = useLogout();
   const { user, authenticated } = usePrivy();
   const [address, setAddress] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  console.log(address,"useraddress");
   const { data: userData } = useEnrichedUser(address, authenticated);
-  console.log(userData, "userData");
   const customizeLogin = useCallback(async () => {
     try {
-      setLoading(true);
-      if (address) {
-        const response = await api.get(
-          `/waitlist/check?wallet=${address}`
-        );
-        const isVerified = response?.data?.data?.isVerified;
-        console.log(isVerified, "isVerified");
-        if (isVerified) {
-          localStorage.setItem("isVerified", "true");
-          toast.dismiss();
-          toast.success("You are verified user !!!");
-          router.push("/launch");
-        }
-      } else {
         await login();
-      }
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
       return undefined;
     }
   }, [login, address])
@@ -56,19 +37,18 @@ export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) =
       (account) => account.type === "wallet" && (account.walletClientType === "privy" || account.walletClientType === "metamask") && account.chainType==="ethereum" 
     );
     setAddress((wallet as any)?.address || "");
-  
   }, [user]);
   
   const value = useMemo(
     () => ({
       user,
+      userData,
       address,
       authenticated,
       customizeLogin,
       logout,
-      loading,
     }),
-    [user, address, authenticated, customizeLogin, logout, loading]
+    [user,userData, address, authenticated, customizeLogin, logout]
   );
 
   return (

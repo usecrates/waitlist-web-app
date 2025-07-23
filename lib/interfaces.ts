@@ -38,19 +38,28 @@ export interface Stock {
   }
   
   export interface EnrichedUser {
+    _id?: string; // optional, MongoDB ObjectId string
     wallet: string;
-    email: string;
-    name: string;
-    dinari_account_id: string;
-    is_kyc_complete: boolean;
-    nationality: string;
-    phoneNumber: string;
-    kyc: any;
-    currentValidateAccounts: any[];
-    totalInvested: number;
-    totalReturnPercent: number;
-    totalUniqueStocks: number;
-    totalInvestedCrates: number;
-    transactions: any[];
-    subscribedCrates: Crate[];
+    email?: string;
+    name?: string;
+    phoneNumber?: string;
+    dinari_account_id?: string;
+    is_dinari_wallet_link?: boolean;
+    kyc?: {
+      pan?: string;
+    };
+    entity_id?: string;
+    nationality?: string | null;
+    is_kyc_complete?: boolean;
+  
+    subscribedCrates?: Crate[]; 
+    transactions?: string[]; 
+    totalInvested?: number;
+    totalInvestedCrates?: number;
+    totalUniqueStocks?: number;
+    totalReturnPercent?: number;
+    currentValidateAccounts?: string[];
+  
+    createdAt?: string; // or Date if you're converting dates
+    updatedAt?: string; // or Date
   }

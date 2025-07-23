@@ -9,8 +9,8 @@ import { usePrivyAuth } from "@/context/PrivyAuthContext";
 
 export default function LaunchPage() {
   const [search, setSearch] = useState("");
-  const { address, } = usePrivyAuth();
-  console.log(address,"address")
+  const { address, userData } = usePrivyAuth();
+  console.log(userData, "address")
   const crates = [
     {
       name: "John Hickenlooper",
@@ -197,16 +197,41 @@ export default function LaunchPage() {
               >
                 View details
               </Button>
-              <Button
-                className="flex-1 text-black font-bold rounded-lg py-3 px-0 border-none shadow-none"
-                style={{
-                  background:
-                    "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
-                  backgroundBlendMode: "normal, normal",
-                }}
-              >
-                Subscribe
-              </Button>
+              {!address ? (
+                <Button
+                  className="flex-1 text-black font-bold rounded-lg py-3 px-0 border-none shadow-none"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                    backgroundBlendMode: "normal, normal",
+                  }}
+                >
+                  Connect Wallet
+                </Button>
+              ) : userData?.is_kyc_complete && address ? (
+                <Button
+                  className="flex-1 text-black font-bold rounded-lg py-3 px-0 border-none shadow-none"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                    backgroundBlendMode: "normal, normal",
+                  }}
+                >
+                  Subscribe
+                </Button>
+              ) : (
+                <Button
+                  className="flex-1 text-black font-bold rounded-lg py-3 px-0 border-none shadow-none"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                    backgroundBlendMode: "normal, normal",
+                  }}
+                >
+                  Complete Your KYC
+                </Button>
+              )}
+
             </div>
           </motion.div>
         </div>
@@ -215,7 +240,7 @@ export default function LaunchPage() {
         <h2 className="text-3xl font-chakra font-bold mb-8">
           Top Trending crates
         </h2>
-       
+
 
         <div className="grid md:grid-cols-3 gap-6">
           {crates.map((crate, i) => (
@@ -224,19 +249,19 @@ export default function LaunchPage() {
         </div>
       </section>
 
-      
+
       <section className="max-w-7xl mx-auto mt-16 px-4 mb-10">
         <div className="bg-[#191919] rounded-md p-8 flex flex-col md:flex-row items-center justify-between">
           <div>
-            <h2 className="text-2xl font-chakra font-bold mb-4"   style={{
-                  background:
-                    "linear-gradient(94.58deg, #7B7B7B 0.8%, #EBEBEB 27.81%, #7B7B7B 44.32%, #EBEBEB 64.8%, #7B7B7B 86.02%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  color: "transparent",
-                  display: "inline",
-                }}>
+            <h2 className="text-2xl font-chakra font-bold mb-4" style={{
+              background:
+                "linear-gradient(94.58deg, #7B7B7B 0.8%, #EBEBEB 27.81%, #7B7B7B 44.32%, #EBEBEB 64.8%, #7B7B7B 86.02%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              color: "transparent",
+              display: "inline",
+            }}>
               Invest in Top US stocks
             </h2>
             <p className="text-[#A0A0A0] font-chakra text-sm max-w-md">
@@ -271,11 +296,11 @@ export default function LaunchPage() {
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                {insight.tag.icon}
-                <span className={`font-bold text-md font-chakra ${insight.tag.type === "popular" ? "text-green-400" : "text-yellow-400"}`}>{insight.tag.label}</span>
-              </div>
-              <div className="flex-1  text-[#A1A1A1] text-sm font-chakra">{insight.description}</div>
+                <div className="flex items-center gap-2">
+                  {insight.tag.icon}
+                  <span className={`font-bold text-md font-chakra ${insight.tag.type === "popular" ? "text-green-400" : "text-yellow-400"}`}>{insight.tag.label}</span>
+                </div>
+                <div className="flex-1  text-[#A1A1A1] text-sm font-chakra">{insight.description}</div>
               </div>
               <button className="ml-8 px-16 py-2 font-chakra bg-[#232323] text-white rounded-md font-medium">View Crate</button>
             </div>
@@ -285,15 +310,15 @@ export default function LaunchPage() {
       <section className="max-w-7xl mx-auto mt-16 px-4 mb-10">
         <div className="bg-[#191919] rounded-md p-8 flex flex-col md:flex-row items-center justify-between">
           <div>
-            <h2 className="text-2xl font-chakra font-bold mb-4"   style={{
-                  background:
-                    "linear-gradient(94.58deg, #7B7B7B 0.8%, #EBEBEB 27.81%, #7B7B7B 44.32%, #EBEBEB 64.8%, #7B7B7B 86.02%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  color: "transparent",
-                  display: "inline",
-                }}>
+            <h2 className="text-2xl font-chakra font-bold mb-4" style={{
+              background:
+                "linear-gradient(94.58deg, #7B7B7B 0.8%, #EBEBEB 27.81%, #7B7B7B 44.32%, #EBEBEB 64.8%, #7B7B7B 86.02%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              color: "transparent",
+              display: "inline",
+            }}>
               Create your custom crates
             </h2>
             <p className="text-[#A0A0A0] font-chakra text-sm max-w-md">
