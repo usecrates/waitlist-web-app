@@ -1,9 +1,6 @@
 "use client";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, use, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useLogin, useLogout, usePrivy } from "@privy-io/react-auth";
-import { api } from "@/config";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 interface AuthContextValue {
   address: string;
   user: any;
@@ -18,28 +15,10 @@ export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) =
   const { logout } = useLogout();
   const { user, authenticated } = usePrivy();
   const [address, setAddress] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const customizeLogin = useCallback(async () => {
     try {
-      setLoading(true);
-      if (address) {
-        const response = await api.get(
-          `/waitlist/check?wallet=${address}`
-        );
-        const isVerified = response?.data?.data?.isVerified;
-        if (isVerified) {
-          localStorage.setItem("isVerified", "true");
-          toast.dismiss();
-          toast.success("You are verified user !!!");
-          router.push("/launch");
-        }
-      } else {
         await login();
-      }
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
       return undefined;
     }
   }, [login, address])
@@ -48,11 +27,10 @@ export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) =
   useEffect(() => {
     if (!user) return setAddress("");
     const wallet = user.linkedAccounts.find(
-      (account) => account.type === "wallet" && (account.walletClientType === "privy" || account.walletClientType === "phantom") && account.chainType==="solana" 
-    );
 
+      (account) => account.type === "wallet" && (account.walletClientType === "privy" || account.walletClientType === "metamask") && account.chainType==="ethereum" 
+    );
     setAddress((wallet as any)?.address || "");
-  
   }, [user]);
   
   const value = useMemo(
@@ -62,9 +40,8 @@ export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) =
       authenticated,
       customizeLogin,
       logout,
-      loading,
     }),
-    [user, address, authenticated, customizeLogin, logout, loading]
+    [user, address, authenticated, customizeLogin, logout]
   );
 
   return (

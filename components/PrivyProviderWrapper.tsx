@@ -1,43 +1,39 @@
 "use client";
-import React, { type ReactNode, StrictMode } from "react";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { createConfig, WagmiProvider } from '@privy-io/wagmi';
+import { mainnet, sepolia } from 'viem/chains';
+import { http } from 'wagmi';
 import { PrivyProvider } from "@privy-io/react-auth";
-import { toSolanaWalletConnectors } from "@privy-io/react-auth/solana";
+import { ReactNode, StrictMode, useState } from "react";
 
-function PrivyProviderWrapper({ children }: { children: ReactNode }) {
+export const config = createConfig({
+  chains: [mainnet, sepolia],
+  transports: {
+    [mainnet.id]: http(),
+    [sepolia.id]: http(),
+  },
+});
+export default function PrivyProviderWrapper({ children }: { children: ReactNode }) {
+  const queryClient = new QueryClient();
   return (
     <StrictMode>
       <PrivyProvider
-        appId={
-          process.env.NEXT_PUBLIC_PRIVY_APP_ID!
-        }
+        appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
         config={{
           appearance: {
             theme: "dark",
-            walletChainType: "solana-only", // Solana only
+            walletChainType: "ethereum-and-solana",
             showWalletLoginFirst: true,
           },
-          solanaClusters: [
-            { name: "devnet", rpcUrl: "https://api.devnet.solana.com" },
-            { name: "mainnet-beta", rpcUrl: "https://api.mainnet-beta.solana.com" },
-            { name: "testnet", rpcUrl: "https://api.testnet.solana.com" },
-          ],
           loginMethods: ["google", "passkey", "wallet", "twitter", "email"],
-          embeddedWallets: {
-            solana: {
-              createOnLogin: "users-without-wallets",
-            },
-          },
-          externalWallets: {
-            solana: {
-              connectors: toSolanaWalletConnectors(),
-            },
-          },
         }}
       >
-        {children}
+        <QueryClientProvider client={queryClient}>
+          <WagmiProvider config={config}>
+            {children}
+          </WagmiProvider>
+        </QueryClientProvider>
       </PrivyProvider>
     </StrictMode>
   );
 }
-
-export default PrivyProviderWrapper;
