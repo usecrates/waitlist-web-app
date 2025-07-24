@@ -48,9 +48,6 @@ export interface Stock {
     phoneNumber?: string;
     dinari_account_id?: string;
     is_dinari_wallet_link?: boolean;
-    kyc?: {
-      pan?: string;
-    };
     entity_id?: string;
     nationality?: string | null;
     is_kyc_complete?: boolean;

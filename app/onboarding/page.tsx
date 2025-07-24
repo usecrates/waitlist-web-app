@@ -35,7 +35,7 @@ export default function OnboardingPage() {
         if (kycSuccess && kycData?.kyc_res.embed_url) {
             window.open(kycData.kyc_res.embed_url, "_blank");
         } else {
-            alert("KYC link created successfully, but no embed URL found.");
+            alert("KYC link created, but no embed URL found.");
         }
     };
 
@@ -85,6 +85,7 @@ export default function OnboardingPage() {
     }, [mutate, address, email, name]);
 
     if (!hasMounted) return null;
+
     if (!authenticated) {
         return (
             <div className="flex items-center justify-center h-screen">
@@ -93,14 +94,19 @@ export default function OnboardingPage() {
         );
     }
 
+    const stepDoneStyle = "bg-green-500";
+    const stepPendingStyle = "bg-green-400";
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-[#0f0f0f] text-white">
-            <h1 className="text-3xl md:text-4xl font-bold mt-24 mb-10">Complete Onboarding</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mt-24 mb-10">
+                {hasRegistered && hasStartedKYC && hasLinkedWallet ? "✅ Onboarding Complete" : "Complete Onboarding"}
+            </h1>
 
             <div className="flex flex-col md:flex-row items-start justify-center gap-10">
                 {/* Step 1 */}
                 <div className="flex flex-col items-center w-full max-w-sm opacity-100">
-                    <div className={`w-10 h-10 ${hasRegistered ? 'bg-green-500' : 'bg-green-400'} rounded-full flex items-center justify-center font-bold text-black`}>
+                    <div className={`w-10 h-10 ${hasRegistered ? stepDoneStyle : stepPendingStyle} rounded-full flex items-center justify-center font-bold text-black`}>
                         1
                     </div>
                     <div className="mt-4 p-6 border border-gray-600 rounded-lg w-full bg-[#1a1a1a] shadow-md">
@@ -140,7 +146,7 @@ export default function OnboardingPage() {
 
                 {/* Step 2 */}
                 <div className={`flex flex-col items-center w-full max-w-sm ${hasRegistered ? "opacity-100" : "opacity-50 pointer-events-none"}`}>
-                    <div className={`w-10 h-10 ${hasStartedKYC ? 'bg-green-500' : 'bg-green-400'} rounded-full flex items-center justify-center font-bold text-black`}>
+                    <div className={`w-10 h-10 ${hasStartedKYC ? stepDoneStyle : stepPendingStyle} rounded-full flex items-center justify-center font-bold text-black`}>
                         2
                     </div>
                     <div className="mt-4 p-6 border border-gray-600 rounded-lg w-full bg-[#1a1a1a] shadow-md flex flex-col justify-center items-center gap-4 min-h-[200px]">
@@ -148,18 +154,18 @@ export default function OnboardingPage() {
                         <button
                             onClick={() => handleClick(userData?.entity_id)}
                             className="bg-green-500 text-black font-semibold py-2 px-4 rounded hover:bg-green-600 transition"
-                            disabled={!hasRegistered}
+                            disabled={!hasRegistered || hasStartedKYC}
                         >
-                            {kycPending ? "Loading..." : "Start KYC"}
+                            {kycPending ? "Loading..." : hasStartedKYC ? "KYC Complete" : "Start KYC"}
                         </button>
-                        {hasStartedKYC && (
+                        {hasStartedKYC && kycData?.kyc_res?.embed_url && (
                             <a
-                                href={kycData?.kyc_res.embed_url}
+                                href={kycData.kyc_res.embed_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-400 underline text-sm"
                             >
-                                Open KYC Link
+                                View KYC Portal
                             </a>
                         )}
                     </div>
@@ -167,7 +173,7 @@ export default function OnboardingPage() {
 
                 {/* Step 3 */}
                 <div className={`flex flex-col items-center w-full max-w-sm ${hasStartedKYC ? "opacity-100" : "opacity-50 pointer-events-none"}`}>
-                    <div className={`w-10 h-10 ${hasLinkedWallet ? 'bg-green-500' : 'bg-green-400'} rounded-full flex items-center justify-center font-bold text-black`}>
+                    <div className={`w-10 h-10 ${hasLinkedWallet ? stepDoneStyle : stepPendingStyle} rounded-full flex items-center justify-center font-bold text-black`}>
                         3
                     </div>
                     <div className="mt-4 p-6 border border-gray-600 rounded-lg w-full bg-[#1a1a1a] shadow-md flex flex-col justify-center items-center gap-4 min-h-[160px]">
@@ -183,7 +189,7 @@ export default function OnboardingPage() {
                 </div>
             </div>
 
-            {/* Debug info */}
+            {/* Debug user info */}
             {userData?.wallet && (
                 <pre className="mt-10 w-full max-w-4xl bg-black/40 p-4 rounded text-sm overflow-x-auto border border-white/10">
                     {JSON.stringify(userData, null, 2)}
