@@ -8,37 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
+import { useGetAllCrates } from "@/hooks/user-hooks";
 
-const mockCrates: Crate[] = [
-  {
-    name: "John Hickenlooper",
-    party: "Democrat/Senate/Colorado",
-    image: "https://t3.ftcdn.net/jpg/06/99/46/60/360_F_699466075_DaPTBNlNQTOwwjkOiFEoOvzDV0ByXR9E.jpg",
-    returns: "+12.45%",
-    thisMonth: "+4.90%",
-    subscribers: "3,490",
-    stocks: "34",
-  },
-  {
-    name: "Marjorie Taylor Greene",
-    party: "Republican/House/Georgia",
-    image: "https://t3.ftcdn.net/jpg/06/99/46/60/360_F_699466075_DaPTBNlNQTOwwjkOiFEoOvzDV0ByXR9E.jpg",
-    returns: "+12.45%",
-    thisMonth: "+4.90%",
-    subscribers: "3,490",
-    stocks: "34",
-  },
-  {
-    name: "Brandon Gill",
-    party: "Republican/House/Texas",
-    image: "https://t3.ftcdn.net/jpg/06/99/46/60/360_F_699466075_DaPTBNlNQTOwwjkOiFEoOvzDV0ByXR9E.jpg",
-    returns: "+12.45%",
-    thisMonth: "+4.90%",
-    subscribers: "3,490",
-    stocks: "34",
-  },
-  // Repeat or add more mock crates as needed
-];
 
 const volatilityOptions = [
   { label: "High Volatility", value: "high" },
@@ -66,6 +37,15 @@ export default function DiscoverPage() {
   const [sortBy, setSortBy] = useState("popularity");
   const [returns, setReturns] = useState("1M");
   const [order, setOrder] = useState("High-Low");
+  const { data: crates, isLoading } = useGetAllCrates();
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+
+  if (!crates || crates?.length === 0) {
+    return <div className="flex items-center justify-center min-h-screen">No crates found</div>;
+  }
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] pt-24 pb-8 px-6">
@@ -205,10 +185,10 @@ export default function DiscoverPage() {
             </div>
           </div>
         </div>
-        {/* Crate Cards Grid */}
+       
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {Array.from({ length: 9 }).map((_, i) => (
-            <CrateCard key={i} crate={mockCrates[i % mockCrates.length]} />
+          {crates?.length && crates?.map((crate, i) => (
+            <CrateCard key={i} crate={crate} />
           ))}
         </div>
       </div>

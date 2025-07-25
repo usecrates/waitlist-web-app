@@ -1,14 +1,14 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-
+import Link from "next/link";
 export type Crate = {
   name: string;
-  party: string;
-  image: string;
-  returns: string;
-  thisMonth: string;
-  subscribers: string;
+  description: string;
+  imageUrl: string;
+  subscriptionAmount: string;
+  totalReturnPercent: string;
+  activeSubscribers: string;
   stocks: string;
 };
 
@@ -25,17 +25,17 @@ const CrateCard = ({ crate }: { crate: Crate }) => {
         <div className="flex items-center gap-3">
           <div className="relative">
             <img
-              src={crate.image}
+              src={crate.imageUrl || "https://t3.ftcdn.net/jpg/06/99/46/60/360_F_699466075_DaPTBNlNQTOwwjkOiFEoOvzDV0ByXR9E.jpg"}
               className="w-14 h-14 rounded-xl object-cover"
-              alt={crate.name}
+              alt={crate?.name}
             />
           </div>
           <div>
             <h3 className="text-white font-semibold text-lg leading-tight">
-              {crate.name}
+              {crate?.name}
             </h3>
             <p className="text-gray-400 text-sm font-medium">
-              {crate.party}
+              {crate?.description}
             </p>
           </div>
         </div>
@@ -60,32 +60,33 @@ const CrateCard = ({ crate }: { crate: Crate }) => {
       <div className="grid grid-cols-2 font-chakra gap-x-8 gap-y-1 mb-6">
         <div>
           <p className="text-green-400 font-semibold text-xl">
-            {crate.returns}
+            {crate.totalReturnPercent}
           </p>
           <p className="text-gray-400 text-sm font-medium">Total Returns</p>
         </div>
         <div>
           <p className="text-green-400 font-semibold text-xl">
-            {crate.thisMonth}
+            {crate.subscriptionAmount}
           </p>
           <p className="text-gray-400 text-sm font-medium">This month</p>
         </div>
         <div>
           <p className="text-white font-semibold text-2xl">
-            {crate.subscribers}
+            {crate.activeSubscribers}
           </p>
           <p className="text-gray-400 text-sm font-medium">Subscribers</p>
         </div>
         <div>
           <p className="text-white font-semibold text-2xl">
-            {crate.stocks}
+            {crate.stocks.length}
           </p>
           <p className="text-gray-400 text-sm font-medium">Stocks</p>
         </div>
       </div>
-      {/* Action buttons */}
+
       <div className="flex gap-3">
         <Button
+          href={`/discover/${crate._id.toString()}`}
           className="flex-1 text-white font-bold rounded-lg py-3 px-0 border-none shadow-none"
           style={{
             background:
@@ -93,7 +94,7 @@ const CrateCard = ({ crate }: { crate: Crate }) => {
             backgroundBlendMode: "normal, normal",
           }}
         >
-          View details
+          View Details
         </Button>
         <Button
           className="flex-1 text-black font-bold rounded-lg py-3 px-0 border-none shadow-none"

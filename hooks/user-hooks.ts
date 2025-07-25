@@ -2,7 +2,7 @@ import { EnrichedUser, RegisterUserInput } from "@/lib/interfaces";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/config";
 import { useMutation } from '@tanstack/react-query';
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 export function useHasMounted() {
     const [hasMounted, setHasMounted] = useState(false);
@@ -11,9 +11,6 @@ export function useHasMounted() {
     }, []);
     return hasMounted;
 }
-
-
-
 const createKYCLink = async (entity_id: string) => {
     try {
         const res = await api.get(`/user/kyc/${entity_id}`);
@@ -43,6 +40,18 @@ const registerUser = async (input: RegisterUserInput) => {
     return res.data;
 };
 
+const fetchAllCrates = async () => {
+    try {
+        const res = await api.get('/crates');
+        if (!res.data.success) {
+            throw new Error(res.data.message || "Failed to fetch crates");
+        }
+        return res.data.data;
+    } catch (error: any) {
+        throw new Error(error?.response?.data?.message || error.message || "Unknown error");
+    }
+}
+
 export const useRegisterUser = () => {
     return useMutation({
         mutationFn: registerUser,
@@ -62,10 +71,19 @@ export const useEnrichedUser = (wallet: string, enabled: boolean) => {
     });
 };
 
-
 export const useCreateKYCLink = () => {
     return useMutation({
         mutationFn: (entity_id: string) => createKYCLink(entity_id),
     });
 };
 
+export const useGetAllCrates = () => {
+    return useQuery({
+        queryKey: ["crates"],
+        queryFn: fetchAllCrates,
+        retry: false, // prevent auto retries for "User not found"
+        onError: (error) => {
+            console.error("Failed to fetch crates:", error);
+        },
+    });
+}
