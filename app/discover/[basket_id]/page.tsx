@@ -4,34 +4,45 @@ import { DonutChartWithLegend } from "@/components/DonutChart";
 import { StocksTable } from "@/components/stocks/StocksTable";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Twitter,  Share, X } from "lucide-react";
+import { ArrowLeft, Twitter, Share, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { BuyCrateModal } from "@/components/BuyCrateModal";
 import { ExitCrateModal } from "@/components/ExitCrateModal";
 import { KycModal } from "@/components/KycModal";
+import { useParams } from "next/navigation";
+import { useGetCrateById } from "@/hooks/user-hooks";
 export default function SingleCrate() {
-  // Simulate subscription state
-  const isSubscribed = false; // Change to false to show subscribe button
+  const isSubscribed = false;
   const [buyModalOpen, setBuyModalOpen] = useState(false);
   const [exitModalOpen, setExitModalOpen] = useState(false);
   const [kycModalOpen, setKycModalOpen] = useState(false);
-  const isKyced = false; // mock: set to true if user is KYCed
-
+  const isKyced = false;
+  const { basket_id } = useParams();
+  const { data: crate, isLoading } = useGetCrateById(basket_id as string);
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+  if (!crate) {
+    return <div className="flex items-center justify-center min-h-screen">Crate not found</div>;
+  }
   return (
     <main className="px-6 py-20 max-w-6xl mx-auto text-white space-y-10">
-      <button className="mb-6 mt-4 flex items-center gap-2 text-gray-400 hover:text-white">
+      <button
+        className="mb-6 mt-4 flex items-center gap-2 text-gray-400 hover:text-white"
+        onClick={() => window.history.back()}
+      >
         <ArrowLeft size={18} />
         Back
       </button>
       <div className="flex flex-col md:flex-row justify-between gap-6">
         <div className="flex gap-4 items-start w-1/2">
-          <Image src="/assets/image.png" width={80} height={80} alt="crate profile" className="rounded" />
+          <img src={crate.imageUrl || "https://t3.ftcdn.net/jpg/06/99/46/60/360_F_699466075_DaPTBNlNQTOwwjkOiFEoOvzDV0ByXR9E.jpg"}  className="w-20 h-20 rounded-xl object-cover"
+              alt={crate?.name} />
           <div>
-            <h2 className="text-2xl font-bold">Nancy Pelosi</h2>
+            <h2 className="text-2xl font-bold">{crate?.name}</h2>
             <p className="text-sm text-gray-400">Democrat / House / California</p>
-            <p className="text-sm mt-2">Invest Like One of America’s Most Active Political Traders
-              Track and copy the portfolio inspired by Nancy Pelosi’s publicly disclosed stock trades.
+            <p className="text-sm mt-2">{crate?.description}
             </p>
           </div>
         </div>
@@ -39,12 +50,12 @@ export default function SingleCrate() {
         <div className="flex gap-6 items-center text-sm">
           <div>
             <p className="text-green-400
-             text-xl font-semibold">+12.45%</p>
+             text-xl font-semibold">+{crate?.totalReturnPercent}%</p>
             <p className="text-gray-400">Total Returns</p>
           </div>
           <div>
             <p className="text-green-400
-             text-xl font-semibold">+2.45%</p>
+             text-xl font-semibold">+{crate?.monthlyReturnPercent}%</p>
             <p className="text-gray-400">This Month</p>
           </div>
           <div>
@@ -54,9 +65,6 @@ export default function SingleCrate() {
           </div>
         </div>
       </div>
-
-
-
       <div className="w-full flex gap-10 mt-0">
         <div className="w-2/3 flex flex-col space-y-6">
           <Tabs defaultValue="Overview" className="bg-[#0e0e0e] w-full">
@@ -78,7 +86,7 @@ export default function SingleCrate() {
             {/* Stats Bar */}
             <div className=" border-b border-[#282828] p-4 mt-4  flex justify-between font-chakra">
               <div>
-                <div className="text-white text-xl">12</div>
+                <div className="text-white text-xl">{crate.stocks.length}</div>
                 <div className="text-[#898989] text-xs">Total No.of Stocks</div>
               </div>
               <div>
@@ -86,7 +94,7 @@ export default function SingleCrate() {
                 <div className="text-[#898989] text-xs">Last Rebalance</div>
               </div>
               <div>
-                <div className="text-white text-xl">Quarterly</div>
+                <div className="text-white text-xl capitalize">{crate?.rebalanceFrequency}</div>
                 <div className="text-[#898989] text-xs">Rebalance Frequency</div>
               </div>
             </div>
@@ -125,7 +133,7 @@ export default function SingleCrate() {
                   </div>
                 </div>
               </div>
-              <hr className="border-[#383838] py-4"/>
+              <hr className="border-[#383838] py-4" />
               <div>
                 <h3 className="text-lg mb-2">
                   Live Performance vs <span className="text-[#FFC081]">Equity Smallcap</span>
@@ -137,7 +145,7 @@ export default function SingleCrate() {
               </div>
 
             </TabsContent>
-              <TabsContent value="Stocks & ETFs">
+            <TabsContent value="Stocks & ETFs">
               <div className="flex flex-col mt-4">
                 <h3 className="text-xl font-semibold mb-2">Holding Distribution</h3>
                 <div className="relative w-full h-[300px]">
@@ -157,7 +165,7 @@ export default function SingleCrate() {
                 <div className="mt-8">
                   <div className="relative w-full">
                     <div className="rounded-lg overflow-x-auto">
-                      <StocksTable />
+                      <StocksTable stocks={crate?.stocks} />
                       {!isSubscribed && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm rounded-lg border border-[#232323] z-10">
                           <img src="/assets/lock.svg" alt="Locked" className="mb-4" width={54} height={54} />
@@ -232,7 +240,7 @@ export default function SingleCrate() {
               </div>
               <p className="text-sm text-white bg-[#202020] w-fit px-2 py-1 rounded-md">17,425 Subscribers</p>
               <p className="text-sm text-gray-400">
-              Follow Nancy Pelosi's crates and copy trade her automatically
+                Follow Nancy Pelosi's crates and copy trade her automatically
               </p>
               <Button
                 className="w-full !font-bold bg-white text-black"
@@ -272,17 +280,17 @@ export default function SingleCrate() {
             </>
           )}
         </div>
-      <ExitCrateModal
-        open={exitModalOpen}
-        onOpenChange={setExitModalOpen}
-        crate={{
-          name: "Nancy Pelosi",
-          meta: "Democrat/House/California",
-          image: "/assets/image.png"
-        }}
-      />
-     
-       
+        <ExitCrateModal
+          open={exitModalOpen}
+          onOpenChange={setExitModalOpen}
+          crate={{
+            name: "Nancy Pelosi",
+            meta: "Democrat/House/California",
+            image: "/assets/image.png"
+          }}
+        />
+
+
 
       </div>
 

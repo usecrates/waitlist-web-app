@@ -52,6 +52,18 @@ const fetchAllCrates = async () => {
     }
 }
 
+const getCrateById = async (crateId: string) => {
+    try {
+        const res = await api.get(`/crates/${crateId}`);
+        if (!res.data.success) {
+            throw new Error(res.data.message || "Failed to fetch crate");
+        }
+        return res.data.data;
+    } catch (error: any) {
+        throw new Error(error?.response?.data?.message || error.message || "Unknown error");
+    }
+}
+
 export const useRegisterUser = () => {
     return useMutation({
         mutationFn: registerUser,
@@ -84,6 +96,18 @@ export const useGetAllCrates = () => {
         retry: false, // prevent auto retries for "User not found"
         onError: (error) => {
             console.error("Failed to fetch crates:", error);
+        },
+    });
+}
+
+export const useGetCrateById = (crateId: string) => {
+    return useQuery({
+        queryKey: ["crate", crateId],
+        queryFn: () => getCrateById(crateId),
+        enabled: !!crateId,
+        retry: false, // prevent auto retries for "User not found"
+        onError: (error) => {
+            console.error("Failed to fetch crate:", error);
         },
     });
 }

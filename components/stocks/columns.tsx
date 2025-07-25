@@ -1,61 +1,58 @@
 "ues client";
 import { ColumnDef } from "@tanstack/react-table";
-import { Copy } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import Image from "next/image";
 
-export type Stock = {
-  symbol: string;
+interface Stock {
+  _id: string;
+  dinari_id: string;
+  cik: string;
+  composite_figi: string;
+  description: string;
+  display_name: string;
   name: string;
-  logo: string;
-  address: string;
-  weight: string;
-};
+  symbol: string;
+  logo_url: string;
+  is_fractionable: boolean;
+  is_tradable: boolean;
+  tokens: string[];
+  createdAt: string;
+  updatedAt: string;
+}
 
-export const columns: ColumnDef<Stock>[] = [
+interface CrateStock {
+  _id: string;
+  weight: number;
+  price: number;
+  stock: Stock;
+}
+
+
+export const crateStockColumns: ColumnDef<CrateStock>[] = [
   {
-    accessorKey: "symbol",
-    header: "Stock",
-    cell: ({ row }) => {
-      const stock = row.original;
-      return (
-        <div className="flex items-center gap-3">
-          <img src={stock.logo} alt={stock.symbol} className="w-6 h-6 rounded" />
-          <div>
-            <p className="font-semibold">{stock.symbol}</p>
-            <p className="text-xs text-[#B6B6B6]">{stock.name}</p>
-          </div>
-        </div>
-      );
-    },
+    header: "Logo",
+    cell: ({ row }) => (
+      <img
+        src={row.original.stock.logo_url}
+        alt={row.original.stock.symbol}
+        className="w-10 h-10 object-contain"
+      />
+    ),
   },
   {
-    accessorKey: "address",
-    header: "Address",
-    cell: ({ row }) => {
-      const address = row.original.address;
-      return (
-        <div className="flex items-center">
-          <span>{address}</span>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="ml-2 h-5 w-5 text-muted-foreground"
-            onClick={() => {
-              navigator.clipboard.writeText(address);
-              toast("Address copied!");
-            }}
-          >
-            <Image src="/assets/copy.svg" alt="copy" height={16} width={16} />
-          </Button>
-        </div>
-      );
-    },
+    header: "Name",
+    accessorFn: (row) => row.stock.name,
   },
   {
+    header: "Symbol",
+    accessorFn: (row) => row.stock.symbol,
+  },
+  {
+    header: "Weight (%)",
     accessorKey: "weight",
-    header: "Weight",
-    cell: ({ row }) => <div>{row.original.weight}</div>,
+    cell: ({ getValue }) => <span>{getValue()}%</span>,
+  },
+  {
+    header: "Price ($)",
+    accessorKey: "price",
+    cell: ({ getValue }) => <span>${getValue()}</span>,
   },
 ];
