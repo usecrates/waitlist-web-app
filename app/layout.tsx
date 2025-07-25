@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { Chakra_Petch, DM_Sans, Ropa_Sans } from "next/font/google";
-import { Toaster } from "sonner";
+import toast, { Toaster } from 'react-hot-toast';
 import { Suspense } from "react";
 
 import "./globals.css";

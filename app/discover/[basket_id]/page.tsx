@@ -12,7 +12,7 @@ import { ExitCrateModal } from "@/components/ExitCrateModal";
 import { KycModal } from "@/components/KycModal";
 import { useParams } from "next/navigation";
 import { useGetCrateById } from "@/hooks/user-hooks";
-import { useBuyOrderMutation } from "@/app/services/buy_order";
+import { useBuyOrderMutation } from "@/services/buy_order";
 import {toast} from "sonner";
 export default function SingleCrate() {
   const isSubscribed = false;
@@ -26,8 +26,9 @@ export default function SingleCrate() {
   const handleClick = () => {
     console.log("Helloo World !!!");
     createBuyOrder({
+      crateId: basket_id as string,
       accountId: "019814c3-64d2-7611-a4b7-dcc7c068f6ea",
-      totalAmountToBeInvested : "100",
+      totalAmountToBeInvested : "5",
       assets: [
         {
           stockId: "0196ea6d-b6de-70d5-ae41-9525959ef309",
