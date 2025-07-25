@@ -12,6 +12,8 @@ import { ExitCrateModal } from "@/components/ExitCrateModal";
 import { KycModal } from "@/components/KycModal";
 import { useParams } from "next/navigation";
 import { useGetCrateById } from "@/hooks/user-hooks";
+import { useBuyOrderMutation } from "@/app/services/buy_order";
+import {toast} from "sonner";
 export default function SingleCrate() {
   const isSubscribed = false;
   const [buyModalOpen, setBuyModalOpen] = useState(false);
@@ -20,6 +22,31 @@ export default function SingleCrate() {
   const isKyced = false;
   const { basket_id } = useParams();
   const { data: crate, isLoading } = useGetCrateById(basket_id as string);
+  const { mutate: createBuyOrder, isLoading:createBuyOrderLoading, isSuccess, error } = useBuyOrderMutation();
+  const handleClick = () => {
+    console.log("Helloo World !!!");
+    createBuyOrder({
+      accountId: "019814c3-64d2-7611-a4b7-dcc7c068f6ea",
+      totalAmountToBeInvested : "100",
+      assets: [
+        {
+          stockId: "0196ea6d-b6de-70d5-ae41-9525959ef309",
+          assetAddress: "0xD771a71E5bb303da787b4ba2ce559e39dc6eD85c",
+          weightage: 40,
+        },
+        {
+          stockId: "0196ea6d-b6ed-716d-a541-4c36bd32e84a",
+          assetAddress: "0x7B58f454c36Edc0FBDEDfA8E0D4392A1a4c0b96c",
+          weightage: 40,
+        },
+        {
+          stockId: "0196ea6d-b6f6-7025-867a-b1fc580ea1a0",
+          assetAddress: "0xdc2C5910d367f62F2F3234C9eaa5Afb12948Ef01",
+          weightage: 20,
+        },
+      ],
+    });
+  };
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
@@ -37,8 +64,8 @@ export default function SingleCrate() {
       </button>
       <div className="flex flex-col md:flex-row justify-between gap-6">
         <div className="flex gap-4 items-start w-1/2">
-          <img src={crate.imageUrl || "https://t3.ftcdn.net/jpg/06/99/46/60/360_F_699466075_DaPTBNlNQTOwwjkOiFEoOvzDV0ByXR9E.jpg"}  className="w-20 h-20 rounded-xl object-cover"
-              alt={crate?.name} />
+          <img src={crate.imageUrl || "https://t3.ftcdn.net/jpg/06/99/46/60/360_F_699466075_DaPTBNlNQTOwwjkOiFEoOvzDV0ByXR9E.jpg"} className="w-20 h-20 rounded-xl object-cover"
+            alt={crate?.name} />
           <div>
             <h2 className="text-2xl font-bold">{crate?.name}</h2>
             <p className="text-sm text-gray-400">Democrat / House / California</p>
@@ -235,30 +262,44 @@ export default function SingleCrate() {
           ) : (
             <>
               <div className="flex gap-2 items-center">
-                <p className="text-lg font-bold text-[#989898]">$5.4/month</p>
+                <p className="text-lg font-bold text-[#989898] capitalize">${crate.subscriptionAmount}/{crate.subscriptionPeriod}</p>
                 <span className="bg-green-600  text-white px-4 py-1 text-sm rounded">Free</span>
               </div>
-              <p className="text-sm text-white bg-[#202020] w-fit px-2 py-1 rounded-md">17,425 Subscribers</p>
+              <p className="text-sm text-white bg-[#202020] w-fit px-2 py-1 rounded-md">{crate.activeSubscribers} Subscribers</p>
               <p className="text-sm text-gray-400">
                 Follow Nancy Pelosi's crates and copy trade her automatically
               </p>
-              <Button
-                className="w-full !font-bold bg-white text-black"
-                style={{
+              <div className="flex gap-4">
+                <Button
+                  className="w-full !font-bold bg-white text-black"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                    backgroundBlendMode: "normal, normal",
+                  }}
+                  onClick={() => {
+                    if (isKyced) {
+                      setBuyModalOpen(true);
+                    } else {
+                      setKycModalOpen(true);
+                    }
+                  }}
+                >
+                  Subscribe
+                </Button>
+                <Button
+                  onClick={handleClick}
+                  className="w-full !font-bold bg-white text-black"
+                  style={{
                   background:
                     "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
                   backgroundBlendMode: "normal, normal",
-                }}
-                onClick={() => {
-                  if (isKyced) {
-                    setBuyModalOpen(true);
-                  } else {
-                    setKycModalOpen(true);
-                  }
-                }}
-              >
-                Subscribe
-              </Button>
+                  }}
+                  disabled={createBuyOrderLoading}
+                >
+                  {createBuyOrderLoading ? "Processing..." : "Invest"}
+                </Button>
+              </div>
               <BuyCrateModal
                 open={buyModalOpen}
                 onOpenChange={setBuyModalOpen}
@@ -289,9 +330,6 @@ export default function SingleCrate() {
             image: "/assets/image.png"
           }}
         />
-
-
-
       </div>
 
     </main>

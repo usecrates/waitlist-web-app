@@ -8,10 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import LoginButton from '@/components/LoginButton';
 import Dinari from '@dinari/api-sdk';
 import orderProcessorData from '@/lib/sbt-deployments/v0.4.0/order_processor.json';
 import { useAccount, useWalletClient, usePublicClient } from 'wagmi';
-import LoginButton from '@/components/LoginButton';
 import { encodeFunctionData, parseAbi, decodeEventLog } from 'viem';
 
 const permitTypes = {
