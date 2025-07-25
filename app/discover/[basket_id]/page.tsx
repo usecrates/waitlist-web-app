@@ -11,24 +11,48 @@ import { BuyCrateModal } from "@/components/BuyCrateModal";
 import { ExitCrateModal } from "@/components/ExitCrateModal";
 import { KycModal } from "@/components/KycModal";
 import { useParams } from "next/navigation";
-import { useGetCrateById } from "@/hooks/user-hooks";
+import { useEnrichedUser, useGetCrateById, useSubscribeCrate } from "@/hooks/user-hooks";
 import { useBuyOrderMutation } from "@/services/buy_order";
-import {toast} from "sonner";
+import { usePrivyAuth } from "@/context/PrivyAuthContext";
+
+import toast from "react-hot-toast";
 export default function SingleCrate() {
-  const isSubscribed = false;
+  const { basket_id } = useParams();
+  const { data: crate, isLoading } = useGetCrateById(basket_id as string);
+  const { address, authenticated } = usePrivyAuth();
+  const { data: userData } = useEnrichedUser(address, authenticated);
+  const { mutate: createBuyOrder, isLoading: createBuyOrderLoading, isSuccess, error } = useBuyOrderMutation();
+  const { mutate, isPending, isSuccess: subscribeSuccess, isError } = useSubscribeCrate();
   const [buyModalOpen, setBuyModalOpen] = useState(false);
   const [exitModalOpen, setExitModalOpen] = useState(false);
   const [kycModalOpen, setKycModalOpen] = useState(false);
-  const isKyced = false;
-  const { basket_id } = useParams();
-  const { data: crate, isLoading } = useGetCrateById(basket_id as string);
-  const { mutate: createBuyOrder, isLoading:createBuyOrderLoading, isSuccess, error } = useBuyOrderMutation();
+  const isKyced = userData?.is_kyc_complete;
+ 
+  const isSubscribed = userData?.subscribedCrates?.some(
+    (crate:any) => crate.crateId === basket_id
+  );
+  
+  console.log(userData,"userdata");
+  const handleSubscribe = () => {
+    if (!address) {
+      toast.error("Please connect your wallet to subscribe.");
+      return;
+    }
+    if (!basket_id) {
+      toast.error("Basket ID is missing.");
+      return;
+    }
+    mutate({ wallet: address, crateId: basket_id as string });
+  };
   const handleClick = () => {
-    console.log("Helloo World !!!");
+    if (!userData?.dinari_account_id) {
+      toast.error("Please complete KYC to invest in crates.");
+      return;
+    }
     createBuyOrder({
       crateId: basket_id as string,
-      accountId: "019814c3-64d2-7611-a4b7-dcc7c068f6ea",
-      totalAmountToBeInvested : "5",
+      accountId: userData?.dinari_account_id,
+      totalAmountToBeInvested: "5",
       assets: [
         {
           stockId: "0196ea6d-b6de-70d5-ae41-9525959ef309",
@@ -48,6 +72,8 @@ export default function SingleCrate() {
       ],
     });
   };
+
+
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
@@ -278,13 +304,8 @@ export default function SingleCrate() {
                       "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
                     backgroundBlendMode: "normal, normal",
                   }}
-                  onClick={() => {
-                    if (isKyced) {
-                      setBuyModalOpen(true);
-                    } else {
-                      setKycModalOpen(true);
-                    }
-                  }}
+                  disabled={isPending}
+                  onClick={handleSubscribe}
                 >
                   Subscribe
                 </Button>
@@ -292,9 +313,9 @@ export default function SingleCrate() {
                   onClick={handleClick}
                   className="w-full !font-bold bg-white text-black"
                   style={{
-                  background:
-                    "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
-                  backgroundBlendMode: "normal, normal",
+                    background:
+                      "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                    backgroundBlendMode: "normal, normal",
                   }}
                   disabled={createBuyOrderLoading}
                 >

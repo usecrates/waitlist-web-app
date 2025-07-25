@@ -2,8 +2,12 @@ import { EnrichedUser, RegisterUserInput } from "@/lib/interfaces";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/config";
 import { useMutation } from '@tanstack/react-query';
-import { use, useEffect, useState } from "react";
-
+import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
+type SubscribeCrateParams = {
+    wallet: string;
+    crateId: string;
+};
 export function useHasMounted() {
     const [hasMounted, setHasMounted] = useState(false);
     useEffect(() => {
@@ -111,3 +115,24 @@ export const useGetCrateById = (crateId: string) => {
         },
     });
 }
+
+export const useSubscribeCrate = () => {
+    return useMutation({
+        mutationFn: async ({ wallet, crateId }: SubscribeCrateParams) => {
+            let id = toast.loading("Subscribing to crate...");
+            try {
+                const response = await api.post(`/user/${wallet}/subscribe`, {
+                    crateId,
+                });
+                toast.success(response.data.message, {
+                    id,
+                });
+                return response.data;
+            } catch (error) {
+                toast.error("Failed to subscribe to crate", {
+                    id,
+                });
+            }
+        },
+    });
+};
