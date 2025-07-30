@@ -8,6 +8,7 @@ export interface Stock {
   export interface RegisterUserInput {
     wallet: string;
     name?: string;
+    email?: string;
   }
   export interface StockHolding {
     stockId: string;

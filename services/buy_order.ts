@@ -73,7 +73,7 @@ export function useBuyOrderMutation() {
             for (const asset of assets) {
                 const rawAmount = (asset.weightage / totalWeight) * Number(totalAmountToBeInvested);
                 const paymentTokenQuantity = rawAmount.toString();
-                const formattedQuantity = formatUnits(Number(paymentTokenQuantity), 6);
+                const formattedQuantity = formatUnits(BigInt(paymentTokenQuantity), 6);
 
                 const _order = {
                     chain_id: `eip155:${chainId}`,
@@ -249,10 +249,7 @@ export function useBuyOrderMutation() {
                 chainId,
             });
 
-           
-            toast.success("Buy order completed successfully", {
-                id
-            });
+            toast.success("Buy order completed successfully", { id });
 
             return txHash;
         },

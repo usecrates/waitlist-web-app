@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { X } from "lucide-react";
+import { usePrivyAuth } from "@/context/PrivyAuthContext";
+import { useEnrichedUser } from "@/hooks/user-hooks";
+import { useBuyOrderMutation } from "@/services/buy_order";
+import { useAccount, useBalance } from "wagmi";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 interface BuyCrateModalProps {
   open: boolean;
@@ -11,50 +17,87 @@ interface BuyCrateModalProps {
     meta?: string;
     image?: string;
   };
+  stocks?: any[];
+  basket_id?: string;
 }
 
-export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps) {
+export function BuyCrateModal({ open, onOpenChange, crate, stocks = [], basket_id }: BuyCrateModalProps) {
+  const router = useRouter();
   // crate: { name, meta, image }
   const [step, setStep] = useState<'input' | 'review' | 'status' | 'success'>('input');
   const [amount, setAmount] = useState('');
+  // Use payment token from config or stock data
+  const paymentTokenAddress = process.env.NEXT_PUBLIC_PAYMENTTOKEN || (stocks[0]?.stock?.tokens?.[1]?.split(':')[2]) || '';
   const [selectedToken, setSelectedToken] = useState('USDC');
-  const [balance] = useState(2498.90);
+  const [balance, setBalance] = useState(0);
   const [orderStatus, setOrderStatus] = useState<'waiting' | 'completed' | 'error'>('waiting');
   const [batchFilled, setBatchFilled] = useState(0);
-  const [batchTotal] = useState(4);
-
-  // Mock order review data
-  const reviewRows = [
-    { stock: 'AAPL', units: '0.12 $30', price: '$353', weight: '40%' },
-    { stock: 'MSFT', units: '0.10 $30', price: '$281', weight: '35%' },
-    { stock: 'AMZN', units: '0.08 $30', price: '$111', weight: '40%' },
-    { stock: 'GOOG', units: '0.08 $30', price: '$234', weight: '23%' },
-    { stock: 'META', units: '0.08 $30', price: '$231', weight: '12%' },
-    { stock: 'AVGO', units: '0.08 $30', price: '$839', weight: '8%' },
-    { stock: 'IBM', units: '0.03 $30', price: '$55', weight: '10%' },
-  ];
-  const subtotal = 950;
-  const slippage = 0.8;
-  const priceImpact = '<0.1%';
-  const totalSpend = 955;
-
-  // Simulate order status to success transition
+  const [batchTotal, setBatchTotal] = useState(stocks.length || 1);
+  
+  // Auth and user data
+  const { address, authenticated } = usePrivyAuth();
+  const { data: userData } = useEnrichedUser(address, authenticated);
+  const { mutate: createBuyOrder, isPending: createBuyOrderLoading } = useBuyOrderMutation();
+  
+  // ERC20 balance for mock USDC token
+  const { data: usdcBalance } = useBalance({
+    address: address as `0x${string}`,
+    token: paymentTokenAddress as `0x${string}`,
+  });
+  
+  // Update balance when USDC balance changes
   useEffect(() => {
-    if (step === 'status') {
-      setBatchFilled(0);
-      setOrderStatus('waiting');
-      let filled = 0;
-      const interval = setInterval(() => {
-        filled += 1;
-        setBatchFilled(filled);
-        if (filled === batchTotal) {
-          clearInterval(interval);
-          setTimeout(() => setOrderStatus('completed'), 500);
-        }
-      }, 600);
-      return () => clearInterval(interval);
+    if (usdcBalance) {
+      setBalance(Number(usdcBalance.formatted));
     }
-  }, [step, batchTotal]);
+  }, [usdcBalance]);
+  
+  // Invest function
+  const handleInvest = () => {
+    const enriched = userData as import("@/lib/interfaces").EnrichedUser;
+    if (!enriched?.dinari_account_id) {
+      toast.error("Please complete KYC to invest in crates.");
+      return;
+    }
+    if (!basket_id) {
+      toast.error("Basket ID is missing.");
+      return;
+    }
+
+    setStep('status');
+    setOrderStatus('waiting');
+    
+    createBuyOrder({
+      crateId: basket_id,
+      accountId: enriched.dinari_account_id,
+      totalAmountToBeInvested: amount,
+      assets: stocks.map(stock => ({
+        stockId: stock.stock.dinari_id,
+        assetAddress: stock.stock.tokens[1].split(":")[2], // Using the second token address (Sepolia)
+        weightage: stock.weight,
+      })),
+    }, {
+      onSuccess: () => {
+        toast.dismiss();
+        toast.success("Invested in crate successfully.");
+        setTimeout(() => setStep('success'), 1200); // Show waiting for a moment
+      },
+      onError: (error) => {
+        toast.dismiss();
+        toast.error("Failed to invest in crate.");
+        setOrderStatus('error');
+      }
+    });
+  };
+  
+  // Mock order review data
+  const subtotal = amount ? parseFloat(amount) : 0;
+  const slippage = 0.8; // fallback value
+  const priceImpact = '<0.1%'; // fallback value
+  const fee = 0; // fallback value
+  const totalSpend = subtotal + fee;
+
+
 
   // When orderStatus is completed, go to success after a short delay
   useEffect(() => {
@@ -76,6 +119,7 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
   }, [open]);
 
   const disabled = !amount || parseFloat(amount) <= 0;
+  console.log(crate,"crate");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -94,9 +138,9 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
               <div className="p-[2px] rounded-lg" style={{ background: "linear-gradient(180deg, #8B8B8B 0%, #E9E9E9 50%, #8B8B8B 100%)" }}>
                 <img src={crate?.image || "/public/placeholder-user.jpg"} className="w-12 h-12 rounded-lg object-cover" alt="crate" />
               </div>
-              <div>
-                <div className="text-lg font-semibold">{crate?.name || 'Nancy Pelosi'}</div>
-                <div className="text-xs text-[#A1A1A1]">{crate?.meta || 'Democrat/House/California'}</div>
+              <div className="ml-2">
+                <div className="text-lg font-semibold">{crate?.name}</div>
+                <div className="text-xs text-[#A1A1A1]">{crate?.meta}</div>
               </div>
             </div>
           )}
@@ -142,7 +186,7 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
                 <button className="bg-[#3D3D3D] text-white px-6 py-1 rounded" onClick={() => setAmount(balance.toFixed(2))}>Max</button>
               </div>
               <div className="text-center text-[#C9C9C9] mb-2">
-                Choose the amount you'd like to invest into the {crate?.name || 'Nancy Pelosi'} crate
+                Choose the amount you'd like to invest into the {crate?.name} crate
               </div>
               <button
                 className={`w-full font-bold py-3 rounded text-lg${disabled ? ' cursor-not-allowed' : ''}`}
@@ -169,19 +213,23 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
                 <table className="w-full text-left text-white">
                   <thead>
                     <tr className="text-[#A1A1A1] text-sm">
-                      <th className="py-2 px-2 font-medium">Stock</th>
-                      <th className="py-2 px-2 font-medium">Units</th>
+                      <th className="py-2 px-2 font-medium">Logo</th>
+                      <th className="py-2 px-2 font-medium">Symbol</th>
+                      <th className="py-2 px-2 font-medium">Name</th>
                       <th className="py-2 px-2 font-medium">Price</th>
                       <th className="py-2 px-2 font-medium">Weight</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {reviewRows.map((row, i) => (
+                    {stocks.map((stock, i) => (
                       <tr key={i} className="border-t border-[#232323] text-base">
-                        <td className="py-2 px-2">{row.stock}</td>
-                        <td className="py-2 px-2">{row.units}</td>
-                        <td className="py-2 px-2">{row.price}</td>
-                        <td className="py-2 px-2">{row.weight}</td>
+                        <td className="py-2 px-2">
+                          <img src={stock?.stock?.logo_url} alt={stock?.stock?.symbol} className="w-8 h-8 rounded bg-white" />
+                        </td>
+                        <td className="py-2 px-2">{stock?.stock.symbol}</td>
+                        <td className="py-2 px-2">{stock?.stock.name}</td>
+                        <td className="py-2 px-2">${amount ? (parseFloat(amount) * (stock.weight / 100)).toFixed(2) : '0'}</td>
+                        <td className="py-2 px-2">{stock.weight}%</td>
                       </tr>
                     ))}
                   </tbody>
@@ -190,7 +238,7 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
               <div className="mt-4 border-t border-[#232323] pt-4 space-y-2 text-base">
                 <div className="flex justify-between">
                   <span className="text-[#A1A1A1]">Subtotal Spend</span>
-                  <span className="font-bold">${subtotal}</span>
+                  <span className="font-bold">${amount ? parseFloat(amount).toFixed(2) : '0'}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-[#A1A1A1]">Slippage</span>
@@ -220,10 +268,10 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
                   backgroundBlendMode: "normal, normal",
                   color: "#000"
                 }}
-                onClick={() => setStep('status')}
-                disabled={disabled}
+                onClick={handleInvest}
+                disabled={disabled || createBuyOrderLoading}
               >
-                Confirm
+                {createBuyOrderLoading ? "Processing..." : "Confirm"}
               </button>
                 </div>
               </div>
@@ -278,7 +326,7 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
                   />
                 </div>
                 <div className="flex gap-4">
-                  <button className="flex-1 bg-[#232323] text-white py-3 rounded">View Portfolio</button>
+                  <button className="flex-1 bg-[#232323] text-white py-3 rounded" onClick={() => router.push('/portfolio')}>View Portfolio</button>
                   <button
                     className={`flex-1 font-bold py-3 rounded text-lg${disabled ? ' cursor-not-allowed' : ''}`}
                     style={disabled ? {
@@ -291,13 +339,11 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
                       backgroundBlendMode: "normal, normal",
                       color: "#000"
                     }}
+                    onClick={() => onOpenChange(false)}
                   >
                     Buy More
                   </button>
-                  {/* Demo: Simulate error */}
-                  {orderStatus === 'waiting' && (
-                    <button className="ml-2 px-4 py-2 bg-red-500 text-white rounded text-xs" onClick={() => setOrderStatus('error')}>Simulate Error</button>
-                  )}
+              
                 </div>
               </>
             ) : (
@@ -312,50 +358,51 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
               <div className="border-[#484848] border-t p-3">
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-[#A1A1A1]">Crate name</span>
-                  <span className="font-bold">Pelosi Crate</span>
+                  <span className="font-bold">{crate?.name}</span>
                 </div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-[#A1A1A1]">Amount sold</span>
-                  <span className="font-bold">$123.60</span>
+                  <span className="text-[#A1A1A1]">Amount Bought</span>
+                  <span className="font-bold">${amount}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-[#A1A1A1]">Remaining</span>
-                  <span className="font-bold">$76.40</span>
-                </div>
+                
               </div>
               <div className="flex items-center text-white border-[#484848] border bg-[#232323] rounded-md p-3 my-2">
                 <div className="p-[2px] rounded-lg" style={{ background: "linear-gradient(180deg, #8B8B8B 0%, #E9E9E9 50%, #8B8B8B 100%)" }}>
                   <img src={crate?.image || "/public/placeholder-user.jpg"} className="w-12 h-12 rounded-lg object-cover" alt="crate" />
                 </div>
-                <div>
-                  <div className="text-lg font-semibold">{crate?.name || 'Nancy Pelosi'}</div>
-                  <div className="text-xs text-[#A1A1A1]">{crate?.meta || 'Democrat/House/California'}</div>
+                <div className="ml-2">
+                  <div className="text-lg font-semibold">{crate?.name}</div>
+                  <div className="text-xs text-[#A1A1A1]">{crate?.meta}</div>
                 </div>
               </div>
               <div className="overflow-x-auto h-40 overflow-y-auto rounded-lg mb-4">
                 <table className="w-full text-left text-white">
                   <thead>
                     <tr className="text-[#A1A1A1] text-sm">
-                      <th className="py-2 px-2 font-medium">Stock</th>
-                      <th className="py-2 px-2 font-medium">Units</th>
+                      <th className="py-2 px-2 font-medium">Logo</th>
+                      <th className="py-2 px-2 font-medium">Symbol</th>
+                      <th className="py-2 px-2 font-medium">Name</th>
                       <th className="py-2 px-2 font-medium">Price</th>
                       <th className="py-2 px-2 font-medium">Weight</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {reviewRows.map((row, i) => (
+                    {stocks.map((stock, i) => (
                       <tr key={i} className="border-t border-[#232323] text-base">
-                        <td className="py-2 px-2">{row.stock}</td>
-                        <td className="py-2 px-2">{row.units}</td>
-                        <td className="py-2 px-2">{row.price}</td>
-                        <td className="py-2 px-2">{row.weight}</td>
+                        <td className="py-2 px-2">
+                          <img src={stock?.stock?.logo_url} alt={stock?.stock?.symbol} className="w-8 h-8 rounded bg-white" />
+                        </td>
+                        <td className="py-2 px-2">{stock?.stock.symbol}</td>
+                        <td className="py-2 px-2">{stock?.stock.name}</td>
+                        <td className="py-2 px-2">${stock.price}</td>
+                        <td className="py-2 px-2">{stock.weight}%</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
               <div className="flex gap-4">
-                <button className="flex-1 bg-[#232323] text-white py-3 rounded">View Portfolio</button>
+                <button className="flex-1 bg-[#232323] text-white py-3 rounded" onClick={() => router.push('/portfolio')}>View Portfolio</button>
                 <button
                   className={`flex-1 font-bold py-3 rounded text-lg${disabled ? ' cursor-not-allowed' : ''}`}
                   style={disabled ? {
@@ -368,6 +415,7 @@ export function BuyCrateModal({ open, onOpenChange, crate }: BuyCrateModalProps)
                     backgroundBlendMode: "normal, normal",
                     color: "#000"
                   }}
+                  onClick={() => onOpenChange(false)}
                 >
                   Buy More
                 </button>
