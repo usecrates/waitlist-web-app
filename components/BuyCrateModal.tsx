@@ -394,7 +394,7 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [], basket_i
                         </td>
                         <td className="py-2 px-2">{stock?.stock.symbol}</td>
                         <td className="py-2 px-2">{stock?.stock.name}</td>
-                        <td className="py-2 px-2">${stock.price}</td>
+                        <td className="py-2 px-2">${stock?.stock.price}</td>
                         <td className="py-2 px-2">{stock.weight}%</td>
                       </tr>
                     ))}

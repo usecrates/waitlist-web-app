@@ -22,6 +22,7 @@ export function DataTable<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+  console.log({data,table})
 
   return (
     <div className="font-chakra">

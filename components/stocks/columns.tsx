@@ -16,12 +16,12 @@ interface Stock {
   tokens: string[];
   createdAt: string;
   updatedAt: string;
+  price: number;
 }
 
 interface CrateStock {
   _id: string;
   weight: number;
-  price: number;
   stock: Stock;
 }
 
@@ -48,11 +48,13 @@ export const crateStockColumns: ColumnDef<CrateStock>[] = [
   {
     header: "Weight (%)",
     accessorKey: "weight",
-    cell: ({ getValue }) => <span>{getValue()}%</span>,
+    cell: ({ getValue }) => <span>{String(getValue())}%</span>,
   },
   {
     header: "Price ($)",
     accessorKey: "price",
-    cell: ({ getValue }) => <span>${getValue()}</span>,
+ cell: ({ row }) => (
+      <span>${row.original.stock.price.toFixed(2)}</span>
+    ),
   },
 ];
