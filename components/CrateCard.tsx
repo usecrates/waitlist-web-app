@@ -86,7 +86,7 @@ const CrateCard = ({ crate }: { crate: Crate }) => {
 
       <div className="flex gap-3">
         <Button
-          href={`/discover/${crate?._id.toString()}`}
+          href={`/discover/${crate?._id?.toString()}`}
           className="flex-1 text-white font-bold rounded-lg py-3 px-0 border-none shadow-none"
           style={{
             background:
