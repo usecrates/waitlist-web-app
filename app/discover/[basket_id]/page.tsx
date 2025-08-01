@@ -16,6 +16,7 @@ import {
   useGetCrateById,
   useSubscribeCrate,
 } from "@/hooks/user-hooks";
+
 import { useBuyOrderMutation } from "@/services/buy_order";
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
 
@@ -77,28 +78,19 @@ export default function SingleCrate() {
       toast.error("Please complete KYC to invest in crates.");
       return;
     }
+    const chainId = process.env.NEXT_PUBLIC_CHAIN_ID || "11155111"; // Default to Sepolia
     createBuyOrder(
       {
-        crateId: basket_id as string,
+        crateId: crate?._id,
         accountId: userData?.dinari_account_id,
         totalAmountToBeInvested: "5",
-        assets: [
-          {
-            stockId: "0196ea6d-b6de-70d5-ae41-9525959ef309",
-            assetAddress: "0xD771a71E5bb303da787b4ba2ce559e39dc6eD85c",
-            weightage: 40,
-          },
-          {
-            stockId: "0196ea6d-b6ed-716d-a541-4c36bd32e84a",
-            assetAddress: "0x7B58f454c36Edc0FBDEDfA8E0D4392A1a4c0b96c",
-            weightage: 40,
-          },
-          {
-            stockId: "0196ea6d-b6f6-7025-867a-b1fc580ea1a0",
-            assetAddress: "0xdc2C5910d367f62F2F3234C9eaa5Afb12948Ef01",
-            weightage: 20,
-          },
-        ],
+        assets: crate?.stocks.map((stockItem) => ({
+          stockId: stockItem.stock.dinari_id,
+          assetAddress: stockItem.stock.tokens.find(token =>
+            token.startsWith(`eip155:${chainId}:`)
+          ),
+          weightage: stockItem.weight,
+        })),
       },
       {
         onSuccess: () => {
