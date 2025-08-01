@@ -2,19 +2,19 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-// Remove: import { Toggle } from "@/components/ui/toggle";
-import { StocksTable } from "@/components/stocks/StocksTable";
 import { RebalanceModal } from "@/components/RebalanceModal";
+import { useUserPortfolio } from "../../hooks/user-hooks";
+import { usePrivyAuth } from "../../context/PrivyAuthContext";
+import { Bug } from "lucide-react";
+import toast from 'react-hot-toast';
 
 export default function PortfolioPage() {
   const [activeTab, setActiveTab] = useState("Crates");
+  const { address, authenticated } = usePrivyAuth();
+  const { data: userPortfolio, isLoading, error } = useUserPortfolio(address, authenticated);
   
-  // Mock data for stats and crates
-  const stats = {
-    currentValue: "$1,235.90",
-    currentValueChange: "+12.67%",
-    totalInvested: "$780.56",
-  };
+
+  console.log({userPortfolio});
   
   const crates = [
     {
@@ -60,7 +60,25 @@ export default function PortfolioPage() {
   const [rebalanceModalOpen, setRebalanceModalOpen] = useState(false);
   const [selectedCrate, setSelectedCrate] = useState<any>(null);
 
-  const stocksData = [
+  // Use real portfolio data for stocks, fallback to mock data
+  const stocksData = userPortfolio?.portfolio?.assets?.map((asset: any) => {
+    // Format token address with ellipsis
+    const tokenAddress = asset.token_address || '';
+    const shortAddress = tokenAddress ? `${tokenAddress.slice(0, 6)}...${tokenAddress.slice(-4)}` : '';
+    
+    return {
+      logo: "/assets/apple.png", // Default logo, you can map based on symbol
+      symbol: asset.symbol,
+      name: asset.symbol, // You might want to add a name field to your API
+      address: shortAddress,
+      fullAddress: tokenAddress, // Keep full address for copy functionality
+      price: `$${asset.current_price?.toFixed(2) || '0.00'}`,
+      holdings: `$${(parseFloat(asset.amount) * asset.current_price).toFixed(2)}`,
+      owned: parseFloat(asset.amount).toFixed(6),
+      netGain: "+0.00%", // This would come from your API if available
+      netGainColor: "text-green-400", // Default to green, adjust based on actual data
+    };
+  }) || [
     {
       logo: "/assets/apple.png",
       symbol: "AAPL",
@@ -144,8 +162,19 @@ export default function PortfolioPage() {
     <div className="min-h-screen pt-32 max-w-6xl w-full mx-auto flex flex-col bg-[#0e0e0e] text-white font-chakra">
       <main className="flex-1 flex flex-col items-center pb-16">
         <section className=" w-full">
-          {/* Main Grid - Tabs and Profile Card at same level */}
-          <motion.div
+          {!address ? (
+            <div className="flex flex-col items-center justify-center min-h-[60vh]">
+              <Bug className="w-16 h-16 text-gray-400 mb-4" />
+              <div className="text-2xl font-chakra text-center">Connect your wallet</div>
+            </div>
+          ) : isLoading ? (
+            <div className="flex flex-col items-center justify-center min-h-[60vh]">
+              <div className="text-2xl font-chakra text-center">Loading portfolio...</div>
+            </div>
+          ) : (
+            <>
+            {/* Main Grid - Tabs and Profile Card at same level */}
+            <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -295,7 +324,7 @@ export default function PortfolioPage() {
                       <thead>
                         <tr className="text-[#A1A1A1] text-sm">
                           <th className="py-3 px-2 font-medium">Stock</th>
-                          <th className="py-3 px-2 font-medium">SOL Address</th>
+                          <th className="py-3 px-2 font-medium">Token Address</th>
                           <th className="py-3 px-2 font-medium">Price</th>
                           <th className="py-3 px-2 font-medium">Holdings</th>
                           <th className="py-3 px-2 font-medium">Owned</th>
@@ -304,7 +333,7 @@ export default function PortfolioPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {stocksData.map((stock, i) => (
+                        {stocksData.map((stock: any, i: number) => (
                           <tr key={i} className="border-t border-[#232323] text-base">
                             <td className="py-3 px-2">
                               <div className="flex items-center gap-3">
@@ -318,9 +347,23 @@ export default function PortfolioPage() {
                             <td className="py-3 px-2">
                               <div className="flex items-center gap-2">
                                 <span>{stock.address}</span>
-                                <button className="ml-1" onClick={() => navigator.clipboard.writeText(stock.address)}>
-                                  <img src="/assets/copy.svg" alt="copy" className="w-4 h-4 opacity-60" />
-                                </button>
+                                {stock.fullAddress && (
+                                  <button
+                                    className="ml-1 hover:opacity-80 transition-opacity"
+                                    onClick={async () => {
+                                      try {
+                                        await navigator.clipboard.writeText(stock.fullAddress);
+                                        toast.success("Token address copied!");
+                                      } catch (err) {
+                                        console.error('Failed to copy token address:', err);
+                                        toast.error("Failed to copy token address.");
+                                      }
+                                    }}
+                                    title="Copy token address"
+                                  >
+                                    <img src="/assets/copy.svg" alt="copy" className="w-4 h-4 opacity-60" />
+                                  </button>
+                                )}
                               </div>
                             </td>
                             <td className="py-3 px-2">{stock.price}</td>
@@ -395,6 +438,8 @@ export default function PortfolioPage() {
             onOpenChange={setRebalanceModalOpen}
             crate={selectedCrate}
           />
+            </>
+          )}
         </section>
       </main>
     </div>
