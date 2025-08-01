@@ -79,9 +79,6 @@ export const useEnrichedUser = (wallet: string, enabled: boolean) => {
         queryFn: () => fetchUserByWallet(wallet),
         enabled: enabled && !!wallet,
         retry: false, // prevent auto retries for "User not found"
-        onError: (error: Error) => {
-            console.error("Failed to fetch user:", error);
-        },
         // You can transform error into null result if you want the consumer to not break
         // select: (data) => data || null,
     });
@@ -98,9 +95,6 @@ export const useGetAllCrates = () => {
         queryKey: ["crates"],
         queryFn: fetchAllCrates,
         retry: false, // prevent auto retries for "User not found"
-        onError: (error: Error) => {
-            console.error("Failed to fetch crates:", error);
-        },
         staleTime: 1000 * 60 * 5, // 5 minutes
     });
 }
@@ -111,9 +105,6 @@ export const useGetCrateById = (crateId: string) => {
         queryFn: () => getCrateById(crateId),
         enabled: !!crateId,
         retry: false, // prevent auto retries for "User not found"
-        onError: (error: Error) => {
-            console.error("Failed to fetch crate:", error);
-        },
         staleTime: 1000 * 60 * 5 // 5 minutes
     });
 }
@@ -137,5 +128,49 @@ export const useSubscribeCrate = () => {
                 });
             }
         },
+    });
+};
+
+const fetchUserPortfolio = async (wallet: string) => {
+    try {
+        const res = await api.get(`/user/${wallet}/dinari-portfolio`);
+        if (!res.data.success) {
+            throw new Error(res.data.message || "Failed to fetch user portfolio");
+        }
+        return res.data.data;
+    } catch (error: any) {
+        throw new Error(error?.response?.data?.message || error.message || "Unknown error");
+    }
+};
+
+const fetchUserOrders = async (wallet: string) => {
+    try {
+        const res = await api.get(`/user/${wallet}/dinari-orders`);
+        if (!res.data.success) {
+            throw new Error(res.data.message || "Failed to fetch user orders");
+        }
+        return res.data.data;
+    } catch (error: any) {
+        throw new Error(error?.response?.data?.message || error.message || "Unknown error");
+    }
+};
+
+export const useUserPortfolio = (wallet: string, enabled: boolean = true) => {
+    return useQuery({
+        queryKey: ["user-portfolio", wallet],
+        queryFn: () => fetchUserPortfolio(wallet),
+        enabled: enabled && !!wallet,
+        retry: false,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+};
+
+export const useUserOrders = (wallet: string, enabled: boolean = true) => {
+    return useQuery({
+        queryKey: ["user-orders", wallet],
+        queryFn: () => fetchUserOrders(wallet),
+        enabled: enabled && !!wallet,
+        retry: false,
+        staleTime: 1000 * 60 * 5, // 5 minutes
     });
 };
