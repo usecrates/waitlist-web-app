@@ -50,8 +50,6 @@ export function useBuyOrderMutation() {
                 throw new Error("Invalid account ID or orders");
             }
             let id = toast.loading("Creating buy order...");
-
-            totalAmountToBeInvested = parseUnits(totalAmountToBeInvested, 6).toString();
             const paymentTokenAddress = process.env.NEXT_PUBLIC_PAYMENTTOKEN as `0x${string}`;
             const chainId = publicClient.chain.id;
 
@@ -76,11 +74,11 @@ export function useBuyOrderMutation() {
             for (const asset of assets) {
                 console.log(totalAmountToBeInvested);
                 const rawAmount = (asset.weightage / totalWeight) * Number(totalAmountToBeInvested);
-                const paymentTokenQuantity = BigInt(Math.trunc(rawAmount)); 
-                const formattedQuantity = (Number(paymentTokenQuantity) / 1e6).toString();
-                
-                console.log(formattedQuantity, "formattedQuantity");
-                console.log(paymentTokenQuantity, "paymentTokenQuantity");
+                const paymentTokenQuantity = parseUnits(Number(rawAmount).toFixed(2).toString(), 6);
+                const formattedQuantity = formatUnits(paymentTokenQuantity, 6);
+
+                console.log(formattedQuantity, "formattedQuantity"); 
+                console.log(paymentTokenQuantity.toString(), "paymentTokenQuantity");
                 const _order = {
                     chain_id: `eip155:${chainId}`,
                     order_side: 'BUY',
