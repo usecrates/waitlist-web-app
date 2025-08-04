@@ -42,6 +42,7 @@ export function useBuyOrderMutation() {
 
     return useMutation({
         mutationFn: async ({ assets, accountId, totalAmountToBeInvested,crateId }: CreateBuyOrderArgs) => {
+            console.log({assets});
             if (!walletClient || !address || !publicClient)
                 throw new Error("Wallet not connected");
             if (!accountId || !assets || assets.length === 0) {

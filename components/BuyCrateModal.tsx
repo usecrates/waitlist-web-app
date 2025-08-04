@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
 import { useEnrichedUser } from "@/hooks/user-hooks";
 import { useBuyOrderMutation } from "@/services/buy_order";
-import { useAccount, useBalance } from "wagmi";
+import { useAccount, useBalance,useChainId } from "wagmi";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
@@ -33,7 +33,7 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [], basket_i
   const [orderStatus, setOrderStatus] = useState<'waiting' | 'completed' | 'error'>('waiting');
   const [batchFilled, setBatchFilled] = useState(0);
   const [batchTotal, setBatchTotal] = useState(stocks.length || 1);
-  
+  const chainId = useChainId()
   // Auth and user data
   const { address, authenticated } = usePrivyAuth();
   const { data: userData } = useEnrichedUser(address, authenticated);
@@ -84,6 +84,7 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [], basket_i
       },
       onError: (error) => {
         toast.dismiss();
+        console.log(error, "error");
         toast.error("Failed to invest in crate.");
         setOrderStatus('error');
       }
@@ -210,31 +211,53 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [], basket_i
             <>
               <div className="text-lg font-semibold mb-4">Review order</div>
               <div className="overflow-x-auto h-48 overflow-y-auto rounded-lg">
-                <table className="w-full text-left text-white">
-                  <thead>
-                    <tr className="text-[#A1A1A1] text-sm">
-                      <th className="py-2 px-2 font-medium">Logo</th>
-                      <th className="py-2 px-2 font-medium">Symbol</th>
-                      <th className="py-2 px-2 font-medium">Name</th>
-                      <th className="py-2 px-2 font-medium">Price</th>
-                      <th className="py-2 px-2 font-medium">Weight</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {stocks.map((stock, i) => (
-                      <tr key={i} className="border-t border-[#232323] text-base">
-                        <td className="py-2 px-2">
-                          <img src={stock?.stock?.logo_url} alt={stock?.stock?.symbol} className="w-8 h-8 rounded bg-white" />
-                        </td>
-                        <td className="py-2 px-2">{stock?.stock.symbol}</td>
-                        <td className="py-2 px-2">{stock?.stock.name}</td>
-                        <td className="py-2 px-2">${amount ? (parseFloat(amount) * (stock.weight / 100)).toFixed(2) : '0'}</td>
-                        <td className="py-2 px-2">{stock.weight}%</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+  <table className="w-full text-left text-white">
+    <thead>
+      <tr className="text-[#A1A1A1] text-sm">
+        <th className="py-2 px-2 font-medium">Logo</th>
+        <th className="py-2 px-2 font-medium">Symbol</th>
+        <th className="py-2 px-2 font-medium">Name</th>
+        <th className="py-2 px-2 font-medium">Price</th>
+        <th className="py-2 px-2 font-medium">Weight</th>
+        <th className="py-2 px-2 font-medium">On Chain?</th> {/* new column */}
+      </tr>
+    </thead>
+    <tbody>
+      {stocks.map((stock, i) => {
+        const isOnChain = stock?.stock?.tokens?.some(token =>
+          token.startsWith(`eip155:${chainId}:`)
+        );
+
+        return (
+          <tr key={i} className="border-t border-[#232323] text-base">
+            <td className="py-2 px-2">
+              <img
+                src={stock?.stock?.logo_url}
+                alt={stock?.stock?.symbol}
+                className="w-8 h-8 rounded bg-white"
+              />
+            </td>
+            <td className="py-2 px-2">{stock?.stock.symbol}</td>
+            <td className="py-2 px-2">{stock?.stock.name}</td>
+            <td className="py-2 px-2">
+              {amount
+                ? (parseFloat(amount) * (stock.weight / 100)).toFixed(2)
+                : "0"}
+            </td>
+            <td className="py-2 px-2">{stock.weight}%</td>
+            <td className="py-2 px-2">
+              {isOnChain ? (
+                <span className="text-green-500">Available</span>
+              ) : (
+                <span className="text-red-500">Not Available</span>
+              )}
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</div>
               <div className="mt-4 border-t border-[#232323] pt-4 space-y-2 text-base">
                 <div className="flex justify-between">
                   <span className="text-[#A1A1A1]">Subtotal Spend</span>
