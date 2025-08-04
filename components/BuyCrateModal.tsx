@@ -64,23 +64,36 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [], basket_i
       return;
     }
 
+    const filteredAssets = stocks.filter(stock =>
+      stock?.stock?.tokens?.some(token =>
+        token.startsWith(`eip155:${chainId}:`)
+      )
+    );
+  
+    if (filteredAssets.length === 0) {
+      toast.error("No supported assets found on this chain.");
+      return;
+    }
+  
     setStep('status');
     setOrderStatus('waiting');
-    
+  
     createBuyOrder({
       crateId: basket_id,
       accountId: enriched.dinari_account_id,
       totalAmountToBeInvested: amount,
-      assets: stocks.map(stock => ({
+      assets: filteredAssets.map(stock => ({
         stockId: stock.stock.dinari_id,
-        assetAddress: stock.stock.tokens[1].split(":")[2], // Using the second token address (Sepolia)
-        weightage: stock.weight,
+        assetAddress: stock.stock.tokens.find(t =>
+          t.startsWith(`eip155:${chainId}:`)
+        )?.split(":")[2] || "", // Pick correct token address for current chain
+        weightage: Number(stock.weight).toFixed(2),
       })),
     }, {
       onSuccess: () => {
         toast.dismiss();
         toast.success("Invested in crate successfully.");
-        setTimeout(() => setStep('success'), 1200); // Show waiting for a moment
+        setTimeout(() => setStep('success'), 1200);
       },
       onError: (error) => {
         toast.dismiss();
@@ -124,7 +137,7 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [], basket_i
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md text-white w-full bg-[#181818] p-0 rounded-2xl font-chakra">
+      <DialogContent className="max-w-xl text-white w-full bg-[#181818] p-0 rounded-2xl font-chakra">
         <div className="p-3">
             <div className="flex bg-[#121212] justify-between items-center p-2 ">
                 <div className="text-2xl text-white font-bold">Buy crate</div>
@@ -182,6 +195,7 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [], basket_i
               </div>
               {/* Quick Select */}
               <div className="flex justify-center gap-4 mb-4">
+                <button className="bg-[#3D3D3D] text-white px-6 py-1 rounded" onClick={() => setAmount(50)}>Min</button>
                 <button className="bg-[#2C2C2C] text-white px-6 py-1 rounded" onClick={() => setAmount((balance * 0.25).toFixed(2))}>25%</button>
                 <button className="bg-[#2C2C2C] text-white px-6 py-1 rounded" onClick={() => setAmount((balance * 0.5).toFixed(2))}>50%</button>
                 <button className="bg-[#3D3D3D] text-white px-6 py-1 rounded" onClick={() => setAmount(balance.toFixed(2))}>Max</button>
@@ -244,7 +258,7 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [], basket_i
                 ? (parseFloat(amount) * (stock.weight / 100)).toFixed(2)
                 : "0"}
             </td>
-            <td className="py-2 px-2">{stock.weight}%</td>
+            <td className="py-2 px-2">{stock.weight.toFixed(2)}%</td>
             <td className="py-2 px-2">
               {isOnChain ? (
                 <span className="text-green-500">Available</span>
@@ -370,7 +384,7 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [], basket_i
                 </div>
               </>
             ) : (
-            // Success step
+
             <>
               <div className="flex flex-col items-center my-4">
                 <img src="/assets/buy_tick.svg" alt="Success" className="w-14 h-14 mb-2" />

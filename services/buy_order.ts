@@ -64,7 +64,9 @@ export function useBuyOrderMutation() {
                 apiSecretKey: process.env.NEXT_PUBLIC_DINARI_API_SECRET_KEY,
                 environment: "sandbox",
             });
-            const totalWeight = assets.reduce((sum, asset) => sum + asset.weightage, 0);
+            const totalWeight = assets.reduce((sum, asset) => sum + parseFloat(asset.weightage), 0);
+            console.log("Total Weight:", totalWeight);
+
             const orders = [];
             let totalOrderAmount = BigInt(0);
             let totalFees = BigInt(0);
@@ -72,10 +74,13 @@ export function useBuyOrderMutation() {
             let tif: number = 1;
             const multiCallBytes: string[] = [];
             for (const asset of assets) {
+                console.log(totalAmountToBeInvested);
                 const rawAmount = (asset.weightage / totalWeight) * Number(totalAmountToBeInvested);
-                const paymentTokenQuantity = rawAmount.toString();
-                const formattedQuantity = formatUnits(BigInt(paymentTokenQuantity), 6);
-
+                const paymentTokenQuantity = BigInt(Math.trunc(rawAmount)); 
+                const formattedQuantity = (Number(paymentTokenQuantity) / 1e6).toString();
+                
+                console.log(formattedQuantity, "formattedQuantity");
+                console.log(paymentTokenQuantity, "paymentTokenQuantity");
                 const _order = {
                     chain_id: `eip155:${chainId}`,
                     order_side: 'BUY',
@@ -92,11 +97,11 @@ export function useBuyOrderMutation() {
                     assetToken: asset.assetAddress,
                     paymentToken: paymentTokenAddress,
                     sell: false,
-                    orderType: orderType, // assuming defined elsewhere
+                    orderType: orderType, 
                     assetTokenQuantity: 0,
                     paymentTokenQuantity: paymentTokenQuantity,
                     price: 0,
-                    tif: tif, // assuming defined elsewhere
+                    tif: tif, 
                 };
 
                 const feeQuoteResponse = await dinariClient.v2.accounts.orders.stocks.eip155.getFeeQuote(accountId, _order);
