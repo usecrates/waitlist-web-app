@@ -7,7 +7,7 @@ import { useUserPortfolio } from "../../hooks/user-hooks";
 import { usePrivyAuth } from "../../context/PrivyAuthContext";
 import { Bug } from "lucide-react";
 import toast from 'react-hot-toast';
-
+import { getChainColor } from "@/utils/get_logo.ts"; 
 export default function PortfolioPage() {
   const [activeTab, setActiveTab] = useState("Crates");
   const { address, authenticated } = usePrivyAuth();
@@ -69,6 +69,7 @@ export default function PortfolioPage() {
     return {
       logo: "/assets/apple.png", // Default logo, you can map based on symbol
       symbol: asset.symbol,
+      chain_id: asset.chain_id,
       name: asset.symbol, // You might want to add a name field to your API
       address: shortAddress,
       fullAddress: tokenAddress, // Keep full address for copy functionality
@@ -324,6 +325,7 @@ export default function PortfolioPage() {
                       <thead>
                         <tr className="text-[#A1A1A1] text-sm">
                           <th className="py-3 px-2 font-medium">Stock</th>
+                          <th className="py-3 px-2 font-medium">ChainId</th>
                           <th className="py-3 px-2 font-medium">Token Address</th>
                           <th className="py-3 px-2 font-medium">Price</th>
                           <th className="py-3 px-2 font-medium">Holdings</th>
@@ -342,6 +344,11 @@ export default function PortfolioPage() {
                                   <div className="font-semibold text-base">{stock.symbol}</div>
                                   <div className="text-xs text-[#B6B6B6]">{stock.name}</div>
                                 </div>
+                              </div>
+                            </td>
+                            <td className="py-3 px-2">
+                              <div className={`flex items-center gap-2 ${getChainColor(stock?.chain_id)}`}>
+                                <span className="text-xs text-white">{stock?.chain_id}</span>
                               </div>
                             </td>
                             <td className="py-3 px-2">
