@@ -71,14 +71,12 @@ export function useBuyOrderMutation() {
             let orderType: number = 0;
             let tif: number = 1;
             const multiCallBytes: string[] = [];
+            const stockHoldings = [];
             for (const asset of assets) {
                 console.log(totalAmountToBeInvested);
                 const rawAmount = (asset.weightage / totalWeight) * Number(totalAmountToBeInvested);
                 const paymentTokenQuantity = parseUnits(Number(rawAmount).toFixed(2).toString(), 6);
                 const formattedQuantity = formatUnits(paymentTokenQuantity, 6);
-
-                console.log(formattedQuantity, "formattedQuantity"); 
-                console.log(paymentTokenQuantity.toString(), "paymentTokenQuantity");
                 const _order = {
                     chain_id: `eip155:${chainId}`,
                     order_side: 'BUY',
@@ -103,7 +101,7 @@ export function useBuyOrderMutation() {
                 };
 
                 const feeQuoteResponse = await dinariClient.v2.accounts.orders.stocks.eip155.getFeeQuote(accountId, _order);
-
+                console.log("Fee Quote Response:", feeQuoteResponse);
                 const orderFee = BigInt(feeQuoteResponse.order_fee_contract_object.fee_quote.fee);
 
                 totalOrderAmount += BigInt(paymentTokenQuantity);
@@ -114,6 +112,14 @@ export function useBuyOrderMutation() {
                     orderParams,
                     feeQuoteResponse,
                     orderFee,
+                });
+
+                stockHoldings.push({
+                    stock: asset._id,
+                    price: asset.price,
+                    userHoldingUSD: formattedQuantity,
+                    sharesOwned: 2,
+                    netGain: 0.15
                 });
             }
             const totalSpendAmount = totalOrderAmount + totalFees;
@@ -251,6 +257,7 @@ export function useBuyOrderMutation() {
                 transactionHash: txHash,
                 orderIds,
                 chainId,
+                stockHoldings,
             });
 
             toast.success("Buy order completed successfully", { id });

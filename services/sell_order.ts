@@ -65,7 +65,6 @@ export function useSellOrderMutation() {
 
             for (const asset of assets) {
                 const assetTokenQuantity = parseUnits(asset.amountToSell, asset.decimals);
-
                 const _order = {
                     chain_id: `eip155:${chainId}`,
                     order_side: 'SELL',
@@ -75,7 +74,6 @@ export function useSellOrderMutation() {
                     payment_token: asset.paymentToken,
                     asset_token_quantity: assetTokenQuantity.toString(),
                 };
-
                 const orderParams = {
                     requestTimestamp: Date.now(),
                     recipient: address,
@@ -157,7 +155,6 @@ export function useSellOrderMutation() {
                 multiCallBytes.push(selfPermitData);
             }
 
-            // ------- Encode sell orders -------
             const orderCalls = orders.map((order) => {
                 return encodeFunctionData({
                     abi: orderProcessorAbi,

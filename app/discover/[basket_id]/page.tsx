@@ -16,6 +16,7 @@ import {
   useGetCrateById,
   useSubscribeCrate,
 } from "@/hooks/user-hooks";
+import {useChainId} from "wagmi";
 
 import { useBuyOrderMutation } from "@/services/buy_order";
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
@@ -25,6 +26,7 @@ export default function SingleCrate() {
   const { basket_id } = useParams();
   const { data: crate, isLoading } = useGetCrateById(basket_id as string);
   const { address, authenticated } = usePrivyAuth();
+  const chainId = useChainId()
   const { data: userData, refetch: refetchUser } = useEnrichedUser(
     address,
     authenticated
@@ -45,13 +47,12 @@ export default function SingleCrate() {
   const [exitModalOpen, setExitModalOpen] = useState(false);
   const [kycModalOpen, setKycModalOpen] = useState(false);
   const isKyced = userData?.is_kyc_complete;
-  console.log(isKyced, "isKyced");
 
   const isSubscribed = userData?.subscribedCrates?.some(
     (crate: any) => crate.crateId === basket_id
   );
 
-  console.log(userData, crate, "userdata");
+ 
   const handleSubscribe = () => {
     if (!address) {
       toast.error("Please connect your wallet to subscribe.");
@@ -73,23 +74,25 @@ export default function SingleCrate() {
     );
     //todo refresh the page after subcribing
   };
+
   const handleInvest = () => {
     if (!userData?.dinari_account_id) {
       toast.error("Please complete KYC to invest in crates.");
       return;
     }
-    const chainId = process.env.NEXT_PUBLIC_CHAIN_ID || "11155111"; // Default to Sepolia
     createBuyOrder(
       {
         crateId: crate?._id,
         accountId: userData?.dinari_account_id,
         totalAmountToBeInvested: "5",
         assets: crate?.stocks.map((stockItem) => ({
+          _id:stockItem.stock._id,
           stockId: stockItem.stock.dinari_id,
           assetAddress: stockItem.stock.tokens.find(token =>
             token.startsWith(`eip155:${chainId}:`)
           ),
           weightage: stockItem.weight,
+          price : stockItem.stock.price.toString(),
         })),
       },
       {
