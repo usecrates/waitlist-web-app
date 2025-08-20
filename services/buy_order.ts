@@ -103,10 +103,9 @@ export function useBuyOrderMutation() {
                 const feeQuoteResponse = await dinariClient.v2.accounts.orders.stocks.eip155.getFeeQuote(accountId, _order);
                 console.log("Fee Quote Response:", feeQuoteResponse);
                 const orderFee = BigInt(feeQuoteResponse.order_fee_contract_object.fee_quote.fee);
-
+        
                 totalOrderAmount += BigInt(paymentTokenQuantity);
                 totalFees += orderFee;
-
                 orders.push({
                     _order,
                     orderParams,

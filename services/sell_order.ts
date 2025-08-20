@@ -93,7 +93,7 @@ export function useSellOrderMutation() {
 
                 orders.push({ orderParams, feeQuoteResponse });
 
-                // ------- PERMIT for this asset -------
+         
                 const nonce = await publicClient.readContract({
                     address: asset.assetAddress,
                     abi: tokenAbi,
