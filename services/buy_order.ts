@@ -62,7 +62,7 @@ export function useBuyOrderMutation() {
                 apiSecretKey: process.env.NEXT_PUBLIC_DINARI_API_SECRET_KEY,
                 environment: "sandbox",
             });
-            const totalWeight = assets.reduce((sum, asset) => sum + parseFloat(asset.weightage), 0);
+            const totalWeight = assets.reduce((sum, asset) => sum + parseFloat(asset?.weightage), 0);
             console.log("Total Weight:", totalWeight);
 
             const orders = [];
@@ -100,10 +100,23 @@ export function useBuyOrderMutation() {
                     tif: tif, 
                 };
 
+
+                const quote = await dinariClient.v2.marketData.stocks.retrieveCurrentQuote(_order.stock_id);
+                const askPrice = Number(quote.ask_price);
+
                 const feeQuoteResponse = await dinariClient.v2.accounts.orders.stocks.eip155.getFeeQuote(accountId, _order);
-                console.log("Fee Quote Response:", feeQuoteResponse);
                 const orderFee = BigInt(feeQuoteResponse.order_fee_contract_object.fee_quote.fee);
-        
+                const orderFeeReadable = Number(formatUnits(orderFee, 6));
+                const paymentReadable = Number(formatUnits(paymentTokenQuantity, 6));
+                console.log(orderFeeReadable,paymentReadable,"orderFeeReadable,paymentReadable")
+                let netSpend = paymentReadable - orderFeeReadable;
+                let minShares = netSpend / askPrice;
+            
+                // Ensure minShares does not go to Infinity or NaN
+                if (!isFinite(minShares) || isNaN(minShares)) {
+                  minShares = 0;
+                }
+                console.log(netSpend,minShares,"netSpend,minShares");
                 totalOrderAmount += BigInt(paymentTokenQuantity);
                 totalFees += orderFee;
                 orders.push({
@@ -111,11 +124,14 @@ export function useBuyOrderMutation() {
                     orderParams,
                     feeQuoteResponse,
                     orderFee,
-                });
+                    minShares: minShares,
+                    priceUsed: askPrice,
+                    stockId: asset.stockId,
+                  });
 
                 stockHoldings.push({
-                    stock: asset._id,
-                    price: asset.price,
+                    stock: asset?._id,
+                    price: asset?.price,
                     userHoldingUSD: formattedQuantity,
                     sharesOwned: 2,
                     netGain: 0.15
