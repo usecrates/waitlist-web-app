@@ -16,7 +16,7 @@ import {
   useGetCrateById,
   useSubscribeCrate,
 } from "@/hooks/user-hooks";
-import {useChainId} from "wagmi";
+import { useChainId } from "wagmi";
 
 import { useBuyOrderMutation } from "@/services/buy_order";
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
@@ -38,7 +38,7 @@ export default function SingleCrate() {
     isSuccess,
     error,
   } = useBuyOrderMutation();
-  const {mutate : createSellOrder,isPending:createSellOrderLoading,isSuccess:isSellOrderSuccess} = useSellOrderMutation();
+  const { mutate: createSellOrder, isPending: createSellOrderLoading, isSuccess: isSellOrderSuccess } = useSellOrderMutation();
   const {
     mutate: subscribeCrate,
     isPending,
@@ -57,7 +57,7 @@ export default function SingleCrate() {
   function getTokenAddress(chainId, tokens) {
     const entry = tokens.find(token => token.split(":")[1] === String(chainId));
     return entry ? entry.split(":")[2] : null;
-}
+  }
 
 
   const handleSubscribe = () => {
@@ -87,16 +87,16 @@ export default function SingleCrate() {
       toast.error("Please complete KYC to invest in crates.");
       return;
     }
-  
+
     createBuyOrder(
       {
         crateId: crate?._id,
         accountId: userData?.dinari_account_id,
         totalAmountToBeInvested: "5",
         assets: crate?.stocks.map((stockItem) => ({
-          stockObjectId:stockItem.stock._id,
+          stockObjectId: stockItem.stock._id,
           stockId: stockItem.stock.dinari_id,
-          assetAddress: getTokenAddress(chainId,stockItem.stock.tokens),
+          assetAddress: getTokenAddress(chainId, stockItem.stock.tokens),
           weightage: stockItem.weight
         })),
       },
@@ -109,8 +109,9 @@ export default function SingleCrate() {
     );
   };
 
-  const handleExitCrate = () =>{
-    if(!address){
+  const handleExitCrate = () => {
+  
+    if (!address) {
       toast.error("Please Connect Your Wallet First");
       return;
     }
@@ -121,27 +122,26 @@ export default function SingleCrate() {
 
     let crateInvestmentData;
     if (userData?.subscribedCrates && userData?.subscribedCrates.length > 0) {
-        for (const _crate of userData?.subscribedCrates) {
-            if (crate?._id === _crate.crateId) {
-                console.log("Subscribed crate found:", _crate);
-                crateInvestmentData = _crate.userInvestment;
-            }
+      for (const _crate of userData?.subscribedCrates) {
+        if (crate?._id === _crate.crateId) {
+          crateInvestmentData = _crate.userInvestment;
         }
+      }
     } else {
-        console.log("No subscribed crates found for this user.");
-        return;
+      console.log("No subscribed crates found for this user.");
+      return;
     }
 
-  if (!crateInvestmentData) {
+    if (!crateInvestmentData) {
       console.log("No investment data found for the specified crate.");
       return;
-  }
+    }
 
     createSellOrder(
       {
         crateId: crate?._id,
         accountId: userData?.dinari_account_id,
-        crateInvestmentData:crateInvestmentData
+        crateInvestmentData: crateInvestmentData
       },
       {
         onSuccess: () => {
@@ -536,7 +536,7 @@ export default function SingleCrate() {
                     Subscribe
                   </Button>
                 ) : (
-         
+
                   <Button
                     onClick={handleInvest}
                     className="w-full !font-bold bg-white text-black"

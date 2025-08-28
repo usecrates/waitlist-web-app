@@ -1,11 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import Dinari from "@dinari/api-sdk";
-import { encodeFunctionData, formatUnits, parseAbi, parseUnits } from "viem";
+import { encodeFunctionData, formatUnits, parseAbi, parseEventLogs, parseUnits } from "viem";
 import orderProcessorData from "@/lib/sbt-deployments/v0.4.0/order_processor.json";
 import { useAccount, useWalletClient, usePublicClient } from "wagmi";
 import { toast } from "react-hot-toast";
 import { api } from "@/config";
-import { BigNumber, ethers } from "ethers";
+import { BigNumber, } from "ethers";
 
 const tokenAbi = parseAbi([
     "function name() view returns (string)",
@@ -64,6 +64,8 @@ export function useSellOrderMutation() {
             let totalFees = BigInt(0);
 
             // ✅ loop over crateInvestmentData.stockHoldings instead of "assets"
+
+            console.log({ crateInvestmentData })
             for (const stock of crateInvestmentData.stockHoldings) {
                 const _stock = stock.stockId;
 
@@ -96,33 +98,37 @@ export function useSellOrderMutation() {
                 const sellOrder = true;
                 const orderType = 0;
 
-                let actualAmount = BigNumber.from(orderAmount);
-                if (sellOrder) {
-                  const { data: allowedDecimalReduction } = await publicClient.readContract({
-                    address: orderProcessorAddress,
-                    abi: orderProcessorAbi,
-                    functionName: "orderDecimalReduction",
-                    args: [assetTokenAddress],
-                  });
-                
-                  const allowablePrecisionReduction = 10 ** allowedDecimalReduction;
-                  const assetTokenDecimals = decimals; 
-                  console.log({assetTokenDecimals,allowablePrecisionReduction})
-                  const maxDecimals = assetTokenDecimals - allowedDecimalReduction;
-                  console.log(`Max Decimals Allowed for Order Amount: ${maxDecimals}`);
-                
-                  const scale = BigNumber.from(10).pow(assetTokenDecimals - allowedDecimalReduction);
-                  actualAmount = actualAmount.div(scale).mul(scale);
-                
-                  console.log(`Adjusted Order Amount: ${actualAmount} tokens`);
-                
-                  if (Number(actualAmount) % allowablePrecisionReduction !== 0) {
-                    console.log(`Asset Token Decimals: ${assetTokenDecimals}`);
-                    throw new Error(`Order amount precision exceeds max decimals of ${maxDecimals}`);
-                  }
-                }
-                
+                let actualAmount = orderAmount; // already bigint from parseUnits()
 
+                if (sellOrder) {
+                    const allowedDecimalReduction = await publicClient.readContract({
+                        address: orderProcessorAddress,
+                        abi: orderProcessorAbi,
+                        functionName: "orderDecimalReduction",
+                        args: [assetTokenAddress],
+                    });
+
+                    const allowedDecimalReductionNum = Number(allowedDecimalReduction); // convert bigint → number
+                    const assetTokenDecimals = Number(decimals); // decimals is bigint from contract
+                    const maxDecimals = assetTokenDecimals - allowedDecimalReductionNum;
+
+                    console.log(`Max Decimals Allowed for Order Amount: ${maxDecimals}`);
+
+                    // scale = 10 ^ (assetTokenDecimals - allowedDecimalReduction)
+                    const scale = 10n ** BigInt(assetTokenDecimals - allowedDecimalReductionNum);
+
+                    // Adjust the amount
+                    actualAmount = (actualAmount / scale) * scale;
+
+                    console.log(`Adjusted Order Amount: ${actualAmount.toString()} tokens`);
+
+                    // allowablePrecisionReduction = 10 ^ allowedDecimalReduction
+                    const allowablePrecisionReduction = 10n ** BigInt(allowedDecimalReductionNum);
+
+                    if (actualAmount % allowablePrecisionReduction !== 0n) {
+                        throw new Error(`Order amount precision exceeds max decimals of ${maxDecimals}`);
+                    }
+                }
                 const orderParams = {
                     requestTimestamp: Date.now(),
                     recipient: address,
@@ -130,27 +136,28 @@ export function useSellOrderMutation() {
                     paymentToken: process.env.NEXT_PUBLIC_PAYMENTTOKEN,
                     sell: sellOrder,
                     orderType: orderType,
-                    assetTokenQuantity: orderAmount,
+                    assetTokenQuantity: Number(actualAmount),
                     paymentTokenQuantity: 0,
                     price: 0,
                     tif: 1,
                 };
 
                 const _order = {
-                    chain_id: `eip155: ${chainId}`,
+                    chain_id: `eip155:${chainId}`,
                     order_side: "SELL",
                     order_tif: "DAY",
                     order_type: "MARKET",
                     stock_id: _stock.dinari_id,
                     payment_token: process.env.NEXT_PUBLIC_PAYMENTTOKEN,
-                    asset_token_quantity: orderAmount.toString(),
+                    asset_token_quantity: Number(actualAmount).toString(),
                 };
+                console.log(_order, "order");
 
                 const feeQuoteResponse = await dinariClient.v2.accounts.orders.stocks.eip155.getFeeQuote(accountId, _order);
                 const orderFee = BigInt(feeQuoteResponse.order_fee_contract_object.fee_quote.fee);
                 totalFees += orderFee;
 
-                console.log(totalFees, "totalFews");
+
 
                 // Permit signing
                 const nonce = await publicClient.readContract({
@@ -175,6 +182,8 @@ export function useSellOrderMutation() {
                     });
                 } catch { }
 
+                console.log(tokenName, deadline);
+
                 const permitDomain = {
                     name: tokenName,
                     version: tokenVersion,
@@ -185,7 +194,7 @@ export function useSellOrderMutation() {
                 const permitMessage = {
                     owner: address,
                     spender: orderProcessorAddress,
-                    value: orderAmount,
+                    value: actualAmount,
                     nonce,
                     deadline,
                 };
@@ -199,14 +208,15 @@ export function useSellOrderMutation() {
                 });
 
                 const v = parseInt(permitSig.slice(-2), 16);
-                const r = `0x${ permitSig.slice(2, 66) }` as `0x${ string }`;
-                const s = `0x${ permitSig.slice(66, 130) }` as `0x${ string }`;
+                const r = `0x${permitSig.slice(2, 66)}` as `0x${string}`;
+                const s = `0x${permitSig.slice(66, 130)}` as `0x${string}`;
 
                 const selfPermitData = encodeFunctionData({
                     abi: orderProcessorAbi,
                     functionName: "selfPermit",
-                    args: [assetTokenAddress, address, orderAmount, deadline, v, r, s],
+                    args: [assetTokenAddress, address, actualAmount, deadline, v, r, s],
                 });
+                console.log({ selfPermitData })
                 multiCallBytes.push(selfPermitData);
 
                 const requestOrderData = encodeFunctionData({
@@ -254,11 +264,31 @@ export function useSellOrderMutation() {
                 account: address,
             });
 
+            const receipt = await publicClient.waitForTransactionReceipt({
+                hash: txHash,
+            });
+            const orderEvents = receipt.logs
+                .filter(log => log.address.toLowerCase() === orderProcessorAddress.toLowerCase())
+                .flatMap(log => {
+                    try {
+                        return parseEventLogs({
+                            abi: orderProcessorAbi,
+                            logs: [log],
+                            eventName: "OrderCreated",
+                        });
+                    } catch (err) {
+                        return [];
+                    }
+                }); if (orderEvents.length === 0) throw new Error("No OrderCreated events found");
+
+            const orderIds = orderEvents.map(event => event?.args?.id?.toString());
+            console.log(orderIds, "orderIds");
             // Push transaction to backend
             await api.post("/transactions", {
                 wallet: address,
                 crateId,
                 type: "sell",
+                orderIds,
                 stockHoldings: executableOrders,
                 totalAmountInvested: totalUsdWithdrawn,
                 totalFeesDeducted: formatUnits(totalFees, 6),

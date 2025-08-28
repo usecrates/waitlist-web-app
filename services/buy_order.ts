@@ -4,7 +4,6 @@ import {
     encodeFunctionData,
     formatUnits,
     parseAbi,
-    parseAbiItem,
     parseEventLogs,
     parseUnits,
 } from "viem";
