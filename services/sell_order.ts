@@ -156,9 +156,6 @@ export function useSellOrderMutation() {
                 const feeQuoteResponse = await dinariClient.v2.accounts.orders.stocks.eip155.getFeeQuote(accountId, _order);
                 const orderFee = BigInt(feeQuoteResponse.order_fee_contract_object.fee_quote.fee);
                 totalFees += orderFee;
-
-
-
                 // Permit signing
                 const nonce = await publicClient.readContract({
                     address: assetTokenAddress,

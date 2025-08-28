@@ -54,7 +54,7 @@ export default function SingleCrate() {
     (crate: any) => crate.crateId === basket_id
   );
 
-  function getTokenAddress(chainId, tokens) {
+  function getTokenAddress(chainId:number, tokens:any) {
     const entry = tokens.find(token => token.split(":")[1] === String(chainId));
     return entry ? entry.split(":")[2] : null;
   }
