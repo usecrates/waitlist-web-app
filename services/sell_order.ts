@@ -65,7 +65,7 @@ export function useSellOrderMutation() {
 
             // ✅ loop over crateInvestmentData.stockHoldings instead of "assets"
 
-            console.log({ crateInvestmentData })
+            const orders = [];
             for (const stock of crateInvestmentData.stockHoldings) {
                 const _stock = stock.stockId;
 
@@ -98,7 +98,7 @@ export function useSellOrderMutation() {
                 const sellOrder = true;
                 const orderType = 0;
 
-                let actualAmount = orderAmount; // already bigint from parseUnits()
+                let actualAmount = orderAmount; 
 
                 if (sellOrder) {
                     const allowedDecimalReduction = await publicClient.readContract({
@@ -151,11 +151,12 @@ export function useSellOrderMutation() {
                     payment_token: process.env.NEXT_PUBLIC_PAYMENTTOKEN,
                     asset_token_quantity: Number(actualAmount).toString(),
                 };
-                console.log(_order, "order");
+        
 
                 const feeQuoteResponse = await dinariClient.v2.accounts.orders.stocks.eip155.getFeeQuote(accountId, _order);
                 const orderFee = BigInt(feeQuoteResponse.order_fee_contract_object.fee_quote.fee);
                 totalFees += orderFee;
+                orders.push({ orderParams, feeQuoteResponse });
                 // Permit signing
                 const nonce = await publicClient.readContract({
                     address: assetTokenAddress,
@@ -178,8 +179,6 @@ export function useSellOrderMutation() {
                         functionName: "version",
                     });
                 } catch { }
-
-                console.log(tokenName, deadline);
 
                 const permitDomain = {
                     name: tokenName,
@@ -213,37 +212,8 @@ export function useSellOrderMutation() {
                     functionName: "selfPermit",
                     args: [assetTokenAddress, address, actualAmount, deadline, v, r, s],
                 });
-                console.log({ selfPermitData })
+              
                 multiCallBytes.push(selfPermitData);
-
-                const requestOrderData = encodeFunctionData({
-                    abi: orderProcessorAbi,
-                    functionName: "createOrder",
-                    args: [
-                        [
-                            orderParams.requestTimestamp,
-                            orderParams.recipient,
-                            orderParams.assetToken,
-                            orderParams.paymentToken,
-                            orderParams.sell,
-                            orderParams.orderType,
-                            orderParams.assetTokenQuantity,
-                            orderParams.paymentTokenQuantity,
-                            orderParams.price,
-                            orderParams.tif,
-                        ],
-                        [
-                            feeQuoteResponse.order_fee_contract_object.fee_quote.orderId,
-                            feeQuoteResponse.order_fee_contract_object.fee_quote.requester,
-                            feeQuoteResponse.order_fee_contract_object.fee_quote.fee,
-                            feeQuoteResponse.order_fee_contract_object.fee_quote.timestamp,
-                            feeQuoteResponse.order_fee_contract_object.fee_quote.deadline,
-                        ],
-                        feeQuoteResponse.order_fee_contract_object.fee_quote_signature,
-                    ],
-                });
-                multiCallBytes.push(requestOrderData);
-
                 executableOrders.push({
                     stock: _stock._id,
                     sharesOwned: formatUnits(orderAmount, decimals),
@@ -251,13 +221,42 @@ export function useSellOrderMutation() {
                 totalUsdWithdrawn += Number(formatUnits(orderAmount, decimals)) * _stock.price;
             }
 
+            const orderCalls = orders.map((order)=>{
+                return encodeFunctionData({
+                    abi: orderProcessorAbi,
+                    functionName: "createOrder",
+                    args: [
+                        [
+                            order.orderParams.requestTimestamp,
+                            order.orderParams.recipient,
+                            order.orderParams.assetToken,
+                            order.orderParams.paymentToken,
+                            order.orderParams.sell,
+                            order.orderParams.orderType,
+                            order.orderParams.assetTokenQuantity,
+                            order.orderParams.paymentTokenQuantity,
+                            order.orderParams.price,
+                            order.orderParams.tif,
+                        ],
+                        [
+                            order.feeQuoteResponse.order_fee_contract_object.fee_quote.orderId,
+                            order.feeQuoteResponse.order_fee_contract_object.fee_quote.requester,
+                            order.feeQuoteResponse.order_fee_contract_object.fee_quote.fee,
+                            order.feeQuoteResponse.order_fee_contract_object.fee_quote.timestamp,
+                            order.feeQuoteResponse.order_fee_contract_object.fee_quote.deadline,
+                        ],
+                        order.feeQuoteResponse.order_fee_contract_object.fee_quote_signature,
+                    ],
+                });
+            });
+
             if (multiCallBytes.length === 0) throw new Error("No sell orders to process");
 
             const txHash = await walletClient.writeContract({
                 address: orderProcessorAddress,
                 abi: orderProcessorAbi,
                 functionName: "multicall",
-                args: [multiCallBytes],
+                args: [[...multiCallBytes, ...orderCalls]],
                 account: address,
             });
 

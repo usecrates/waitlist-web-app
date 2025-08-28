@@ -476,7 +476,7 @@ export default function SingleCrate() {
                   >
                     Exit
                   </button>
-                  {/* <Button
+                  <Button
                     onClick={handleInvest}
                     className="w-full !font-bold bg-white text-black"
                     style={{
@@ -487,7 +487,7 @@ export default function SingleCrate() {
                     disabled={createBuyOrderLoading}
                   >
                     {createBuyOrderLoading ? "Processing..." : "Button"}
-                  </Button> */}
+                  </Button>
                 </div>
               </div>
             </div>
