@@ -1,10 +1,18 @@
 import { useMutation } from "@tanstack/react-query";
 import Dinari from "@dinari/api-sdk";
-import { encodeFunctionData, formatUnits, parseAbi, parseAbiItem, parseEventLogs, parseUnits } from "viem";
+import {
+    encodeFunctionData,
+    formatUnits,
+    parseAbi,
+    parseAbiItem,
+    parseEventLogs,
+    parseUnits,
+} from "viem";
 import orderProcessorData from "@/lib/sbt-deployments/v0.4.0/order_processor.json";
-import { useAccount, useWalletClient, usePublicClient, useWatchContractEvent } from "wagmi";
-import { toast } from "react-hot-toast";
+import { useAccount, useWalletClient, usePublicClient } from "wagmi";
+import { toast } from "sonner";
 import { api } from "@/config";
+
 const tokenAbi = parseAbi([
     "function name() view returns (string)",
     "function decimals() view returns (uint8)",
@@ -25,14 +33,15 @@ const permitTypes = {
 interface BuyOrderInput {
     stockId: string;
     assetAddress: string;
+    stockObjectId: string;
     weightage: number;
 }
 
 interface CreateBuyOrderArgs {
     assets: BuyOrderInput[];
     accountId: string;
+    crateId: string;
     totalAmountToBeInvested: string;
-    crateId?: string; 
 }
 
 export function useBuyOrderMutation() {
@@ -41,47 +50,61 @@ export function useBuyOrderMutation() {
     const publicClient = usePublicClient();
 
     return useMutation({
-        mutationFn: async ({ assets, accountId, totalAmountToBeInvested,crateId }: CreateBuyOrderArgs) => {
-            console.log({assets});
+        mutationFn: async ({
+            assets,
+            accountId,
+            crateId,
+            totalAmountToBeInvested,
+        }: CreateBuyOrderArgs) => {
             if (!walletClient || !address || !publicClient)
                 throw new Error("Wallet not connected");
             if (!accountId || !assets || assets.length === 0) {
                 toast.error("Invalid account ID or orders");
                 throw new Error("Invalid account ID or orders");
             }
-            let id = toast.loading("Creating buy order...");
-            const paymentTokenAddress = process.env.NEXT_PUBLIC_PAYMENTTOKEN as `0x${string}`;
+
             const chainId = publicClient.chain.id;
+            const paymentTokenAddress =
+                process.env.NEXT_PUBLIC_PAYMENTTOKEN as `0x${string}`;
 
             const orderProcessorAbi = orderProcessorData.abi;
-            const orderProcessorAddress = (orderProcessorData.networkAddresses as Record<string, string>)[String(chainId)] as `0x${string}`;
-            if (!orderProcessorAddress) throw new Error("Missing order processor address");
+            const orderProcessorAddress = (orderProcessorData.networkAddresses as Record<
+                string,
+                string
+            >)[String(chainId)] as `0x${string}`;
+            if (!orderProcessorAddress)
+                throw new Error("Missing order processor address");
 
             const dinariClient = new Dinari({
                 apiKeyID: process.env.NEXT_PUBLIC_DINARI_API_KEY_ID,
                 apiSecretKey: process.env.NEXT_PUBLIC_DINARI_API_SECRET_KEY,
                 environment: "sandbox",
             });
-            const totalWeight = assets.reduce((sum, asset) => sum + parseFloat(asset?.weightage), 0);
-            console.log("Total Weight:", totalWeight);
 
+            totalAmountToBeInvested = parseUnits(
+                totalAmountToBeInvested,
+                6
+            ).toString();
+
+
+
+            const totalWeight = assets.reduce((sum, asset) => sum + asset.weightage, 0);
             const orders = [];
             let totalOrderAmount = BigInt(0);
             let totalFees = BigInt(0);
-            let orderType: number = 0;
-            let tif: number = 1;
-            const multiCallBytes: string[] = [];
-            const stockHoldings = [];
+
             for (const asset of assets) {
-                console.log(totalAmountToBeInvested);
-                const rawAmount = (asset.weightage / totalWeight) * Number(totalAmountToBeInvested);
-                const paymentTokenQuantity = parseUnits(Number(rawAmount).toFixed(2).toString(), 6);
-                const formattedQuantity = formatUnits(paymentTokenQuantity, 6);
+                const rawAmount =
+                    (asset.weightage / totalWeight) * Number(totalAmountToBeInvested);
+                const paymentTokenQuantity = rawAmount.toString();
+                const formattedQuantity = formatUnits(Number(paymentTokenQuantity), 6);
+
+                console.log(paymentTokenQuantity, formattedQuantity, "formattedQuantity");
                 const _order = {
                     chain_id: `eip155:${chainId}`,
-                    order_side: 'BUY',
-                    order_tif: 'DAY',
-                    order_type: 'MARKET',
+                    order_side: "BUY",
+                    order_tif: "DAY",
+                    order_type: "MARKET",
                     stock_id: asset.stockId,
                     payment_token: paymentTokenAddress,
                     payment_token_quantity: formattedQuantity,
@@ -93,66 +116,70 @@ export function useBuyOrderMutation() {
                     assetToken: asset.assetAddress,
                     paymentToken: paymentTokenAddress,
                     sell: false,
-                    orderType: orderType, 
+                    orderType: 0,
                     assetTokenQuantity: 0,
                     paymentTokenQuantity: paymentTokenQuantity,
                     price: 0,
-                    tif: tif, 
+                    tif: 1,
                 };
 
-
-                const quote = await dinariClient.v2.marketData.stocks.retrieveCurrentQuote(_order.stock_id);
+                const quote = await dinariClient.v2.marketData.stocks.retrieveCurrentQuote(
+                    asset.stockId
+                );
                 const askPrice = Number(quote.ask_price);
 
-                const feeQuoteResponse = await dinariClient.v2.accounts.orders.stocks.eip155.getFeeQuote(accountId, _order);
-                const orderFee = BigInt(feeQuoteResponse.order_fee_contract_object.fee_quote.fee);
+                const feeQuoteResponse =
+                    await dinariClient.v2.accounts.orders.stocks.eip155.getFeeQuote(
+                        accountId,
+                        _order
+                    );
+
+                const orderFee = BigInt(
+                    feeQuoteResponse.order_fee_contract_object.fee_quote.fee
+                );
                 const orderFeeReadable = Number(formatUnits(orderFee, 6));
                 const paymentReadable = Number(formatUnits(paymentTokenQuantity, 6));
-                console.log(orderFeeReadable,paymentReadable,"orderFeeReadable,paymentReadable")
+
                 let netSpend = paymentReadable - orderFeeReadable;
                 let minShares = netSpend / askPrice;
-            
-                // Ensure minShares does not go to Infinity or NaN
                 if (!isFinite(minShares) || isNaN(minShares)) {
-                  minShares = 0;
+                    minShares = 0;
                 }
-                console.log(netSpend,minShares,"netSpend,minShares");
+
                 totalOrderAmount += BigInt(paymentTokenQuantity);
                 totalFees += orderFee;
+
                 orders.push({
                     _order,
                     orderParams,
                     feeQuoteResponse,
                     orderFee,
-                    minShares: minShares,
+                    minShares,
                     priceUsed: askPrice,
                     stockId: asset.stockId,
-                  });
-
-                stockHoldings.push({
-                    stock: asset?._id,
-                    price: asset?.price,
-                    userHoldingUSD: formattedQuantity,
-                    sharesOwned: 2,
-                    netGain: 0.15
+                    stockObjectId: asset.stockObjectId,
                 });
             }
+
             const totalSpendAmount = totalOrderAmount + totalFees;
+            console.log({ totalSpendAmount })
+            console.log({ orders });
+
+            // ----- Permit -----
             const nonce = await publicClient.readContract({
                 address: paymentTokenAddress,
                 abi: tokenAbi,
                 functionName: "nonces",
                 args: [address],
             });
-
             const block = await publicClient.getBlock();
             const deadline = Number(block.timestamp) + 60 * 5;
+
             const tokenName = await publicClient.readContract({
                 address: paymentTokenAddress,
                 abi: tokenAbi,
                 functionName: "name",
             });
-
             let tokenVersion = "1";
             try {
                 tokenVersion = await publicClient.readContract({
@@ -194,13 +221,13 @@ export function useBuyOrderMutation() {
                 functionName: "selfPermit",
                 args: [paymentTokenAddress, address, totalSpendAmount, deadline, v, r, s],
             });
-            multiCallBytes.push(selfPermitData);
+            console.log({ selfPermitData })
 
-            if (orders.length === 0) {
-                throw new Error("No valid orders to process");
-            }
-            const orderCalls = orders.map((order, i) => {
-                return encodeFunctionData({
+            // ----- Build multicall -----
+
+
+            const orderCalls = orders.map((order) =>
+                encodeFunctionData({
                     abi: orderProcessorAbi,
                     functionName: "createOrder",
                     args: [[
@@ -220,9 +247,13 @@ export function useBuyOrderMutation() {
                         order?.feeQuoteResponse.order_fee_contract_object.fee_quote.fee,
                         order?.feeQuoteResponse.order_fee_contract_object.fee_quote.timestamp,
                         order?.feeQuoteResponse.order_fee_contract_object.fee_quote.deadline,
-                    ], order?.feeQuoteResponse.order_fee_contract_object.fee_quote_signature],
-                });
-            });
+                    ],
+                    order?.feeQuoteResponse.order_fee_contract_object.fee_quote_signature,
+                    ],
+                })
+            );
+            console.log({ orderCalls })
+
 
             const txHash = await walletClient.writeContract({
                 address: orderProcessorAddress,
@@ -232,8 +263,12 @@ export function useBuyOrderMutation() {
                 account: address,
             });
 
-            const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
-            console.log({ receipt });
+            const receipt = await publicClient.waitForTransactionReceipt({
+                hash: txHash,
+            });
+
+            console.log({ txHash })
+
 
             const orderEvents = receipt.logs
                 .filter(log => log.address.toLowerCase() === orderProcessorAddress.toLowerCase())
@@ -247,37 +282,27 @@ export function useBuyOrderMutation() {
                     } catch (err) {
                         return [];
                     }
-                });
+                }); if (orderEvents.length === 0) throw new Error("No OrderCreated events found");
 
-            if (orderEvents.length === 0) throw new Error("No OrderCreated events found");
-            const orderIds = orderEvents.map(event => event.args.id?.toString());
-            console.log("Order IDs:", orderIds);
-            console.log({
+            const orderIds = orderEvents.map(event => event?.args?.id?.toString());
+            console.log(orderIds,"orderIds");
+            const bodyObject = {
+                totalAmountInvested: formatUnits(totalAmountToBeInvested, 6),
+                type: "buy",
                 wallet: address,
                 crateId,
-                type: "buy",
-                totalAmountInvested: formatUnits(totalOrderAmount, 6),
+                chainId,
                 totalFeesDeducted: formatUnits(totalFees, 6),
                 transactionHash: txHash,
+                stockHoldings: orders.map((o) => ({
+                    sharesOwned: o.minShares,
+                    stock: o.stockObjectId,
+                })),
                 orderIds,
-                chainId,
-            });
-
-            await api.post("/transactions", {
-                wallet: address,
-                crateId,
-                type: "buy",
-                totalAmountInvested: formatUnits(totalOrderAmount, 6),
-                totalFeesDeducted: formatUnits(totalFees, 6),
-                transactionHash: txHash,
-                orderIds,
-                chainId,
-                stockHoldings,
-            });
-
-            toast.success("Buy order completed successfully", { id });
-
-            return txHash;
+            };
+              const res = await api.post(`/transactions`, bodyObject);
+              console.log({ res });
+              return { txHash, backendResponse: res.data };
         },
     });
 }

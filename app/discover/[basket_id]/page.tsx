@@ -22,6 +22,7 @@ import { useBuyOrderMutation } from "@/services/buy_order";
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
 
 import toast from "react-hot-toast";
+import { useSellOrderMutation } from "@/services/sell_order";
 export default function SingleCrate() {
   const { basket_id } = useParams();
   const { data: crate, isLoading } = useGetCrateById(basket_id as string);
@@ -37,6 +38,7 @@ export default function SingleCrate() {
     isSuccess,
     error,
   } = useBuyOrderMutation();
+  const {mutate : createSellOrder,isPending:createSellOrderLoading,isSuccess:isSellOrderSuccess} = useSellOrderMutation();
   const {
     mutate: subscribeCrate,
     isPending,
@@ -52,7 +54,12 @@ export default function SingleCrate() {
     (crate: any) => crate.crateId === basket_id
   );
 
- 
+  function getTokenAddress(chainId, tokens) {
+    const entry = tokens.find(token => token.split(":")[1] === String(chainId));
+    return entry ? entry.split(":")[2] : null;
+}
+
+
   const handleSubscribe = () => {
     if (!address) {
       toast.error("Please connect your wallet to subscribe.");
@@ -80,19 +87,17 @@ export default function SingleCrate() {
       toast.error("Please complete KYC to invest in crates.");
       return;
     }
+  
     createBuyOrder(
       {
         crateId: crate?._id,
         accountId: userData?.dinari_account_id,
         totalAmountToBeInvested: "5",
         assets: crate?.stocks.map((stockItem) => ({
-          _id:stockItem.stock._id,
+          stockObjectId:stockItem.stock._id,
           stockId: stockItem.stock.dinari_id,
-          assetAddress: stockItem.stock.tokens.find(token =>
-            token.startsWith(`eip155:${chainId}:`)
-          ),
-          weightage: stockItem.weight,
-          price : stockItem.stock.price.toString(),
+          assetAddress: getTokenAddress(chainId,stockItem.stock.tokens),
+          weightage: stockItem.weight
         })),
       },
       {
@@ -103,6 +108,50 @@ export default function SingleCrate() {
       }
     );
   };
+
+  const handleExitCrate = () =>{
+    if(!address){
+      toast.error("Please Connect Your Wallet First");
+      return;
+    }
+    if (!userData?.dinari_account_id) {
+      toast.error("Please complete KYC to invest in crates.");
+      return;
+    };
+
+    let crateInvestmentData;
+    if (userData?.subscribedCrates && userData?.subscribedCrates.length > 0) {
+        for (const _crate of userData?.subscribedCrates) {
+            if (crate?._id === _crate.crateId) {
+                console.log("Subscribed crate found:", _crate);
+                crateInvestmentData = _crate.userInvestment;
+            }
+        }
+    } else {
+        console.log("No subscribed crates found for this user.");
+        return;
+    }
+
+  if (!crateInvestmentData) {
+      console.log("No investment data found for the specified crate.");
+      return;
+  }
+
+    createSellOrder(
+      {
+        crateId: crate?._id,
+        accountId: userData?.dinari_account_id,
+        crateInvestmentData:crateInvestmentData
+      },
+      {
+        onSuccess: () => {
+          toast.success("Invested in crate successfully.");
+          refetchUser();
+        },
+      }
+    );
+
+  }
 
   if (isLoading) {
     return (
@@ -423,10 +472,22 @@ export default function SingleCrate() {
                         "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
                       backgroundBlendMode: "normal, normal",
                     }}
-                    onClick={() => setExitModalOpen(true)}
+                    onClick={handleExitCrate}
                   >
                     Exit
                   </button>
+                  {/* <Button
+                    onClick={handleInvest}
+                    className="w-full !font-bold bg-white text-black"
+                    style={{
+                      background:
+                        "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                      backgroundBlendMode: "normal, normal",
+                    }}
+                    disabled={createBuyOrderLoading}
+                  >
+                    {createBuyOrderLoading ? "Processing..." : "Button"}
+                  </Button> */}
                 </div>
               </div>
             </div>
@@ -475,7 +536,7 @@ export default function SingleCrate() {
                     Subscribe
                   </Button>
                 ) : (
-                  // Show Invest button if KYC'd and subscribed
+         
                   <Button
                     onClick={handleInvest}
                     className="w-full !font-bold bg-white text-black"
