@@ -143,9 +143,10 @@ const fetchUserPortfolio = async (wallet: string) => {
     }
 };
 
-const fetchUserOrders = async (wallet: string) => {
+const fetchUserTransactions = async (userId: string) => {
     try {
-        const res = await api.get(`/user/${wallet}/dinari-orders`);
+        const res = await api.get(`/transactions/user/${userId}`);
+        console.log(res)
         if (!res.data.success) {
             throw new Error(res.data.message || "Failed to fetch user orders");
         }
@@ -165,11 +166,11 @@ export const useUserPortfolio = (wallet: string, enabled: boolean = true) => {
     });
 };
 
-export const useUserOrders = (wallet: string, enabled: boolean = true) => {
+export const useUserOrders = (userId: string, enabled: boolean = true) => {
     return useQuery({
-        queryKey: ["user-orders", wallet],
-        queryFn: () => fetchUserOrders(wallet),
-        enabled: enabled && !!wallet,
+        queryKey: ["user-orders", userId],
+        queryFn: () => fetchUserTransactions(userId),
+        enabled: enabled && !!userId,
         retry: false,
         staleTime: 1000 * 60 * 5, // 5 minutes
     });

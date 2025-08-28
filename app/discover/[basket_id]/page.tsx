@@ -32,6 +32,7 @@ export default function SingleCrate() {
     address,
     authenticated
   );
+  console.log({userData})
   const {
     mutate: createBuyOrder,
     isPending: createBuyOrderLoading,
@@ -79,7 +80,7 @@ export default function SingleCrate() {
         },
       }
     );
-    //todo refresh the page after subcribing
+    
   };
 
   const handleInvest = () => {

@@ -5,7 +5,7 @@ import orderProcessorData from "@/lib/sbt-deployments/v0.4.0/order_processor.jso
 import { useAccount, useWalletClient, usePublicClient } from "wagmi";
 import { toast } from "react-hot-toast";
 import { api } from "@/config";
-import { BigNumber, constants } from "ethers";
+import { BigNumber, } from "ethers";
 
 const tokenAbi = parseAbi([
     "function name() view returns (string)",
@@ -13,9 +13,7 @@ const tokenAbi = parseAbi([
     "function version() view returns (string)",
     "function nonces(address owner) view returns (uint256)",
     "function balanceOf(address account) view returns (uint256)",
-    "function allowance(address owner, address spender) view returns (uint256)",
-    "function approve(address spender, uint256 amount) returns (bool)",
-  ]);
+]);
 
 const permitTypes = {
     Permit: [
@@ -100,7 +98,7 @@ export function useSellOrderMutation() {
                 const sellOrder = true;
                 const orderType = 0;
 
-                let actualAmount = orderAmount;
+                let actualAmount = orderAmount; 
 
                 if (sellOrder) {
                     const allowedDecimalReduction = await publicClient.readContract({
@@ -114,7 +112,7 @@ export function useSellOrderMutation() {
                     const assetTokenDecimals = Number(decimals); // decimals is bigint from contract
                     const maxDecimals = assetTokenDecimals - allowedDecimalReductionNum;
 
-                    console.log(`Max Decimals Allowed for Order Amount: ${maxDecimals}`);
+              
 
                     // scale = 10 ^ (assetTokenDecimals - allowedDecimalReduction)
                     const scale = 10n ** BigInt(assetTokenDecimals - allowedDecimalReductionNum);
@@ -122,7 +120,7 @@ export function useSellOrderMutation() {
                     // Adjust the amount
                     actualAmount = (actualAmount / scale) * scale;
 
-                    console.log(`Adjusted Order Amount: ${actualAmount.toString()} tokens`);
+                
 
                     // allowablePrecisionReduction = 10 ^ allowedDecimalReduction
                     const allowablePrecisionReduction = 10n ** BigInt(allowedDecimalReductionNum);
@@ -153,80 +151,71 @@ export function useSellOrderMutation() {
                     payment_token: process.env.NEXT_PUBLIC_PAYMENTTOKEN,
                     asset_token_quantity: Number(actualAmount).toString(),
                 };
-
+        
 
                 const feeQuoteResponse = await dinariClient.v2.accounts.orders.stocks.eip155.getFeeQuote(accountId, _order);
                 const orderFee = BigInt(feeQuoteResponse.order_fee_contract_object.fee_quote.fee);
                 totalFees += orderFee;
                 orders.push({ orderParams, feeQuoteResponse });
                 // Permit signing
-
-
-                const allowance = await publicClient.readContract({
+                const nonce = await publicClient.readContract({
                     address: assetTokenAddress,
                     abi: tokenAbi,
-                    functionName: "allowance",
-                    args: [address, orderProcessorAddress],
+                    functionName: "nonces",
+                    args: [address],
                 });
-                if (Number(allowance) < Number(orderAmount)) {
-
-                    const nonce = await publicClient.readContract({
+                const block = await publicClient.getBlock();
+                const deadline = Number(block.timestamp) + 60 * 5;
+                const tokenName = await publicClient.readContract({
+                    address: assetTokenAddress,
+                    abi: tokenAbi,
+                    functionName: "name",
+                });
+                let tokenVersion = "1";
+                try {
+                    tokenVersion = await publicClient.readContract({
                         address: assetTokenAddress,
                         abi: tokenAbi,
-                        functionName: "nonces",
-                        args: [address],
+                        functionName: "version",
                     });
-                    const block = await publicClient.getBlock();
-                    const deadline = Number(block.timestamp) + 60 * 5;
-                    const tokenName = await publicClient.readContract({
-                        address: assetTokenAddress,
-                        abi: tokenAbi,
-                        functionName: "name",
-                    });
-                    let tokenVersion = "1";
-                    try {
-                        tokenVersion = await publicClient.readContract({
-                            address: assetTokenAddress,
-                            abi: tokenAbi,
-                            functionName: "version",
-                        });
-                    } catch { }
+                } catch { }
 
-                    const permitDomain = {
-                        name: tokenName,
-                        version: tokenVersion,
-                        chainId,
-                        verifyingContract: assetTokenAddress,
-                    } as const;
+                const permitDomain = {
+                    name: tokenName,
+                    version: tokenVersion,
+                    chainId,
+                    verifyingContract: assetTokenAddress,
+                } as const;
 
-                    const permitMessage = {
-                        owner: address,
-                        spender: orderProcessorAddress,
-                        value: constants.MaxUint256,
-                        nonce,
-                        deadline,
-                    };
+                const permitMessage = {
+                    owner: address,
+                    spender: orderProcessorAddress,
+                    value: actualAmount,
+                    nonce,
+                    deadline,
+                };
 
-                    const permitSig = await walletClient.signTypedData({
-                        domain: permitDomain,
-                        types: permitTypes,
-                        primaryType: "Permit",
-                        message: permitMessage,
-                        account: address,
-                    });
+                const permitSig = await walletClient.signTypedData({
+                    domain: permitDomain,
+                    types: permitTypes,
+                    primaryType: "Permit",
+                    message: permitMessage,
+                    account: address,
+                });
 
-                    const v = parseInt(permitSig.slice(-2), 16);
-                    const r = `0x${permitSig.slice(2, 66)}` as `0x${string}`;
-                    const s = `0x${permitSig.slice(66, 130)}` as `0x${string}`;
+                const v = parseInt(permitSig.slice(-2), 16);
+                const r = `0x${permitSig.slice(2, 66)}` as `0x${string}`;
+                const s = `0x${permitSig.slice(66, 130)}` as `0x${string}`;
 
-                    const selfPermitData = encodeFunctionData({
-                        abi: orderProcessorAbi,
-                        functionName: "selfPermit",
-                        args: [assetTokenAddress, address, constants.MaxUint256, deadline, v, r, s],
-                    });
+                const selfPermitData = encodeFunctionData({
+                    abi: orderProcessorAbi,
+                    functionName: "selfPermit",
+                    args: [assetTokenAddress, address, actualAmount, deadline, v, r, s],
+                });
 
-                    multiCallBytes.push(selfPermitData);
-                }
+                console.log(`Order Number Approval : ${stock.stockId}`);
+              
+                multiCallBytes.push(selfPermitData);
                 executableOrders.push({
                     stock: _stock._id,
                     sharesOwned: formatUnits(orderAmount, decimals),
@@ -234,7 +223,9 @@ export function useSellOrderMutation() {
                 totalUsdWithdrawn += Number(formatUnits(orderAmount, decimals)) * _stock.price;
             }
 
-            const orderCalls = orders.map((order) => {
+            console.log("Number of orders !!!",orders.length);
+
+            const orderCalls = orders.map((order)=>{
                 return encodeFunctionData({
                     abi: orderProcessorAbi,
                     functionName: "createOrder",

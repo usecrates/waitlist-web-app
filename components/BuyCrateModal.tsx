@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
 import { useEnrichedUser } from "@/hooks/user-hooks";
 import { useBuyOrderMutation } from "@/services/buy_order";
-import { useAccount, useBalance,useChainId } from "wagmi";
+import {useBalance,useChainId } from "wagmi";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
@@ -133,7 +133,7 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [], basket_i
   }, [open]);
 
   const disabled = !amount || parseFloat(amount) <= 0;
-  console.log(crate,"crate");
+  
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

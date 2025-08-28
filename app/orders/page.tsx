@@ -9,133 +9,23 @@ import { Popover, PopoverTrigger, PopoverContent } from '../../components/ui/pop
 import { ChevronDown } from 'lucide-react';
 import { Search, Bug } from 'lucide-react';
 import Image from 'next/image';
-import { useUserOrders } from '../../hooks/user-hooks';
+import { useEnrichedUser, useUserOrders } from '../../hooks/user-hooks';
 import { usePrivyAuth } from '../../context/PrivyAuthContext';
 import toast from 'react-hot-toast';
 
 
-const mockData = [
-  {
-    date: '12 Dec 2024 14:01',
-    type: 'Buy',
-    crate: 'Nancy Policy',
-    crateLink: '#',
-    txId: 'XsHt...vULr7',
-    amount: 549,
-    status: 'In Progress',
-  },
-  {
-    date: '12 Dec 2024 14:01',
-    type: 'Exit',
-    crate: 'John Hicken looper',
-    crateLink: '#',
-    txId: 'XsHt...vULr7',
-    amount: 80,
-    status: 'In Progress',
-  },
-  {
-    date: '12 Dec 2024 14:01',
-    type: 'Exit',
-    crate: 'Nancy Policy',
-    crateLink: '#',
-    txId: 'XsHt...vULr7',
-    amount: 139,
-    status: 'In Progress',
-  },
-  {
-    date: '12 Dec 2024 14:01',
-    type: 'Exit',
-    crate: 'Nancy Policy',
-    crateLink: '#',
-    txId: 'XsHt...vULr7',
-    amount: 922,
-    status: 'Completed',
-  },
-  {
-    date: '12 Dec 2024 14:01',
-    type: 'Rebalance',
-    crate: 'Nancy Policy',
-    crateLink: '#',
-    txId: 'XsHt...vULr7',
-    amount: 609,
-    status: 'Completed',
-  },
-  {
-    date: '12 Dec 2024 14:01',
-    type: 'Buy',
-    crate: 'Nancy Policy',
-    crateLink: '#',
-    txId: 'XsHt...vULr7',
-    amount: 702,
-    status: 'Failed',
-  },
-  {
-    date: '12 Dec 2024 14:01',
-    type: 'Buy',
-    crate: 'Nancy Policy',
-    crateLink: '#',
-    txId: 'XsHt...vULr7',
-    amount: 153,
-    status: 'Completed',
-  },
-  {
-    date: '12 Dec 2024 14:01',
-    type: 'Rebalance',
-    crate: 'Nancy Policy',
-    crateLink: '#',
-    txId: 'XsHt...vULr7',
-    amount: 319,
-    status: 'Completed',
-  },
-  {
-    date: '12 Dec 2024 14:01',
-    type: 'Rebalance',
-    crate: 'Nancy Policy',
-    crateLink: '#',
-    txId: 'XsHt...vULr7',
-    amount: 599,
-    status: 'Failed',
-  },
-  {
-    date: '12 Dec 2024 14:01',
-    type: 'Buy',
-    crate: 'Nancy Policy',
-    crateLink: '#',
-    txId: 'XsHt...vULr7',
-    amount: 697,
-    status: 'Completed',
-  },
-  {
-    date: '12 Dec 2024 14:01',
-    type: 'Buy',
-    crate: 'Nancy Policy',
-    crateLink: '#',
-    txId: 'XsHt...vULr7',
-    amount: 757,
-    status: 'In Progress',
-  },
-  {
-    date: '12 Dec 2024 14:01',
-    type: 'Buy',
-    crate: 'Nancy Policy',
-    crateLink: '#',
-    txId: 'XsHt...vULr7',
-    amount: 242,
-    status: 'In Progress',
-  },
-];
 
 const statusBadge = (status: string) => {
   if (status === 'FILLED')
-    return  <div className="bg-green-900/60 text-green-400 px-2 py-1 w-fit rounded text-xs font-medium flex items-center gap-2">
+    return <div className="bg-green-900/60 text-green-400 px-2 py-1 w-fit rounded text-xs font-medium flex items-center gap-2">
       <Image src="/assets/crate_filled.svg" alt="Completed" width={16} height={16} />
       Completed</div>;
   if (status === 'REJECTED' || status === 'ERROR')
-    return  <div className="bg-red-900/60 text-red-400 px-2 py-1 rounded text-xs font-medium w-fit flex items-center gap-2">
+    return <div className="bg-red-900/60 text-red-400 px-2 py-1 rounded text-xs font-medium w-fit flex items-center gap-2">
       <Image src="/assets/crate_failed.svg" alt="Failed" width={16} height={16} />
       Failed</div>;
   if (status === 'CANCELLED')
-    return  <div className="bg-orange-900/60 text-orange-400 px-2 py-1 rounded text-xs font-medium w-fit flex items-center gap-2">
+    return <div className="bg-orange-900/60 text-orange-400 px-2 py-1 rounded text-xs font-medium w-fit flex items-center gap-2">
       <Image src="/assets/crate_failed.svg" alt="Cancelled" width={16} height={16} />
       Cancelled</div>;
   return <div className="bg-gray-800/60 text-gray-300 px-2 py-1 rounded text-xs font-medium w-fit flex items-center gap-2">
@@ -144,9 +34,9 @@ const statusBadge = (status: string) => {
 };
 
 const typeBadge = (type: string) => {
-  if (type === 'BUY')
+  if (type === 'buy')
     return <span className="bg-[#2D2D2D] text-green-400 px-2 py-1 rounded text-xs font-medium">Buy</span>;
-  if (type === 'SELL')
+  if (type === 'sell')
     return <span className="bg-[#2D2D2D] text-orange-400 px-2 py-1 rounded text-xs font-medium">Sell</span>;
   return <span className="bg-[#2D2D2D] text-blue-300 px-2 py-1 rounded text-xs font-medium">{type}</span>;
 };
@@ -170,22 +60,22 @@ const page = () => {
   const [transactionType, setTransactionType] = useState<string>('');
   const [crateType, setCrateType] = useState<string>('');
   const { address, authenticated } = usePrivyAuth();
-  const { data: userOrders, isLoading, error } = useUserOrders(address, authenticated);
-  
-  // Use real data if available, otherwise fall back to mock data
-  const ordersData = userOrders?.orders || mockData;
-  
+  const { data: userData,isLoading } = useEnrichedUser(address, authenticated);
+  console.log(userData)
+  const ordersData = userData?.transactions;
+  console.log(userData?.transactions);
+
   // Filter orders based on transaction type
-  const filteredOrders = ordersData.filter((order: any) => {
-    if (transactionType && order.order_side) {
-      return order.order_side.toLowerCase() === transactionType.toLowerCase();
+  const filteredOrders = ordersData?.length && ordersData?.filter((order: any) => {
+    if (transactionType && order.type) {
+      return order.type.toLowerCase() === transactionType.toLowerCase();
     }
     return true;
   });
-  
-  const hasTransactions = filteredOrders.length > 0;
 
-  console.log({userOrders});
+  const hasTransactions = filteredOrders?.length > 0;
+
+
 
   return (
     <div className=" min-h-screen pt-24 max-w-6xl w-full mx-auto  text-white">
@@ -268,66 +158,101 @@ const page = () => {
             </div>
           </div>
           {hasTransactions ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead className="bg-[#171717]">
+            <div className="overflow-x-auto rounded-xl border border-[#2A2A2A] shadow-lg">
+              <table className="min-w-full text-sm font-chakra">
+                <thead className="bg-[#1E1E1E] text-[#A1A1A1] uppercase text-xs">
                   <tr>
-                    <th className="px-4 py-3 text-left font-medium">Date</th>
-                    <th className="px-4 py-3 text-left font-medium">Transaction type</th>
-                    <th className="px-4 py-3 text-left font-medium">Stock Name</th>
-                    <th className="px-4 py-3 text-left font-medium">Transaction ID</th>
-                    <th className="px-4 py-3 text-left font-medium">Amount</th>
-                    <th className="px-4 py-3 text-left font-medium">Status</th>
+                    <th className="px-4 py-3 text-left">Date</th>
+                    <th className="px-4 py-3 text-left">Type</th>
+                    {/* <th className="px-4 py-3 text-left">Crate / Stock</th> */}
+                    <th className="px-4 py-3 text-left">Tx Hash</th>
+                    <th className="px-4 py-3 text-left">Amount</th>
+                    <th className="px-4 py-3 text-left">Status</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {filteredOrders.map((order: any, i: number) => {
-                    // Format the date
-                    const orderDate = new Date(order.created_dt).toLocaleDateString('en-US', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: false
+                <tbody className="divide-y divide-[#2A2A2A]">
+                  {filteredOrders?.map((order: any, i: number) => {
+                    // Date formatting
+                    const orderDate = new Date(order.createdAt).toLocaleString("en-US", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
                     });
-                    
-                    // Format transaction hash
-                    const txHash = order.order_transaction_hash || order.cancel_transaction_hash || '';
-                    const shortTxHash = txHash ? `${txHash.slice(0, 6)}...${txHash.slice(-4)}` : '';
-                    
-                    // Format amount
-                    const amount = parseFloat(order.payment_token_quantity || '0');
-                    
+
+                    // Tx hash formatting
+                    const txHash = order.txHash || "";
+                    const shortTxHash = txHash ? `${txHash.slice(0, 6)}...${txHash.slice(-4)}` : "";
+
+                    // Amount formatting
+                    const amount = order.totalAmountInvested || 0;
+                    const formattedAmount = `$${amount.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}`;
+
                     return (
-                      <tr key={order.id || i} className="transition">
-                        <td className="px-4 py-3 whitespace-nowrap text-[#A1A1A1]">{orderDate}</td>
-                        <td className="px-4 py-3">{typeBadge(order.order_side)}</td>
+                      <tr
+                        key={order._id || i}
+                        className="hover:bg-[#121212] transition-colors"
+                      >
+                        <td className="px-4 py-3 text-[#A1A1A1]">{orderDate}</td>
                         <td className="px-4 py-3">
-                          <span className="text-white">{order.stockDetails?.name}</span>
+                          <span
+                            className={`px-2 py-1 rounded-md text-xs font-medium ${order.type === "buy"
+                                ? "bg-green-900/40 text-green-400"
+                                : "bg-red-900/40 text-red-400"
+                              }`}
+                          >
+                            {order.type.toUpperCase()}
+                          </span>
                         </td>
+                        {/* <td className="px-4 py-3 text-white">
+                          {order.crateId?.name || order.stockDetails?.name || "—"}
+                        </td> */}
                         <td className="px-4 py-3 flex items-center gap-2">
-                          <span>{shortTxHash}</span>
+                          <span className="text-blue-400">{shortTxHash}</span>
                           {txHash && (
-                            <button 
-                              className="hover:text-blue-400 transition-colors" 
+                            <button
+                              className="hover:text-blue-500 transition-colors"
                               onClick={async () => {
                                 try {
                                   await navigator.clipboard.writeText(txHash);
-                                  toast.success("Transaction hash copied!");
+                                  toast.success("Tx hash copied!");
                                 } catch (err) {
-                                  console.error('Failed to copy transaction hash:', err);
-                                  toast.error("Failed to copy transaction hash to clipboard.");
+                                  toast.error("Failed to copy tx hash.");
                                 }
                               }}
-                              title="Copy transaction hash"
+                              title="Copy full hash"
                             >
-                              <Image src="/assets/copy.svg" alt="Copy" width={16} height={16} />
+                              <Image
+                                src="/assets/copy.svg"
+                                alt="Copy"
+                                width={16}
+                                height={16}
+                              />
                             </button>
                           )}
                         </td>
-                        <td className={`px-4 py-3 font-medium ${amount > 0 ? 'text-green-400' : 'text-red-400'}`}>${amount.toFixed(2)}</td>
-                        <td className="px-4 py-3">{statusBadge(order.status)}</td>
+                        <td
+                          className={`px-4 py-3 font-medium ${order.type === "buy" ? "text-green-400" : "text-red-400"
+                            }`}
+                        >
+                          {formattedAmount}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`px-2 py-1 rounded-md text-xs ${order.status === "success"
+                                ? "bg-green-900/40 text-green-400"
+                                : order.status === "pending"
+                                  ? "bg-yellow-900/40 text-yellow-400"
+                                  : "bg-red-900/40 text-red-400"
+                              }`}
+                          >
+                            {order.status ? order.status.toUpperCase() : "PENDING"}
+                          </span>
+                        </td>
                       </tr>
                     );
                   })}
@@ -335,14 +260,26 @@ const page = () => {
               </table>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center min-h-[60vh]">
-              <Image src="/assets/txn.svg" alt="No transactions" width={220} height={120} />
-              <div className="mt-10 text-2xl font-chakra text-center">Hey, go buy crates to see<br/>your transactions here!</div>
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+              <Image
+                src="/assets/txn.svg"
+                alt="No transactions"
+                width={220}
+                height={120}
+              />
+              <div className="mt-8 text-xl font-chakra text-gray-300">
+                No transactions yet.
+                <br />
+                Start by buying your first crate!
+              </div>
               <a href="/discover" className="mt-8">
-                <button className="border border-[#444] rounded px-6 py-3 text-white font-chakra text-lg hover:bg-[#181818] transition">Discover more crates</button>
+                <button className="border border-[#444] rounded-lg px-6 py-3 text-white font-chakra text-lg hover:bg-[#181818] transition">
+                  Discover More Crates
+                </button>
               </a>
             </div>
           )}
+
         </>
       )}
     </div>
