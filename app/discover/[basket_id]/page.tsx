@@ -49,7 +49,7 @@ export default function SingleCrate() {
   const [exitModalOpen, setExitModalOpen] = useState(false);
   const [kycModalOpen, setKycModalOpen] = useState(false);
   const isKyced = userData?.is_kyc_complete;
-
+  console.log({userData})
   const isSubscribed = userData?.subscribedCrates?.some(
     (crate: any) => crate.crateId === basket_id
   );
@@ -58,7 +58,7 @@ export default function SingleCrate() {
     const entry = tokens.find(token => token.split(":")[1] === String(chainId));
     return entry ? entry.split(":")[2] : null;
   }
-  
+
   const handleSubscribe = () => {
     if (!address) {
       toast.error("Please connect your wallet to subscribe.");

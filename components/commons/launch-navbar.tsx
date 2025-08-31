@@ -25,9 +25,9 @@ export default function Navbar() {
             <Link href="/orders" className={pathname === "/orders" ? "text-white" : "text-gray-400 hover:text-white transition-colors"}>
               Orders
             </Link>
-            <Link href="/create" className={pathname === "/create" ? "text-white" : "text-gray-400 hover:text-white transition-colors"}>
+            {/* <Link href="/create" className={pathname === "/create" ? "text-white" : "text-gray-400 hover:text-white transition-colors"}>
               Create
-            </Link>
+            </Link> */}
           </nav>
         </div>
         {/* Right: Wallet/Account Button */}

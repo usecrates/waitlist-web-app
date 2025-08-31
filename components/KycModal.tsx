@@ -96,7 +96,7 @@ export function KycModal({ open, onOpenChange, crate }: KycModalProps) {
         environment: "sandbox",
       });
       const enriched = userData as import("@/lib/interfaces").EnrichedUser;
-      if (!enriched?.dinari_account_id) return toast.error("Please create an Entity ID first.");
+      // if (!enriched?.dinari_account_id) return toast.error("Please create an Entity ID first.");
       const nonceResp = await client.v2.accounts.wallet.external.getNonce(enriched.dinari_account_id, {
         wallet_address: address,
         chain_id: "eip155:0",
