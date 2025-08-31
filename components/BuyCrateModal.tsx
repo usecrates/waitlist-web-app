@@ -20,8 +20,12 @@ interface BuyCrateModalProps {
   stocks?: any[];
   basket_id?: string;
 }
+function getTokenAddress(chainId:number, tokens:any) {
+  const entry = tokens.find(token => token.split(":")[1] === String(chainId));
+  return entry ? entry.split(":")[2] : null;
+}
 
-export function BuyCrateModal({ open, onOpenChange, crate, stocks = [], basket_id }: BuyCrateModalProps) {
+export function BuyCrateModal({ open, onOpenChange, crate, stocks = [] }: BuyCrateModalProps) {
   const router = useRouter();
   // crate: { name, meta, image }
   const [step, setStep] = useState<'input' | 'review' | 'status' | 'success'>('input');
@@ -36,9 +40,8 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [], basket_i
   const chainId = useChainId()
   // Auth and user data
   const { address, authenticated } = usePrivyAuth();
-  const { data: userData } = useEnrichedUser(address, authenticated);
+  const { data: userData,refetch: refetchUser } = useEnrichedUser(address, authenticated);
   const { mutate: createBuyOrder, isPending: createBuyOrderLoading } = useBuyOrderMutation();
-  
   // ERC20 balance for mock USDC token
   const { data: usdcBalance } = useBalance({
     address: address as `0x${string}`,
@@ -51,58 +54,84 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [], basket_i
       setBalance(Number(usdcBalance.formatted));
     }
   }, [usdcBalance]);
-  
-  // Invest function
+
+
   const handleInvest = () => {
-    const enriched = userData as import("@/lib/interfaces").EnrichedUser;
-    if (!enriched?.dinari_account_id) {
+    if (!userData?.dinari_account_id) {
       toast.error("Please complete KYC to invest in crates.");
       return;
     }
-    if (!basket_id) {
-      toast.error("Basket ID is missing.");
-      return;
-    }
-
-    const filteredAssets = stocks.filter(stock =>
-      stock?.stock?.tokens?.some(token =>
-        token.startsWith(`eip155:${chainId}:`)
-      )
-    );
-  
-    if (filteredAssets.length === 0) {
-      toast.error("No supported assets found on this chain.");
-      return;
-    }
-  
-    setStep('status');
-    setOrderStatus('waiting');
-  
-    createBuyOrder({
-      crateId: basket_id,
-      accountId: enriched.dinari_account_id,
-      totalAmountToBeInvested: amount,
-      assets: filteredAssets.map(stock => ({
-        stockId: stock.stock.dinari_id,
-        assetAddress: stock.stock.tokens.find(t =>
-          t.startsWith(`eip155:${chainId}:`)
-        )?.split(":")[2] || "", // Pick correct token address for current chain
-        weightage: Number(stock.weight).toFixed(2),
-      })),
-    }, {
-      onSuccess: () => {
-        toast.dismiss();
-        toast.success("Invested in crate successfully.");
-        setTimeout(() => setStep('success'), 1200);
+    createBuyOrder(
+      {
+        crateId: crate?._id,
+        accountId: userData?.dinari_account_id,
+        totalAmountToBeInvested: amount,
+        assets: crate?.stocks.map((stockItem) => ({
+          stockObjectId: stockItem.stock._id,
+          stockId: stockItem.stock.dinari_id,
+          assetAddress: getTokenAddress(chainId, stockItem.stock.tokens),
+          weightage: stockItem.weight
+        })),
       },
-      onError: (error) => {
-        toast.dismiss();
-        console.log(error, "error");
-        toast.error("Failed to invest in crate.");
-        setOrderStatus('error');
+      {
+        onSuccess: () => {
+          toast.success("Invested in crate successfully.");
+          refetchUser();
+        },
       }
-    });
+    );
   };
+  // Invest function
+  // const handleInvest = () => {
+  //   const enriched = userData as import("@/lib/interfaces").EnrichedUser;
+  //   if (!enriched?.dinari_account_id) {
+  //     toast.error("Please complete KYC to invest in crates.");
+  //     return;
+  //   }
+  //   if (!basket_id) {
+  //     toast.error("Basket ID is missing.");
+  //     return;
+  //   }
+
+  //   const filteredAssets = stocks.filter(stock =>
+  //     stock?.stock?.tokens?.some(token =>
+  //       token.startsWith(`eip155:${chainId}:`)
+  //     )
+  //   );
+  
+  //   if (filteredAssets.length === 0) {
+  //     toast.error("No supported assets found on this chain.");
+  //     return;
+  //   }
+  
+  //   setStep('status');
+  //   setOrderStatus('waiting');
+  
+  //   createBuyOrder({
+  //     crateId: basket_id,
+  //     accountId: enriched.dinari_account_id,
+  //     totalAmountToBeInvested: amount,
+  //     assets: filteredAssets.map(stock => ({
+  //       stockId: stock.stock.dinari_id,
+  //       assetAddress: stock.stock.tokens.find(t =>
+  //         t.startsWith(`eip155:${chainId}:`)
+  //       )?.split(":")[2] || "", // Pick correct token address for current chain
+  //       weightage: Number(stock.weight).toFixed(2),
+  //     })),
+  //   }, {
+  //     onSuccess: () => {
+  //       toast.dismiss();
+  //       toast.success("Invested in crate successfully.");
+  //       setTimeout(() => setStep('success'), 1200);
+  //     },
+  //     onError: (error) => {
+  //       toast.dismiss();
+  //       console.log(error, "error");
+  //       toast.error("Failed to invest in crate.");
+  //       setOrderStatus('error');
+  //     }
+  //   });
+  // };
   
   // Mock order review data
   const subtotal = amount ? parseFloat(amount) : 0;

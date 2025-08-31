@@ -181,7 +181,7 @@ export default function SingleCrate() {
           <img
             src={
               crate.imageUrl ||
-              "https://t3.ftcdn.net/jpg/06/99/46/60/360_F_699466075_DaPTBNlNQTOwwjkOiFEoOvzDV0ByXR9E.jpg"
+              "https://t3.ftcdn.next/jpg/06/99/46/60/360_F_699466075_DaPTBNlNQTOwwjkOiFEoOvzDV0ByXR9E.jpg"
             }
             className="w-20 h-20 rounded-xl object-cover"
             alt={crate?.name}
@@ -476,7 +476,7 @@ export default function SingleCrate() {
                   >
                     Exit
                   </button>
-                  <Button
+                  {/* <Button
                     onClick={handleInvest}
                     className="w-full !font-bold bg-white text-black"
                     style={{
@@ -487,7 +487,7 @@ export default function SingleCrate() {
                     disabled={createBuyOrderLoading}
                   >
                     {createBuyOrderLoading ? "Processing..." : "Button"}
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
             </div>
@@ -566,11 +566,7 @@ export default function SingleCrate() {
         <BuyCrateModal
           open={buyModalOpen}
           onOpenChange={setBuyModalOpen}
-          crate={{
-            name: crate?.name,
-            meta: crate?.description,
-            image: crate?.imageUrl,
-          }}
+          crate={crate}
           stocks={crate?.stocks || []}
           basket_id={basket_id as string}
         />
