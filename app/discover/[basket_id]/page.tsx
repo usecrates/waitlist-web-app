@@ -32,7 +32,6 @@ export default function SingleCrate() {
     address,
     authenticated
   );
-  console.log({userData})
   const {
     mutate: createBuyOrder,
     isPending: createBuyOrderLoading,
