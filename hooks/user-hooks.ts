@@ -79,8 +79,6 @@ export const useEnrichedUser = (wallet: string, enabled: boolean) => {
         queryFn: () => fetchUserByWallet(wallet),
         enabled: enabled && !!wallet,
         retry: false, // prevent auto retries for "User not found"
-        // You can transform error into null result if you want the consumer to not break
-        // select: (data) => data || null,
     });
 };
 

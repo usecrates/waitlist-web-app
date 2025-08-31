@@ -11,10 +11,7 @@ import { Search, Bug } from 'lucide-react';
 import Image from 'next/image';
 import { useEnrichedUser, useUserOrders } from '../../hooks/user-hooks';
 import { usePrivyAuth } from '../../context/PrivyAuthContext';
-import toast from 'react-hot-toast';
 import OrderRow from '@/components/OrderRow';
-
-
 
 const statusBadge = (status: string) => {
   if (status === 'FILLED')

@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
 import { useGetAllCrates } from "@/hooks/user-hooks";
-
+import { useEnrichedUser } from "@/hooks/user-hooks";
+import { usePrivyAuth } from "@/context/PrivyAuthContext";
 
 const volatilityOptions = [
   { label: "High Volatility", value: "high" },
@@ -38,7 +39,8 @@ export default function DiscoverPage() {
   const [returns, setReturns] = useState("1M");
   const [order, setOrder] = useState("High-Low");
   const { data: crates, isLoading } = useGetAllCrates();
-
+  const { address,authenticated } = usePrivyAuth();
+  const { data: userData, isLoading:userLoading, error } = useEnrichedUser(address, authenticated);
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
@@ -46,6 +48,17 @@ export default function DiscoverPage() {
   if (!crates || crates?.length === 0) {
     return <div className="flex items-center justify-center min-h-screen">No crates found</div>;
   }
+  const subscribedIds = new Set(
+    userData?.subscribedCrates.map((c: any) => c.crateId)
+  );
+  
+  // extend crates with a boolean
+  const cratesWithSubscription = crates.map((crate: any) => ({
+    ...crate,
+    isSubscribed: subscribedIds.has(crate._id),
+  }));
+
+
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] pt-24 pb-8 px-6">
@@ -187,7 +200,7 @@ export default function DiscoverPage() {
         </div>
        
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {crates?.length && crates?.map((crate, i) => (
+          {cratesWithSubscription?.length && cratesWithSubscription?.map((crate, i) => (
             <CrateCard key={i} crate={crate} />
           ))}
         </div>

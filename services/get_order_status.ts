@@ -4,19 +4,17 @@ import { toast } from "sonner";
 import orderProcessorData from "@/lib/sbt-deployments/v0.4.0/order_processor.json";
 
 export function useGetOrderStatus() {
-
   const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
-  console.log(address,walletClient,publicClient,"client")
-  if (!walletClient || !address || !publicClient)
-    throw new Error("Wallet not connected");
 
   return useMutation({
     mutationFn: async ({ orderIds }: { orderIds: string[] }) => {
-      try {
-        if (!publicClient || !walletClient) throw new Error("Wallet not connected");
+      if (!walletClient || !address || !publicClient) {
+        throw new Error("Wallet not connected");
+      }
 
+      try {
         const chainId = publicClient.chain.id;
         const orderProcessorAbi = orderProcessorData.abi;
         const orderProcessorAddress = (orderProcessorData.networkAddresses as Record<
@@ -24,7 +22,6 @@ export function useGetOrderStatus() {
           string
         >)[String(chainId)] as `0x${string}`;
 
-        // Call contract for each orderId
         const statuses = await Promise.all(
           orderIds.map(async (orderId) => {
             const status = await publicClient.readContract({
@@ -33,10 +30,10 @@ export function useGetOrderStatus() {
               functionName: "getOrderStatus",
               args: [orderId],
             });
-            return Number(status); // 0 = pending, 1 = completed
+            return Number(status); 
           })
         );
-
+        console.log(statuses,"staus")
         const completedCount = statuses.filter((s) => s === 1).length;
         const percentageCompleted =
           orderIds.length > 0

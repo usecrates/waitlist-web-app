@@ -10,6 +10,8 @@ export type Crate = {
   totalReturnPercent: string;
   activeSubscribers: string;
   stocks: string;
+  isSubscribed: boolean;
+  _id?: string;
 };
 
 const CrateCard = ({ crate }: { crate: Crate }) => {
@@ -17,32 +19,33 @@ const CrateCard = ({ crate }: { crate: Crate }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 }}
-      className="border font-chakra border-[#272727] rounded-md bg-[#1a1a1a] py-3 px-4 relative overflow-hidden"
+      whileHover={{ scale: 1.02 }}
+      transition={{ duration: 0.2 }}
+      className="relative overflow-hidden rounded-2xl border border-[#2a2a2a] bg-[#1b1b1b]/80 backdrop-blur-md p-5 shadow-lg hover:shadow-2xl transition-all"
     >
       {/* Header with image, name, and bookmark */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <img
-              src={crate.imageUrl || "https://t3.ftcdn.net/jpg/06/99/46/60/360_F_699466075_DaPTBNlNQTOwwjkOiFEoOvzDV0ByXR9E.jpg"}
-              className="w-14 h-14 rounded-xl object-cover"
-              alt={crate?.name}
-            />
-          </div>
+        <div className="flex items-center gap-4">
+          <img
+            src={
+              crate.imageUrl ||
+              "https://t3.ftcdn.net/jpg/06/99/46/60/360_F_699466075_DaPTBNlNQTOwwjkOiFEoOvzDV0ByXR9E.jpg"
+            }
+            className="w-16 h-16 rounded-xl object-cover shadow-md"
+            alt={crate?.name}
+          />
           <div>
-            <h3 className="text-white font-semibold text-lg leading-tight">
+            <h3 className="text-white font-semibold text-xl leading-snug">
               {crate?.name}
             </h3>
-            <p className="text-gray-400 text-sm font-medium">
+            <p className="text-gray-400 text-sm font-medium line-clamp-2">
               {crate?.description}
             </p>
           </div>
         </div>
-        {/* Bookmark icon */}
-        <div className="w-6 h-6  rounded flex items-center justify-center">
+        <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#2b2b2b] hover:bg-[#333] transition-colors cursor-pointer">
           <svg
-            className="w-4 h-4 text-gray-400"
+            className="w-5 h-5 text-gray-300"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -56,59 +59,63 @@ const CrateCard = ({ crate }: { crate: Crate }) => {
           </svg>
         </div>
       </div>
-      {/* Stats grid */}
-      <div className="grid grid-cols-2 font-chakra gap-x-8 gap-y-1 mb-6">
-        <div>
-          <p className="text-green-400 font-semibold text-xl">
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 gap-6 mb-6">
+        <motion.div whileHover={{ scale: 1.05 }}>
+          <p className="text-green-400 font-semibold text-2xl">
             {crate.totalReturnPercent}
           </p>
           <p className="text-gray-400 text-sm font-medium">Total Returns</p>
-        </div>
-        <div>
-          <p className="text-green-400 font-semibold text-xl">
+        </motion.div>
+        <motion.div whileHover={{ scale: 1.05 }}>
+          <p className="text-green-400 font-semibold text-2xl">
             {crate.subscriptionAmount}
           </p>
-          <p className="text-gray-400 text-sm font-medium">This month</p>
-        </div>
-        <div>
+          <p className="text-gray-400 text-sm font-medium">This Month</p>
+        </motion.div>
+        <motion.div whileHover={{ scale: 1.05 }}>
           <p className="text-white font-semibold text-2xl">
             {crate.activeSubscribers}
           </p>
           <p className="text-gray-400 text-sm font-medium">Subscribers</p>
-        </div>
-        <div>
+        </motion.div>
+        <motion.div whileHover={{ scale: 1.05 }}>
           <p className="text-white font-semibold text-2xl">
             {crate.stocks.length}
           </p>
           <p className="text-gray-400 text-sm font-medium">Stocks</p>
-        </div>
+        </motion.div>
       </div>
 
-      <div className="flex gap-3">
+      {/* Buttons */}
+      <div className="flex gap-4">
         <Button
           href={`/discover/${crate?._id?.toString()}`}
-          className="flex-1 text-white font-bold rounded-lg py-3 px-0 border-none shadow-none"
+          className="flex-1 font-semibold rounded-lg py-3 shadow-md hover:shadow-lg transition-all"
           style={{
-            background:
-              "linear-gradient(0deg, #232323, #232323), linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
-            backgroundBlendMode: "normal, normal",
+            background: "linear-gradient(135deg, #2e2e2e, #3a3a3a)",
+            color: "white",
           }}
         >
           View Details
         </Button>
         <Button
-          className="flex-1 text-black font-bold rounded-lg py-3 px-0 border-none shadow-none"
+          disabled={crate?.isSubscribed}
+          className="flex-1 font-semibold rounded-lg py-3 shadow-md hover:shadow-lg transition-all"
           style={{
-            background:
-              "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
-            backgroundBlendMode: "normal, normal",
+            background: crate?.isSubscribed
+              ? "linear-gradient(135deg, #059669, #10B981)" // Green when subscribed
+              : "linear-gradient(135deg, #7B7B7B, #999999)", // Gray when not
+            color: crate?.isSubscribed ? "white" : "black",
+            cursor: crate?.isSubscribed ? "not-allowed" : "pointer",
           }}
         >
-          Subscribe
+          {crate?.isSubscribed ? "Subscribed" : "Subscribe"}
         </Button>
       </div>
     </motion.div>
   );
 };
 
-export default CrateCard; 
+export default CrateCard;
