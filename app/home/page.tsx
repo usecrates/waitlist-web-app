@@ -12,7 +12,7 @@ export default function LaunchPage() {
 
   const { address,authenticated } = usePrivyAuth();
   const { data: userData, isLoading, error } = useEnrichedUser(address, authenticated);
-  console.log(userData, "address")
+
   const crates = [
     {
       name: "John Hickenlooper",

@@ -37,7 +37,7 @@ export function KycModal({ open, onOpenChange, crate }: KycModalProps) {
   const { signMessageAsync } = useSignMessage();
   const [walletLinking, setWalletLinking] = useState(false);
   const [walletLinked, setWalletLinked] = useState(false);
-
+  const [kycLink,setKycLink] = useState();
   // Step completion logic
   const hasRegistered = !!(userData as import("@/lib/interfaces").EnrichedUser)?.entity_id;
   const hasStartedKYC = !!(userData as import("@/lib/interfaces").EnrichedUser)?.is_kyc_complete;
@@ -71,10 +71,18 @@ export function KycModal({ open, onOpenChange, crate }: KycModalProps) {
   const handleKYC = () => {
     const enriched = userData as import("@/lib/interfaces").EnrichedUser;
     if (!enriched?.entity_id) return toast.error("Please register first.");
-    console.log(enriched.entity_id,"enriched");
+  
+    console.log(enriched.entity_id, "enriched");
+  
     kycMutate(enriched.entity_id, {
-      onSuccess: () => {
-        refetchUser();
+      onSuccess: (data) => {
+        console.log("✅ KYC Data:", data); 
+        setKycLink(data.data.kyc_res.embed_url);
+        console.log(kycLink);
+        // refetchUser();
+      },
+      onError: (err: any) => {
+        toast.error(err.message || "KYC failed");
       }
     });
   };
@@ -138,11 +146,11 @@ export function KycModal({ open, onOpenChange, crate }: KycModalProps) {
     }
   }, [step, hasRegistered, hasStartedKYC, hasLinkedWallet, hasPaymentStep, onOpenChange]);
 
-  React.useEffect(() => {
-    if (kycSuccess && kycData?.kyc_res?.embed_url) {
-      window.open(kycData.kyc_res.embed_url, "_blank");
-    }
-  }, [kycSuccess, kycData]);
+  // React.useEffect(() => {
+  //   if (kycSuccess && kycLink) {
+  //     window.open(kycLink, "_blank");
+  //   }
+  // }, [kycSuccess, kycLink]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -212,9 +220,9 @@ export function KycModal({ open, onOpenChange, crate }: KycModalProps) {
               >
                 {kycPending ? "Loading..." : hasStartedKYC ? "KYC Complete" : "Start KYC"}
               </button>
-              {hasStartedKYC && kycData?.kyc_res?.embed_url && (
+              {kycLink && (
                 <a
-                  href={kycData.kyc_res.embed_url}
+                  href={kycLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-400 underline text-sm block mt-2"

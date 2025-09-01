@@ -18,7 +18,7 @@ export function useHasMounted() {
 const createKYCLink = async (entity_id: string) => {
     try {
         const res = await api.get(`/user/kyc/${entity_id}`);
-
+   
         if (!res.data.success) {
             throw new Error(res.data.message || "Failed to fetch user");
         }
