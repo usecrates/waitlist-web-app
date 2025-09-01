@@ -34,6 +34,7 @@ interface BuyOrderInput {
     assetAddress: string;
     stockObjectId: string;
     weightage: number;
+    isOnchain: Boolean;
 }
 
 interface CreateBuyOrderArgs {
@@ -61,6 +62,8 @@ export function useBuyOrderMutation() {
                 toast.error("Invalid account ID or orders");
                 throw new Error("Invalid account ID or orders");
             }
+            let id = toast.loading("Buying...");
+            console.log("button clicked")
 
             const chainId = publicClient.chain.id;
             const paymentTokenAddress =
@@ -88,17 +91,26 @@ export function useBuyOrderMutation() {
 
 
             const totalWeight = assets.reduce((sum, asset) => sum + asset.weightage, 0);
+
             const orders = [];
             let totalOrderAmount = BigInt(0);
             let totalFees = BigInt(0);
 
             for (const asset of assets) {
-                const rawAmount =
-                    (asset.weightage / totalWeight) * Number(totalAmountToBeInvested);
+                if (!asset.isOnchain) {
+                    continue;
+                }
+                const rawAmount = Math.ceil(
+                    (asset.weightage / totalWeight) * Number(totalAmountToBeInvested)
+                );
                 const paymentTokenQuantity = rawAmount.toString();
-                const formattedQuantity = formatUnits(Number(paymentTokenQuantity), 6);
-
+                const formattedQuantity = BigInt(paymentTokenQuantity.toString()) / BigInt(10 ** 6)
+                console.log(totalWeight, asset.weightage, paymentTokenQuantity, rawAmount);
                 console.log(paymentTokenQuantity, formattedQuantity, "formattedQuantity");
+                if (!formattedQuantity) {
+
+                    continue;
+                }
                 const _order = {
                     chain_id: `eip155:${chainId}`,
                     order_side: "BUY",
@@ -106,7 +118,7 @@ export function useBuyOrderMutation() {
                     order_type: "MARKET",
                     stock_id: asset.stockId,
                     payment_token: paymentTokenAddress,
-                    payment_token_quantity: formattedQuantity,
+                    payment_token_quantity: formattedQuantity.toString(),
                 };
 
                 const orderParams = {
@@ -126,6 +138,7 @@ export function useBuyOrderMutation() {
                     asset.stockId
                 );
                 const askPrice = Number(quote.ask_price);
+
 
                 const feeQuoteResponse =
                     await dinariClient.v2.accounts.orders.stocks.eip155.getFeeQuote(
@@ -284,7 +297,7 @@ export function useBuyOrderMutation() {
                 }); if (orderEvents.length === 0) throw new Error("No OrderCreated events found");
 
             const orderIds = orderEvents.map(event => event?.args?.id?.toString());
-            console.log(orderIds,"orderIds");
+            console.log(orderIds, "orderIds");
             const bodyObject = {
                 totalAmountInvested: formatUnits(totalAmountToBeInvested, 6),
                 type: "buy",
@@ -299,9 +312,10 @@ export function useBuyOrderMutation() {
                 })),
                 orderIds,
             };
-              const res = await api.post(`/transactions`, bodyObject);
-              console.log({ res });
-              return { txHash, backendResponse: res.data };
+            const res = await api.post(`/transactions`, bodyObject);
+            console.log({ res });
+            toast.success("Invested in crate successfully.",{id});
+            return { txHash, backendResponse: res.data };
         },
     });
 }

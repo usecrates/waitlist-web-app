@@ -2,18 +2,20 @@ import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { X } from "lucide-react";
-
+import { useSellOrderMutation } from "@/services/sell_order";
+import { usePrivyAuth } from "@/context/PrivyAuthContext";
+import toast from "react-hot-toast";
+import { useChainId } from "wagmi";
+import { useEnrichedUser } from "@/hooks/user-hooks";
 interface ExitCrateModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  crate?: {
-    name?: string;
-    meta?: string;
-    image?: string;
-  };
+  crate?: any;
+  subscribeCrateData: any;
+  userData: any;
 }
 
-export function ExitCrateModal({ open, onOpenChange, crate }: ExitCrateModalProps) {
+export function ExitCrateModal({ open, onOpenChange, crate, subscribeCrateData, userData }: ExitCrateModalProps) {
   const [step, setStep] = useState<'input' | 'review' | 'status' | 'success'>('input');
   const [units, setUnits] = useState(0);
   const [selectedToken, setSelectedToken] = useState('USDC');
@@ -22,25 +24,32 @@ export function ExitCrateModal({ open, onOpenChange, crate }: ExitCrateModalProp
   const [orderStatus, setOrderStatus] = useState<'waiting' | 'completed' | 'error'>('waiting');
   const [batchFilled, setBatchFilled] = useState(0);
   const [batchTotal] = useState(4);
+  const { address, authenticated } = usePrivyAuth();
+  const chainId = useChainId()
+  const { refetch: refetchUser } = useEnrichedUser(
+    address,
+    authenticated
+  );
 
-  // Simulate price and percentage
-  const price = units === 0 ? 0 : 1045; // Example
+  const price = units === 0 ? 0 : 1045;
   const percent = units === 0 ? 0 : 75; // Example
   const currentValue = 200;
-
+  console.log({ crate });
+  const { mutate: createSellOrder, isPending: createSellOrderLoading, isSuccess: isSellOrderSuccess } = useSellOrderMutation();
   // Mock review data
-  const reviewRows = [
-    { stock: 'AAPL', units: '0.12', price: '$353', value: '0.08 $30' },
-    { stock: 'AVGO', units: '0.12', price: '$353', value: '0.08 $30' },
-    { stock: 'JPM', units: '0.12', price: '$353', value: '0.08 $30' },
-    { stock: 'AMZN', units: '0.12', price: '$353', value: '0.08 $30' },
-    { stock: 'GOOG', units: '0.12', price: '$353', value: '0.08 $30' },
-    { stock: 'MSFT', units: '0.12', price: '$353', value: '0.08 $30' },
-  ];
-  const subtotal = 950;
+  const reviewRows = subscribeCrateData?.userInvestment?.stockHoldings?.map((item) => {
+    const stock = item.stockId.symbol;
+    const units = item.sharesOwned.toFixed(4); // round to 4 decimals
+    const price = `$${item.stockId.price}`;
+    const value = `$${(item.sharesOwned * item.stockId.price).toFixed(2)}`;
+
+    return { stock, units, price, value };
+  });
+  const subtotal = subscribeCrateData?.userInvestment?.investedAmount.toFixed(2);
   const slippage = 0.8;
   const priceImpact = '<0.1%';
-  const totalReceivable = 955;
+  const totalReceivable = subscribeCrateData?.userInvestment?.currentValue.toFixed(2);
+  console.log({ subscribeCrateData })
 
   // Success button activation timer
   useEffect(() => {
@@ -88,6 +97,51 @@ export function ExitCrateModal({ open, onOpenChange, crate }: ExitCrateModalProp
     }
   }, [open]);
 
+
+  const handleExitCrate = () => {
+
+    if (!address) {
+      toast.error("Please Connect Your Wallet First");
+      return;
+    }
+    if (!userData?.dinari_account_id) {
+      toast.error("Please complete KYC to invest in crates.");
+      return;
+    };
+
+    let crateInvestmentData;
+    if (userData?.subscribedCrates && userData?.subscribedCrates.length > 0) {
+      for (const _crate of userData?.subscribedCrates) {
+        if (crate?._id === _crate.crateId) {
+          crateInvestmentData = _crate.userInvestment;
+        }
+      }
+    } else {
+      console.log("No subscribed crates found for this user.");
+      return;
+    }
+
+    if (!crateInvestmentData) {
+      console.log("No investment data found for the specified crate.");
+      return;
+    }
+
+    createSellOrder(
+      {
+        crateId: crate?._id,
+        accountId: userData?.dinari_account_id,
+        crateInvestmentData: crateInvestmentData
+      },
+      {
+        onSuccess: () => {
+          toast.success("Invested in crate successfully.");
+          refetchUser();
+        },
+      }
+    );
+
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md text-white w-full bg-[#181818] p-0 rounded-2xl font-chakra">
@@ -98,21 +152,21 @@ export function ExitCrateModal({ open, onOpenChange, crate }: ExitCrateModalProp
               <X className="text-white" size={20} />
             </button>
           </div>
-      
+
           {step !== 'success' && (
             <>
-            <div className="text-[#C9C9C9] my-4 text-sm">
-            This will only sell stocks attributed to this Crate. Your other holdings will remain unaffected.
-          </div>
-            <div className="flex items-center border gap-4 border-[#484848] bg-[#232323] rounded-md p-3 mb-4">
-              <div className="p-[2px] rounded-lg" style={{ background: "linear-gradient(180deg, #8B8B8B 0%, #E9E9E9 50%, #8B8B8B 100%)" }}>
-                <img src={crate?.image} className="w-12 h-12 rounded-lg object-cover" alt="crate" />
+              <div className="text-[#C9C9C9] my-4 text-sm">
+                This will only sell stocks attributed to this Crate. Your other holdings will remain unaffected.
               </div>
-              <div>
-                <div className="text-lg font-semibold">{crate?.name}</div>
-                <div className="text-xs text-[#A1A1A1]">{crate?.meta}</div>
+              <div className="flex items-center border gap-4 border-[#484848] bg-[#232323] rounded-md p-3 mb-4">
+                <div className="p-[2px] rounded-lg" style={{ background: "linear-gradient(180deg, #8B8B8B 0%, #E9E9E9 50%, #8B8B8B 100%)" }}>
+                  <img src={crate?.image} className="w-12 h-12 rounded-lg object-cover" alt="crate" />
+                </div>
+                <div>
+                  <div className="text-lg font-semibold">{crate?.name}</div>
+                  <div className="text-xs text-[#A1A1A1]">{crate?.meta}</div>
+                </div>
               </div>
-            </div>
             </>
           )}
           {step === 'input' && (
@@ -135,7 +189,7 @@ export function ExitCrateModal({ open, onOpenChange, crate }: ExitCrateModalProp
               <div className="text-center text-base font-medium my-6">How Much do you want to sell?</div>
               <div className="flex w-3/4 mx-auto justify-between mb-1">
                 <span className="text-left text-[#898989] text-xs font-medium">Units</span>
-                
+
               </div>
               <div className="flex items-center w-3/4 mx-auto gap-2 mb-6">
                 <span className="text-right text-white text-lg font-ch">{units}</span>
@@ -235,7 +289,10 @@ export function ExitCrateModal({ open, onOpenChange, crate }: ExitCrateModalProp
                       backgroundBlendMode: "normal, normal",
                       color: "#000"
                     }}
-                    onClick={() => setStep('status')}
+                    onClick={()=>{
+                        handleExitCrate();
+                        setStep('status');
+                    }}
                     disabled={units === 0}
                   >
                     Confirm
@@ -249,7 +306,7 @@ export function ExitCrateModal({ open, onOpenChange, crate }: ExitCrateModalProp
               {orderStatus === 'completed' && (
                 <div className="flex items-center gap-2 text-green-400 text-xl font-semibold mb-2">
                   <span className="w-6 h-6 rounded-full bg-green-400 flex items-center justify-center">
-                    <svg width="18" height="18" fill="none"><path d="M5 9l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    <svg width="18" height="18" fill="none"><path d="M5 9l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </span>
                   All orders filled
                 </div>
@@ -257,7 +314,7 @@ export function ExitCrateModal({ open, onOpenChange, crate }: ExitCrateModalProp
               {orderStatus === 'error' && (
                 <div className="flex items-center gap-2 text-red-400 text-xl font-semibold mb-2">
                   <span className="w-6 h-6 rounded-full bg-red-400 flex items-center justify-center">
-                    <svg width="18" height="18" fill="none"><circle cx="9" cy="9" r="8" stroke="#fff" strokeWidth="2"/><path d="M9 5v4m0 4h.01" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
+                    <svg width="18" height="18" fill="none"><circle cx="9" cy="9" r="8" stroke="#fff" strokeWidth="2" /><path d="M9 5v4m0 4h.01" stroke="#fff" strokeWidth="2" strokeLinecap="round" /></svg>
                   </span>
                   Uh-oh, your order couldn't be placed
                 </div>
@@ -308,7 +365,7 @@ export function ExitCrateModal({ open, onOpenChange, crate }: ExitCrateModalProp
                 >
                   Invest More
                 </button>
-              
+
               </div>
             </>
           )}
@@ -368,7 +425,7 @@ export function ExitCrateModal({ open, onOpenChange, crate }: ExitCrateModalProp
               <div className="flex gap-4 mt-4">
                 <button
                   className="flex-1 font-bold py-3 bg-[#232323] text-white rounded text-lg"
-                
+
                 >
                   View Portfolio
                 </button>

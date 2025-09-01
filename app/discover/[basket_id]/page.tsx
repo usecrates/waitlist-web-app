@@ -22,7 +22,7 @@ import { useBuyOrderMutation } from "@/services/buy_order";
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
 
 import toast from "react-hot-toast";
-import { useSellOrderMutation } from "@/services/sell_order";
+
 export default function SingleCrate() {
   const { basket_id } = useParams();
   const { data: crate, isLoading } = useGetCrateById(basket_id as string);
@@ -38,7 +38,7 @@ export default function SingleCrate() {
     isSuccess,
     error,
   } = useBuyOrderMutation();
-  const { mutate: createSellOrder, isPending: createSellOrderLoading, isSuccess: isSellOrderSuccess } = useSellOrderMutation();
+
   const {
     mutate: subscribeCrate,
     isPending,
@@ -108,49 +108,7 @@ export default function SingleCrate() {
     );
   };
 
-  const handleExitCrate = () => {
-  
-    if (!address) {
-      toast.error("Please Connect Your Wallet First");
-      return;
-    }
-    if (!userData?.dinari_account_id) {
-      toast.error("Please complete KYC to invest in crates.");
-      return;
-    };
 
-    let crateInvestmentData;
-    if (userData?.subscribedCrates && userData?.subscribedCrates.length > 0) {
-      for (const _crate of userData?.subscribedCrates) {
-        if (crate?._id === _crate.crateId) {
-          crateInvestmentData = _crate.userInvestment;
-        }
-      }
-    } else {
-      console.log("No subscribed crates found for this user.");
-      return;
-    }
-
-    if (!crateInvestmentData) {
-      console.log("No investment data found for the specified crate.");
-      return;
-    }
-
-    createSellOrder(
-      {
-        crateId: crate?._id,
-        accountId: userData?.dinari_account_id,
-        crateInvestmentData: crateInvestmentData
-      },
-      {
-        onSuccess: () => {
-          toast.success("Invested in crate successfully.");
-          refetchUser();
-        },
-      }
-    );
-
-  }
 
   if (isLoading) {
     return (
@@ -471,7 +429,7 @@ export default function SingleCrate() {
                         "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
                       backgroundBlendMode: "normal, normal",
                     }}
-                    onClick={handleExitCrate}
+                    onClick={()=>setExitModalOpen(true)}
                   >
                     Exit
                   </button>
@@ -556,11 +514,9 @@ export default function SingleCrate() {
         <ExitCrateModal
           open={exitModalOpen}
           onOpenChange={setExitModalOpen}
-          crate={{
-            name: crate?.name,
-            meta: crate?.description,
-            image: crate?.imageUrl,
-          }}
+          crate={crate}
+          userData={userData}
+          subscribeCrateData={userData?.subscribedCrates?.find((_c)=>_c.crateId===crate._id)}
         />
         <BuyCrateModal
           open={buyModalOpen}

@@ -1,5 +1,5 @@
 export function getChainIcon(chainIdString: string): string {
-    const chainId = chainIdString.replace("eip155:", "");
+    const chainId = chainIdString?.replace("eip155:", "");
   
     const chainIcons: Record<string, string> = {
       "1": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png",         // Ethereum Mainnet

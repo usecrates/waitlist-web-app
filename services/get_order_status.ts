@@ -47,14 +47,7 @@ export function useGetOrderStatus(orderIds?: string[]) {
             ? (completedCount / orderIds!.length) * 100
             : 0;
 
-        console.log("Order Status Debug:", {
-          chainId,
-          orderProcessorAddress,
-          orderIds,
-          statuses,
-          completedCount,
-          percentageCompleted,
-        });
+      
 
         return {
           statuses, // array of raw codes
