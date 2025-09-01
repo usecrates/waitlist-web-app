@@ -1,16 +1,17 @@
-import { useMutation } from "@tanstack/react-query";
-import { useAccount, useWalletClient, usePublicClient } from "wagmi";
+import { useQuery } from "@tanstack/react-query";
+import { useAccount, usePublicClient } from "wagmi";
 import { toast } from "sonner";
 import orderProcessorData from "@/lib/sbt-deployments/v0.4.0/order_processor.json";
 
-export function useGetOrderStatus() {
+export function useGetOrderStatus(orderIds?: string[]) {
   const { address } = useAccount();
-  const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
 
-  return useMutation({
-    mutationFn: async ({ orderIds }: { orderIds: string[] }) => {
-      if (!walletClient || !address || !publicClient) {
+  return useQuery({
+    queryKey: ["orderStatus", address, orderIds],
+    enabled: !!address && !!publicClient && !!orderIds && orderIds.length > 0,
+    queryFn: async () => {
+      if (!address || !publicClient) {
         throw new Error("Wallet not connected");
       }
 
@@ -22,28 +23,43 @@ export function useGetOrderStatus() {
           string
         >)[String(chainId)] as `0x${string}`;
 
+        if (!orderProcessorAddress) {
+          throw new Error(`No contract deployed for chainId ${chainId}`);
+        }
+
+        // Read statuses
         const statuses = await Promise.all(
-          orderIds.map(async (orderId) => {
+          orderIds!.map(async (orderId) => {
             const status = await publicClient.readContract({
               address: orderProcessorAddress,
               abi: orderProcessorAbi,
               functionName: "getOrderStatus",
-              args: [orderId],
+              args: [BigInt(orderId)], // ✅ ensure correct type
             });
-            return Number(status); 
+            return Number(status); // 1 = not completed, 2 = completed
           })
         );
-        console.log(statuses,"staus")
-        const completedCount = statuses.filter((s) => s === 1).length;
+        
+       
+        const completedCount = statuses.filter((s) => s === 2).length;
         const percentageCompleted =
-          orderIds.length > 0
-            ? (completedCount / orderIds.length) * 100
+          orderIds!.length > 0
+            ? (completedCount / orderIds!.length) * 100
             : 0;
 
-        return {
+        console.log("Order Status Debug:", {
+          chainId,
+          orderProcessorAddress,
+          orderIds,
           statuses,
           completedCount,
-          total: orderIds.length,
+          percentageCompleted,
+        });
+
+        return {
+          statuses, // array of raw codes
+          completedCount,
+          total: orderIds!.length,
           percentageCompleted,
         };
       } catch (err: any) {

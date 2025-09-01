@@ -2,25 +2,11 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { useGetOrderStatus } from "@/services/get_order_status";
+import { useAccount } from "wagmi";
 
 export default function OrderRow({ order }: { order: any }) {
-  const { mutateAsync: fetchOrderStatus, isLoading: statusLoading } = useGetOrderStatus();
-  const [statusInfo, setStatusInfo] = useState<any>(null);
-
-  useEffect(() => {
-    const getStatus = async () => {
-      try {
-        if (order?.orderIds?.length > 0) {
-          const res = await fetchOrderStatus({ orderIds: order.orderIds });
-          setStatusInfo(res);
-        }
-      } catch (err: any) {
-        toast.error(err?.message || "Failed to fetch order status");
-      }
-    };
-    getStatus();
-  }, [order?.orderIds, fetchOrderStatus]);
-
+  const { address } = useAccount();
+  const { data: statusInfo, isLoading: statusLoading } = useGetOrderStatus(order?.orderIds);
   // Format date
   const orderDate = new Date(order.createdAt).toLocaleString("en-US", {
     day: "2-digit",
@@ -44,11 +30,10 @@ export default function OrderRow({ order }: { order: any }) {
       <td className="px-4 py-3 text-[#A1A1A1]">{orderDate}</td>
       <td className="px-4 py-3">
         <span
-          className={`px-2 py-1 rounded-md text-xs font-medium ${
-            order.type === "buy"
+          className={`px-2 py-1 rounded-md text-xs font-medium ${order.type === "buy"
               ? "bg-green-900/40 text-green-400"
               : "bg-red-900/40 text-red-400"
-          }`}
+            }`}
         >
           {order.type.toUpperCase()}
         </span>
@@ -75,25 +60,29 @@ export default function OrderRow({ order }: { order: any }) {
       </td>
 
       <td
-        className={`px-4 py-3 font-medium ${
-          order.type === "buy" ? "text-green-400" : "text-red-400"
-        }`}
+        className={`px-4 py-3 font-medium ${order.type === "buy" ? "text-green-400" : "text-red-400"
+          }`}
       >
         {formattedAmount}
       </td>
 
       <td className="px-4 py-3">
-        <span
-          className={`px-2 py-1 rounded-md text-xs ${
-            order.status === "success"
-              ? "bg-green-900/40 text-green-400"
-              : order.status === "pending"
-              ? "bg-yellow-900/40 text-yellow-400"
-              : "bg-red-900/40 text-red-400"
-          }`}
-        >
-          {order.status ? order.status.toUpperCase() : "PENDING"}
-        </span>
+        {statusLoading ? (
+          <span className="text-yellow-400">Loading...</span>
+        ) : statusInfo ? (
+          <span
+            className={`px-2 py-1 rounded-md text-xs ${statusInfo.completedCount === statusInfo.total
+                ? "bg-green-900/40 text-green-400"
+                : "bg-yellow-900/40 text-yellow-400"
+              }`}
+          >
+            {statusInfo.completedCount === statusInfo.total
+              ? "COMPLETED"
+              : "PENDING"}
+          </span>
+        ) : (
+          <span className="text-gray-400">No Data</span>
+        )}
       </td>
 
       <td className="px-4 py-3">
