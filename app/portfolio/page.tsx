@@ -268,7 +268,7 @@ export default function PortfolioPage() {
                             </td>
                             <td className="py-3 px-2">
                               <div className={`flex items-center gap-2 ${getChainColor(stock?.chain_id)}`}>
-                                <span className="text-xs text-white">{stock?.chain_id}</span>
+                                <span className="text-md text-white">{stock?.chain_id}</span>
                               </div>
                             </td>
                             <td className="py-3 px-2">
