@@ -5,8 +5,6 @@ import orderProcessorData from "@/lib/sbt-deployments/v0.4.0/order_processor.jso
 import { useAccount, useWalletClient, usePublicClient } from "wagmi";
 import { toast } from "react-hot-toast";
 import { api } from "@/config";
-import { BigNumber, } from "ethers";
-
 const tokenAbi = parseAbi([
     "function name() view returns (string)",
     "function decimals() view returns (uint8)",
@@ -25,7 +23,7 @@ const permitTypes = {
     ],
 };
 
-function getTokenAddress(chainId, tokens) {
+function getTokenAddress(chainId:any, tokens:any) {
     const entry = tokens.find(token => token.split(":")[1] === String(chainId));
     return entry ? entry.split(":")[2] : null;
 }
@@ -224,7 +222,6 @@ export function useSellOrderMutation() {
             }
 
             console.log("Number of orders !!!",orders.length);
-
             const orderCalls = orders.map((order)=>{
                 return encodeFunctionData({
                     abi: orderProcessorAbi,

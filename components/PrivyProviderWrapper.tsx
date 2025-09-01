@@ -7,7 +7,7 @@ import { PrivyProvider } from "@privy-io/react-auth";
 import { ReactNode, StrictMode, useState } from "react";
 
 export const config = createConfig({
-  chains: [ sepolia],
+  chains: [sepolia],
   transports: {
     [sepolia.id]: http(),
   },
