@@ -13,9 +13,6 @@ export default function PortfolioPage() {
   const { address, authenticated } = usePrivyAuth();
   const { data: userPortfolio, isLoading, error } = useUserPortfolio(address, authenticated);
   
-
-  console.log({userPortfolio});
-  
   const crates = [
     {
       avatar: "https://t3.ftcdn.net/jpg/06/99/46/60/360_F_699466075_DaPTBNlNQTOwwjkOiFEoOvzDV0ByXR9E.jpg",
@@ -62,12 +59,13 @@ export default function PortfolioPage() {
 
   // Use real portfolio data for stocks, fallback to mock data
   const stocksData = userPortfolio?.portfolio?.assets?.map((asset: any) => {
+   
     // Format token address with ellipsis
     const tokenAddress = asset.token_address || '';
     const shortAddress = tokenAddress ? `${tokenAddress.slice(0, 6)}...${tokenAddress.slice(-4)}` : '';
     
     return {
-      logo: "/assets/apple.png", // Default logo, you can map based on symbol
+      logo: asset.logo_url, 
       symbol: asset.symbol,
       chain_id: asset.chain_id,
       name: asset.symbol, // You might want to add a name field to your API
@@ -79,85 +77,7 @@ export default function PortfolioPage() {
       netGain: "+0.00%", // This would come from your API if available
       netGainColor: "text-green-400", // Default to green, adjust based on actual data
     };
-  }) || [
-    {
-      logo: "/assets/apple.png",
-      symbol: "AAPL",
-      name: "Apple Inc",
-      address: "XsHt...vULr7",
-      price: "$211.16",
-      holdings: "$8,614",
-      owned: "2,926",
-      netGain: "+14.67%",
-      netGainColor: "text-green-400",
-    },
-    {
-      logo: "/assets/apple.png",
-      symbol: "NVIDIA",
-      name: "NVIDIA Corporation",
-      address: "XsHt...vULr7",
-      price: "$164.92",
-      holdings: "$6,553",
-      owned: "4,672",
-      netGain: "+12.07%",
-      netGainColor: "text-green-400",
-    },
-    {
-      logo: "/assets/apple.png",
-      symbol: "MSFT",
-      name: "Microsoft Corporation",
-      address: "XsHt...vULr7",
-      price: "$503.32",
-      holdings: "$4,525",
-      owned: "4,617",
-      netGain: "-1.23%",
-      netGainColor: "text-red-400",
-    },
-    {
-      logo: "/assets/apple.png",
-      symbol: "WMT",
-      name: "Walmart Inc.",
-      address: "XsHt...vULr7",
-      price: "$94.40",
-      holdings: "$9,014",
-      owned: "719",
-      netGain: "-2.90%",
-      netGainColor: "text-red-400",
-    },
-    {
-      logo: "/assets/apple.png",
-      symbol: "TSLA",
-      name: "Tesla",
-      address: "XsHt...vULr7",
-      price: "$313.51",
-      holdings: "$6,568",
-      owned: "2,567",
-      netGain: "-8.34%",
-      netGainColor: "text-red-400",
-    },
-    {
-      logo: "/assets/apple.png",
-      symbol: "META",
-      name: "META Inc",
-      address: "XsHt...vULr7",
-      price: "$717.51",
-      holdings: "$2,012",
-      owned: "7,192",
-      netGain: "+6.44%",
-      netGainColor: "text-green-400",
-    },
-    {
-      logo: "/assets/apple.png",
-      symbol: "GOOG",
-      name: "Alphabet Inc [Google]",
-      address: "XsHt...vULr7",
-      price: "$181.31",
-      holdings: "$6,666",
-      owned: "9,947",
-      netGain: "-4.82%",
-      netGainColor: "text-red-400",
-    },
-  ];
+  });
 
   return (
     <div className="min-h-screen pt-32 max-w-6xl w-full mx-auto flex flex-col bg-[#0e0e0e] text-white font-chakra">
