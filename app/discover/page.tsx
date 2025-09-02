@@ -41,7 +41,7 @@ export default function DiscoverPage() {
   const { data: crates, isLoading } = useGetAllCrates();
   const { address,authenticated } = usePrivyAuth();
   const { data: userData, isLoading:userLoading, error } = useEnrichedUser(address, authenticated);
-  if (isLoading) {
+  if (isLoading && userLoading && address) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
