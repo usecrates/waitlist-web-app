@@ -1,48 +1,19 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
-import { Switch } from '../../components/ui/switch';
-import { Badge } from '../../components/ui/badge';
-import { Copy } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '../../components/ui/popover';
-import { ChevronDown } from 'lucide-react';
-import { Search, Bug } from 'lucide-react';
+import { ChevronDown, Search, Bug } from 'lucide-react';
 import Image from 'next/image';
-import { useEnrichedUser, useUserOrders } from '../../hooks/user-hooks';
+import { useEnrichedUser } from '../../hooks/user-hooks';
 import { usePrivyAuth } from '../../context/PrivyAuthContext';
 import OrderRow from '@/components/OrderRow';
-
-const statusBadge = (status: string) => {
-  if (status === 'FILLED')
-    return <div className="bg-green-900/60 text-green-400 px-2 py-1 w-fit rounded text-xs font-medium flex items-center gap-2">
-      <Image src="/assets/crate_filled.svg" alt="Completed" width={16} height={16} />
-      Completed</div>;
-  if (status === 'REJECTED' || status === 'ERROR')
-    return <div className="bg-red-900/60 text-red-400 px-2 py-1 rounded text-xs font-medium w-fit flex items-center gap-2">
-      <Image src="/assets/crate_failed.svg" alt="Failed" width={16} height={16} />
-      Failed</div>;
-  if (status === 'CANCELLED')
-    return <div className="bg-orange-900/60 text-orange-400 px-2 py-1 rounded text-xs font-medium w-fit flex items-center gap-2">
-      <Image src="/assets/crate_failed.svg" alt="Cancelled" width={16} height={16} />
-      Cancelled</div>;
-  return <div className="bg-gray-800/60 text-gray-300 px-2 py-1 rounded text-xs font-medium w-fit flex items-center gap-2">
-    <Image src="/assets/progress.svg" alt="In Progress" width={16} height={16} />
-    {status}</div>;
-};
-
-const typeBadge = (type: string) => {
-  if (type === 'buy')
-    return <span className="bg-[#2D2D2D] text-green-400 px-2 py-1 rounded text-xs font-medium">Buy</span>;
-  if (type === 'sell')
-    return <span className="bg-[#2D2D2D] text-orange-400 px-2 py-1 rounded text-xs font-medium">Sell</span>;
-  return <span className="bg-[#2D2D2D] text-blue-300 px-2 py-1 rounded text-xs font-medium">{type}</span>;
-};
 
 const transactionTypeOptions = [
   { label: 'Buy', value: 'buy' },
   { label: 'Sell', value: 'sell' },
 ];
+
 const crateTypeOptions = [
   { label: 'All', value: 'all' },
   { label: 'AI', value: 'ai' },
@@ -52,29 +23,51 @@ const crateTypeOptions = [
   { label: 'Others', value: 'others' },
 ];
 
-const page = () => {
-  const [activeOnly, setActiveOnly] = useState(false);
+const Page = () => {
+  const [latestFirst, setLatestFirst] = useState(false);
   const [search, setSearch] = useState('');
   const [transactionType, setTransactionType] = useState<string>('');
   const [crateType, setCrateType] = useState<string>('');
   const { address, authenticated } = usePrivyAuth();
   const { data: userData, isLoading } = useEnrichedUser(address, authenticated);
 
-  const ordersData = userData?.transactions;
-  // Filter orders based on transaction type
-  const filteredOrders = ordersData?.length && ordersData?.filter((order: any) => {
-    if (transactionType && order.type) {
-      return order.type.toLowerCase() === transactionType.toLowerCase();
+  const ordersData = userData?.transactions || [];
+
+  const filteredOrders = useMemo(() => {
+    let result = [...ordersData];
+
+    // filter by transaction type
+    if (transactionType) {
+      result = result.filter(order => order.type?.toLowerCase() === transactionType.toLowerCase());
     }
-    return true;
-  });
 
-  const hasTransactions = filteredOrders?.length > 0;
+    // filter by crate type
+    if (crateType && crateType !== 'all') {
+      result = result.filter(order => order.crateType?.toLowerCase() === crateType.toLowerCase());
+    }
 
+    // search filter
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(order =>
+        order.symbol?.toLowerCase().includes(q) ||
+        order.creator?.toLowerCase().includes(q) ||
+        order.txHash?.toLowerCase().includes(q)
+      );
+    }
 
+    // sort latest first
+    if (latestFirst) {
+      result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+
+    return result;
+  }, [ordersData, transactionType, crateType, search, latestFirst]);
+
+  const hasTransactions = filteredOrders.length > 0;
 
   return (
-    <div className=" min-h-screen pt-24 max-w-6xl w-full mx-auto  text-white">
+    <div className="min-h-screen pt-24 max-w-6xl w-full mx-auto text-white">
       <h1 className="text-2xl font-semibold mb-4">Transactions</h1>
       {!address ? (
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -113,9 +106,10 @@ const page = () => {
                 ))}
               </PopoverContent>
             </Popover>
+
             {/* Crate Type Dropdown */}
             <Popover>
-              <PopoverTrigger asChild>
+              {/* <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   className="w-36 bg-[#232323] border-none text-white font-chakra justify-between flex items-center"
@@ -124,7 +118,7 @@ const page = () => {
                   <span>{crateType ? crateTypeOptions.find(o => o.value === crateType)?.label : 'Crate type'}</span>
                   <ChevronDown className="ml-2 w-4 h-4 shrink-0" />
                 </Button>
-              </PopoverTrigger>
+              </PopoverTrigger> */}
               <PopoverContent className="bg-[#232323] mt-2 text-white font-chakra w-44 p-2">
                 {crateTypeOptions.map(opt => (
                   <button
@@ -138,10 +132,18 @@ const page = () => {
                 ))}
               </PopoverContent>
             </Popover>
+
+            {/* Latest Orders toggle */}
             <label className="flex items-center gap-2 cursor-pointer">
-              <span className="text-sm">Active Crates only</span>
-              <input type="checkbox" checked={activeOnly} onChange={() => setActiveOnly(!activeOnly)} className="accent-green-500" />
+              <span className="text-sm">Latest Orders First</span>
+              <input
+                type="checkbox"
+                checked={latestFirst}
+                onChange={() => setLatestFirst(!latestFirst)}
+                className="accent-green-500"
+              />
             </label>
+
             <div className="flex-1" />
             <div className="w-full md:w-96 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#727272] w-4 h-4 pointer-events-none" />
@@ -153,6 +155,7 @@ const page = () => {
               />
             </div>
           </div>
+
           {hasTransactions ? (
             <div className="overflow-x-auto rounded-xl border border-[#2A2A2A] shadow-lg">
               <table className="min-w-full text-sm font-chakra">
@@ -167,7 +170,7 @@ const page = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#2A2A2A]">
-                  {filteredOrders?.map((order: any, i: number) => (
+                  {filteredOrders.map((order: any, i: number) => (
                     <OrderRow key={order._id || i} order={order} />
                   ))}
                 </tbody>
@@ -175,12 +178,7 @@ const page = () => {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-              <Image
-                src="/assets/txn.svg"
-                alt="No transactions"
-                width={220}
-                height={120}
-              />
+              <Image src="/assets/txn.svg" alt="No transactions" width={220} height={120} />
               <div className="mt-8 text-xl font-chakra text-gray-300">
                 No transactions yet.
                 <br />
@@ -193,11 +191,10 @@ const page = () => {
               </a>
             </div>
           )}
-
         </>
       )}
     </div>
   );
 };
 
-export default page;
+export default Page;

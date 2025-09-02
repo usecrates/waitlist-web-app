@@ -303,7 +303,7 @@ export default function SingleCrate() {
                   Holding Distribution
                 </h3>
                 <div className="relative w-full h-[300px]">
-                  <DonutChartWithLegend />
+                <DonutChartWithLegend stocks={crate?.stocks || []} />
                   {!isSubscribed && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm rounded-lg border border-[#232323] z-10">
                       <img

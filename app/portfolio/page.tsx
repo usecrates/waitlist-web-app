@@ -123,7 +123,7 @@ export default function PortfolioPage() {
                   }`}
                   onClick={() => setActiveTab("Stocks")}
                 >
-                  Stocks
+                  Your Holdings
                 </button>
               </div>
 

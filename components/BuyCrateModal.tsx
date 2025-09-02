@@ -72,6 +72,7 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [] }: BuyCra
       toast.error("Please complete KYC to invest in crates.");
       return;
     }
+
     createBuyOrder(
       {
         crateId: crate?._id,

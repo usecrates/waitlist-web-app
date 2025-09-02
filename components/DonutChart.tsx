@@ -8,37 +8,47 @@ import {
   Tooltip,
 } from "recharts";
 
-const data = [
-  { name: "Velo V2 USDC+USDD", value: 30, color: "#7ed957" },
-  { name: "USDT ERC20", value: 20, color: "#8664ff" },
-  { name: "Ethereum", value: 10.02, color: "#57c0ff" },
-  { name: "Ethereum", value: 10.02, color: "#57c0ff" },
-  { name: "USDT ERC20", value: 9.93, color: "#8664ff" },
-  { name: "USDC", value: 5.89, color: "#d9d9d9" },
-  { name: "Velo V2 USDC+USDD", value: 3.93, color: "#7ed957" },
-  { name: "DAI", value: 3.0, color: "#5871f5" },
+
+const COLORS = [
+  "#7ed957",
+  "#8664ff",
+  "#57c0ff",
+  "#d9d9d9",
+  "#5871f5",
+  "#ff6b6b",
+  "#f5a623",
+  "#00c49f",
+  "#ffbb28",
+  "#0088fe",
 ];
 
-const renderLegend = () => {
+const renderLegend = (stocks) => {
   return (
     <div className="text-sm text-white">
-      {data.map((entry, index) => (
+      {stocks.map((entry, index) => (
         <div key={index} className="flex justify-between items-center py-1">
           <div className="flex items-center gap-2">
             <span
               className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: entry.color }}
+              style={{ backgroundColor: COLORS[index % COLORS.length] }}
             />
-            <span>{entry.name}</span>
+            <span>{entry.stock?.name} -- {entry.stock?.symbol}</span>
           </div>
-          <span className="text-gray-400">{entry.value}%</span>
+          <span className="text-gray-400">{entry.weight}%</span>
         </div>
       ))}
     </div>
   );
 };
 
-export function DonutChartWithLegend() {
+export function DonutChartWithLegend({ stocks }) {
+
+  const chartData = stocks?.map((stock, index) => ({
+    name: stock?.stock?.name || stock?.stock?.symbol,
+    value: stock.weight,
+    color: COLORS[index % COLORS.length],
+  }));
+
   return (
     <div className="grid md:grid-cols-2 gap-6 bg-[#171717] p-6 rounded-xl w-full max-w-3xl">
       {/* Chart */}
@@ -46,19 +56,23 @@ export function DonutChartWithLegend() {
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={data}
+              data={chartData}
               dataKey="value"
               innerRadius={50}
               outerRadius={100}
               paddingAngle={4}
               strokeWidth={0}
             >
-              {data.map((entry, index) => (
+              {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
             <Tooltip
-              contentStyle={{ background: "#1e1e1e", border: "none", borderRadius: "6px" }}
+              contentStyle={{
+                background: "#1e1e1e",
+                border: "none",
+                borderRadius: "6px",
+              }}
               itemStyle={{ color: "#fff" }}
             />
           </PieChart>
@@ -66,7 +80,7 @@ export function DonutChartWithLegend() {
       </div>
 
       {/* Legend */}
-      <div className="flex flex-col justify-center">{renderLegend()}</div>
+      <div className="flex flex-col justify-center">{renderLegend(stocks)}</div>
     </div>
   );
 }
