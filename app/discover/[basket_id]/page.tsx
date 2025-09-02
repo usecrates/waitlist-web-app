@@ -364,13 +364,13 @@ export default function SingleCrate() {
                   <div className="flex flex-col items-center">
                     <span className="text-lg font-bold text-white">150$</span>
                     <span className="text-gray-400 text-sm mt-1">
-                      Current Value
+                      Investment Amount
                     </span>
                   </div>
                   <div className="flex flex-col items-center">
                     <span className="text-lg font-bold text-white">100$</span>
                     <span className="text-gray-400 text-sm mt-1">
-                      Current Investment
+                      Current Amount
                     </span>
                   </div>
                   <div className="flex flex-col items-center">
@@ -390,7 +390,7 @@ export default function SingleCrate() {
                       Total Returns
                     </span>
                   </div>
-                  <div className="flex flex-col items-center">
+                  {/* <div className="flex flex-col items-center">
                     <span className="text-lg font-bold text-white">
                       50${" "}
                       <span className="text-green-400 text-xs font-semibold align-bottom">
@@ -408,7 +408,7 @@ export default function SingleCrate() {
                     <span className="text-gray-400 text-sm mt-1">
                       Realised Returns
                     </span>
-                  </div>
+                  </div> */}
                 </div>
                 <div className="flex gap-4 mt-2">
                   <button

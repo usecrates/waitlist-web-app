@@ -1,18 +1,33 @@
 "use client";
-import { useState } from "react";
 import { motion } from "framer-motion";
 import CrateCard, { Crate } from "@/components/CrateCard";
 import { Button } from "@/components/ui/button";
 
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
-import { useEnrichedUser } from "@/hooks/user-hooks";
+import { useEnrichedUser, useGetAllCrates } from "@/hooks/user-hooks";
+import { useMemo } from "react";
 
 
 export default function LaunchPage() {
 
   const { address,authenticated } = usePrivyAuth();
   const { data: userData, isLoading, error } = useEnrichedUser(address, authenticated);
+    const { data: cratesData, isLoading:cratesLoading } = useGetAllCrates();
+    const stats = useMemo(() => {
+      if (!cratesData) return { tvl: 0, totalTransactions: 0, totalSubscribers: 0 };
+    
+      return cratesData.reduce(
+        (acc, crate) => {
+          acc.tvl += Number(crate.tvl) ?? 0;
+          acc.totalTransactions += crate.transactions?.length ?? 0;
+          acc.totalSubscribers += crate.activeSubscribers ?? 0;
+          return acc;
+        },
+        { tvl: 0, totalTransactions: 0, totalSubscribers: 0 }
+      );
+    }, [cratesData]);
 
+    console.log(cratesData)
   const crates = [
     {
       name: "John Hickenlooper",
@@ -97,17 +112,17 @@ export default function LaunchPage() {
             <span className="text-4xl font-chakra text-[#A0A0A0] font-bold">Overview</span>
           </div>
           <div className="flex-[2] flex flex-row gap-8">
-            <div className="flex-1 flex flex-col  rounded-lg p-8">
-              <span className="text-3xl flex flex-row items-center gap-2 font-chakra text-white font-bold">$620.27 <span className="text-red-500 text-base align-top">-0.41</span></span>
-              <span className="text-[#A1A1A1] font-chakra mt-2">S&amp;P 500</span>
+          <div className="flex-1 flex flex-col  rounded-lg p-8">
+              <span className="text-3xl font-chakra text-white font-bold">{stats?.totalTransactions}</span>
+              <span className="text-[#A1A1A1] font-chakra mt-2">Total Transactions</span>
             </div>
             <div className="flex-1 flex flex-col  rounded-lg p-8">
-              <span className="text-3xl font-chakra text-white font-bold">$3,456.78</span>
-              <span className="text-[#A1A1A1] font-chakra mt-2">Net Worth</span>
+              <span className="text-3xl font-chakra text-white font-bold">{stats?.totalSubscribers}</span>
+              <span className="text-[#A1A1A1] font-chakra mt-2">Total Subscribers</span>
             </div>
             <div className="flex-1 flex flex-col  rounded-lg p-8">
-              <span className="text-3xl font-chakra text-white font-bold">$245.90</span>
-              <span className="text-[#A1A1A1] font-chakra mt-2">Total Returns</span>
+              <span className="text-3xl font-chakra text-white font-bold">${stats?.tvl.toFixed(2)}</span>
+              <span className="text-[#A1A1A1] font-chakra mt-2">Total Value Locked</span>
             </div>
           </div>
         </div>
@@ -190,6 +205,7 @@ export default function LaunchPage() {
 
             <div className="flex gap-3">
               <Button
+                href={"/discover/689090741310baca7450a37c"}
                 className="flex-1 text-white font-bold rounded-lg py-3 px-0 border-none shadow-none"
                 style={{
                   background:
@@ -221,18 +237,7 @@ export default function LaunchPage() {
                 >
                   Subscribe
                 </Button>
-              ) : (
-                <Button
-                  className="flex-1 text-black font-bold rounded-lg py-3 px-0 border-none shadow-none"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
-                    backgroundBlendMode: "normal, normal",
-                  }}
-                >
-                  Complete Your KYC
-                </Button>
-              )}
+              ) : null}
 
             </div>
           </motion.div>
@@ -272,6 +277,7 @@ export default function LaunchPage() {
             </p>
           </div>
           <Button
+            href={"/discover"}
             className="mt-6 md:mt-0 px-8 py-3 text-md font-chakra text-black font-bold rounded-xl border-none shadow-none"
             style={{
               background:

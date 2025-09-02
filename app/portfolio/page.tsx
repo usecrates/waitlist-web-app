@@ -235,7 +235,7 @@ export default function PortfolioPage() {
                             </tr>
                           </thead>
                           <tbody>
-                            {stocksData.map((stock: any, i: number) => (
+                            {stocksData?.map((stock: any, i: number) => (
                               <tr key={i} className="border-t border-[#232323] text-base">
                                 <td className="py-3 px-2">
                                   <div className="flex items-center gap-3">
