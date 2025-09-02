@@ -49,12 +49,12 @@ export default function SingleCrate() {
   const [exitModalOpen, setExitModalOpen] = useState(false);
   const [kycModalOpen, setKycModalOpen] = useState(false);
   const isKyced = userData?.is_kyc_complete;
-  console.log({userData})
+  console.log({ userData })
   const isSubscribed = userData?.subscribedCrates?.some(
     (crate: any) => crate.crateId === basket_id
   );
 
-  function getTokenAddress(chainId:number, tokens:any) {
+  function getTokenAddress(chainId: number, tokens: any) {
     const entry = tokens.find(token => token.split(":")[1] === String(chainId));
     return entry ? entry.split(":")[2] : null;
   }
@@ -78,7 +78,7 @@ export default function SingleCrate() {
         },
       }
     );
-    
+
   };
 
   const handleInvest = () => {
@@ -302,8 +302,8 @@ export default function SingleCrate() {
                 <h3 className="text-xl font-semibold mb-2">
                   Holding Distribution
                 </h3>
-                <div className="relative w-full h-[300px]">
-                <DonutChartWithLegend stocks={crate?.stocks || []} />
+                <div className="relative w-full h-auto">
+                  <DonutChartWithLegend stocks={crate?.stocks || []} />
                   {!isSubscribed && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm rounded-lg border border-[#232323] z-10">
                       <img
@@ -429,7 +429,7 @@ export default function SingleCrate() {
                         "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
                       backgroundBlendMode: "normal, normal",
                     }}
-                    onClick={()=>setExitModalOpen(true)}
+                    onClick={() => setExitModalOpen(true)}
                   >
                     Exit
                   </button>
@@ -516,7 +516,7 @@ export default function SingleCrate() {
           onOpenChange={setExitModalOpen}
           crate={crate}
           userData={userData}
-          subscribeCrateData={userData?.subscribedCrates?.find((_c)=>_c.crateId===crate._id)}
+          subscribeCrateData={userData?.subscribedCrates?.find((_c) => _c.crateId === crate._id)}
         />
         <BuyCrateModal
           open={buyModalOpen}

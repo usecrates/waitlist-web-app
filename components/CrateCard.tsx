@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export type Crate = {
   name: string;
@@ -35,8 +36,8 @@ const CrateCard = ({ crate }: { crate: Crate }) => {
             alt={crate?.name}
           />
           <div>
-            <h3 className="text-white font-semibold text-xl leading-snug">
-              {crate?.name}
+            <h3 className="text-white font-semibold text-xl leading-snug cursor-pointer">
+              <Link href={`/discover/${crate?._id?.toString()}`}>{crate?.name}</Link>
             </h3>
             <p className="text-gray-400 text-sm font-medium line-clamp-2">
               {crate?.description}
@@ -98,7 +99,7 @@ const CrateCard = ({ crate }: { crate: Crate }) => {
             color: "white",
           }}
         >
-          View Details
+          Explore
         </Button>
         <Button
           disabled={crate?.isSubscribed}

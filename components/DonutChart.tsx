@@ -34,7 +34,7 @@ const renderLegend = (stocks) => {
             />
             <span>{entry.stock?.name} -- {entry.stock?.symbol}</span>
           </div>
-          <span className="text-gray-400">{entry.weight}%</span>
+          <span className="text-gray-400">{entry.weight.toFixed(2)}%</span>
         </div>
       ))}
     </div>
