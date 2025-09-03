@@ -10,24 +10,34 @@ import { useMemo } from "react";
 
 export default function LaunchPage() {
 
-  const { address,authenticated } = usePrivyAuth();
+  const { address, authenticated } = usePrivyAuth();
   const { data: userData, isLoading, error } = useEnrichedUser(address, authenticated);
-    const { data: cratesData, isLoading:cratesLoading } = useGetAllCrates();
-    const stats = useMemo(() => {
-      if (!cratesData) return { tvl: 0, totalTransactions: 0, totalSubscribers: 0 };
-    
-      return cratesData.reduce(
-        (acc, crate) => {
-          acc.tvl += Number(crate.tvl) ?? 0;
-          acc.totalTransactions += crate.transactions?.length ?? 0;
-          acc.totalSubscribers += crate.activeSubscribers ?? 0;
-          return acc;
-        },
-        { tvl: 0, totalTransactions: 0, totalSubscribers: 0 }
-      );
-    }, [cratesData]);
+  const { data: cratesData, isLoading: cratesLoading } = useGetAllCrates();
 
-    console.log(cratesData)
+  const subscribedIds = new Set(
+    userData?.subscribedCrates.map((c: any) => c.crateId)
+  );
+
+  // extend crates with a boolean
+  const cratesWithSubscription = cratesData?.map((crate: any) => ({
+    ...crate,
+    isSubscribed: subscribedIds.has(crate._id),
+  }));
+  const stats = useMemo(() => {
+    if (!cratesData) return { tvl: 0, totalTransactions: 0, totalSubscribers: 0 };
+
+    return cratesData.reduce(
+      (acc, crate) => {
+        acc.tvl += Number(crate.tvl) ?? 0;
+        acc.totalTransactions += crate.transactions?.length ?? 0;
+        acc.totalSubscribers += crate.activeSubscribers ?? 0;
+        return acc;
+      },
+      { tvl: 0, totalTransactions: 0, totalSubscribers: 0 }
+    );
+  }, [cratesData]);
+
+  console.log(cratesData)
   const crates = [
     {
       name: "John Hickenlooper",
@@ -112,7 +122,7 @@ export default function LaunchPage() {
             <span className="text-4xl font-chakra text-[#A0A0A0] font-bold">Overview</span>
           </div>
           <div className="flex-[2] flex flex-row gap-8">
-          <div className="flex-1 flex flex-col  rounded-lg p-8">
+            <div className="flex-1 flex flex-col  rounded-lg p-8">
               <span className="text-3xl font-chakra text-white font-bold">{stats?.totalTransactions}</span>
               <span className="text-[#A1A1A1] font-chakra mt-2">Total Transactions</span>
             </div>
@@ -250,7 +260,7 @@ export default function LaunchPage() {
 
 
         <div className="grid md:grid-cols-3 gap-6">
-          {crates.map((crate, i) => (
+          {cratesWithSubscription?.length && cratesWithSubscription?.map((crate, i) => (
             <CrateCard key={i} crate={crate} />
           ))}
         </div>

@@ -9,12 +9,32 @@ import { Bug } from "lucide-react";
 import toast from 'react-hot-toast';
 import { getChainColor } from "@/utils/get_logo.ts";
 import Link from "next/link";
+import { useBalance } from "wagmi";
 export default function PortfolioPage() {
+
   const [activeTab, setActiveTab] = useState("Crates");
   const { address, authenticated } = usePrivyAuth();
   const { data: userPortfolio, isLoading, error } = useUserPortfolio(address, authenticated);
   const { data: cratesData, isLoading: cratesLoading } = useGetAllCrates();
   const { data: userData, isLoading: userLoading } = useEnrichedUser(address, authenticated);
+  const {
+    data: nativeBalance,
+    isLoading: nativeLoading,
+  } = useBalance({
+    address,
+    enabled: !!address, // prevents running if no wallet
+  });
+
+  // ✅ ERC20 balance (mockUSD for example)
+  const {
+    data: tokenBalance,
+    isLoading: tokenLoading,
+  } = useBalance({
+    address,
+    token: "0x665b099132d79739462DfDe6874126AFe840F7a3" as `0x${string}`,
+    enabled: !!address, // same guard
+  });
+
 
 
   const subscribedIds = new Set(
@@ -88,8 +108,8 @@ export default function PortfolioPage() {
                   <div className="flex gap-8 border-t pt-3 border-b border-[#232323] mb-0">
                     <button
                       className={`px-2 pb-2 text-base border-b-2 transition-all ${activeTab === "Crates"
-                          ? "border-white text-white"
-                          : "border-transparent text-gray-400"
+                        ? "border-white text-white"
+                        : "border-transparent text-gray-400"
                         }`}
                       onClick={() => setActiveTab("Crates")}
                     >
@@ -97,8 +117,8 @@ export default function PortfolioPage() {
                     </button>
                     <button
                       className={`px-2 pb-2 text-base border-b-2 transition-all ${activeTab === "Stocks"
-                          ? "border-white text-white"
-                          : "border-transparent text-gray-400"
+                        ? "border-white text-white"
+                        : "border-transparent text-gray-400"
                         }`}
                       onClick={() => setActiveTab("Stocks")}
                     >
@@ -111,10 +131,10 @@ export default function PortfolioPage() {
                     <div className="flex w-full">
                       {/* Current Value */}
                       <div className="w-1/2 flex flex-col items-start justify-center px-4">
-                        <div className="text-2xl font-bold flex items-end gap-2">
-                          $835.90 <span className="text-green-400 text-base font-normal">12.67%</span>
+                        <div className="text-2xl font-bold">
+                          {nativeLoading ? "Loading..." : `${Number(nativeBalance?.formatted || 0).toFixed(2)} ETH`}
                         </div>
-                        <div className="text-gray-400 text-sm mt-1">Current Value</div>
+                        <div className="text-gray-400 text-sm mt-1">Native Balance</div>
                       </div>
                       {/* Divider */}
                       <div className="w-px bg-[#232323] h-20 self-center" />
@@ -122,6 +142,13 @@ export default function PortfolioPage() {
                       <div className="w-1/2 flex flex-col items-start justify-center px-4">
                         <div className="text-2xl font-bold">$501.29</div>
                         <div className="text-gray-400 text-sm mt-1">Total Invested</div>
+                      </div>
+                      <div className="w-px bg-[#232323] h-20 self-center" />
+                      <div className="w-1/2 flex flex-col items-start justify-center px-4">
+                        <div className="text-2xl font-bold">
+                          {tokenLoading ? "Loading..." : `$${Number(tokenBalance?.formatted || 0).toFixed(2)}`}
+                        </div>
+                        <div className="text-gray-400 text-sm mt-1">mockUSD Holding</div>
                       </div>
                     </div>
                   </div>
@@ -184,6 +211,10 @@ export default function PortfolioPage() {
                                 <div>
                                   <div className="text-green-400 font-semibold text-xl">{crate.activeSubscribers}</div>
                                   <div className="text-gray-400 text-xs">Active Subscribers</div>
+                                </div>
+                                <div>
+                                  <div className="text-green-400 font-semibold text-xl">{crate?.stocks?.length}</div>
+                                  <div className="text-gray-400 text-xs">Stocks Holding</div>
                                 </div>
                                 <div>
                                   <div className="text-green-400 font-semibold text-xl">{crate.monthlyReturnPercent}%</div>
