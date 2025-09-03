@@ -18,7 +18,7 @@ export function useHasMounted() {
 const createKYCLink = async (entity_id: string) => {
     try {
         const res = await api.get(`/user/kyc/${entity_id}`);
-   
+
         if (!res.data.success) {
             throw new Error(res.data.message || "Failed to fetch user");
         }
@@ -27,6 +27,21 @@ const createKYCLink = async (entity_id: string) => {
         throw new Error(error?.response?.data?.message || error.message || "Unknown error");
     }
 };
+
+const getMockUsdc = async (wallet: `0x${string}`, chain_id: number) => {
+    try {
+        const res = await api.post(`/user/fund-wallet`, {
+            wallet, chain_id
+        });
+
+        if (!res.data.success) {
+            throw new Error(res.data.message || "Failed to fetch user");
+        }
+        return res.data;
+    } catch (error: any) {
+        throw new Error(error?.response?.data?.message || error.message || "Unknown error");
+    }
+}
 
 const fetchUserByWallet = async (wallet: string): Promise<EnrichedUser> => {
     try {
@@ -173,3 +188,16 @@ export const useUserOrders = (userId: string, enabled: boolean = true) => {
         staleTime: 1000 * 60 * 5, // 5 minutes
     });
 };
+
+export function useFundWallet() {
+    return useMutation({
+        mutationFn: ({ wallet, chain_id }: { wallet: `0x${string}`; chain_id: number }) =>
+            getMockUsdc(wallet, chain_id),
+        onSuccess: () => {
+            toast.success("✅ Wallet funded successfully!")
+        },
+        onError: (error: any) => {
+            toast.error(`❌ ${error.message}`)
+        },
+    })
+}

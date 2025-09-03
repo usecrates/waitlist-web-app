@@ -3,9 +3,15 @@ import { motion } from "framer-motion";
 import LoginButton from "@/components/LoginButton";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { Button } from "../ui/button";
+import { useFundWallet } from "@/hooks/user-hooks";
+import { useAccount, useChainId } from "wagmi";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { mutate: fundWallet, isPending, isError, error, data } = useFundWallet()
+  const { address } = useAccount();
+  const chainId = useChainId();
   return (
     <header className="fixed top-0 left-0 font-chakra right-0 z-50 bg-black border-b border-[#272727] py-4">
       <div className="max-w-6xl mx-auto flex items-center justify-between ">
@@ -25,9 +31,11 @@ export default function Navbar() {
             <Link href="/orders" className={pathname === "/orders" ? "text-white" : "text-gray-400 hover:text-white transition-colors"}>
               Orders
             </Link>
-            {/* <Link href="/create" className={pathname === "/create" ? "text-white" : "text-gray-400 hover:text-white transition-colors"}>
-              Create
-            </Link> */}
+            <Button
+              disabled={isPending}
+              onClick={() => fundWallet({ wallet: address as `0x${string}`, chain_id: chainId })} className="text-white bg-inherit">
+              Fund Wallet
+            </Button>
           </nav>
         </div>
         {/* Right: Wallet/Account Button */}
