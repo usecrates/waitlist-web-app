@@ -34,6 +34,8 @@ const getMockUsdc = async (wallet: `0x${string}`, chain_id: number) => {
             wallet, chain_id
         });
 
+        console.log(res)
+
         if (!res.data.success) {
             throw new Error(res.data.message || "Failed to fetch user");
         }
