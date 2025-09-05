@@ -86,6 +86,7 @@ export default function SingleCrate() {
       toast.error("Please complete KYC to invest in crates.");
       return;
     }
+    console.log("clickd")
 
     createBuyOrder(
       {

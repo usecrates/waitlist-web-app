@@ -3,18 +3,21 @@
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
-import { switchChain } from "@wagmi/core";
-import { useEffect, useState } from "react";
+
+import { useWallets } from "@privy-io/react-auth";
 import { Button } from "@/components/ui/button";
-import { useChainId } from "wagmi";
 import { config } from "./PrivyProviderWrapper";
+import { useSwitchChain } from "wagmi";
 const REQUIRED_CHAIN_ID = 11155111; // Sepolia
 
 export default function LoginButton() {
   const { customizeLogin, logout, address, authenticated, loading } = usePrivyAuth();
   const shortAddress = address ? `${address.slice(0, 4)}...${address.slice(-4)}` : "";
-
-  const chainId = useChainId();
+  const { wallets } = useWallets();
+  const { switchChain } = useSwitchChain(); 
+  const wallet = wallets[0];
+  const chainId = wallet?.chainId;
+  console.log(chainId,"chains")
 
   const copyToClipboard = async () => {
     if (address) {
@@ -25,7 +28,8 @@ export default function LoginButton() {
 
   const handleSwitchChain = async () => {
     try {
-      await switchChain(config,{chainId:REQUIRED_CHAIN_ID});
+      console.log("Connect to different chain")
+      await switchChain({ chainId: REQUIRED_CHAIN_ID });
       toast.success("Switched to Sepolia!");
     } catch (err) {
       toast.error("Failed to switch network");
@@ -37,7 +41,7 @@ export default function LoginButton() {
     <div className="flex flex-col items-center gap-2">
       {authenticated && address ? (
         <div className="flex gap-2 text-black">
-          {chainId !== REQUIRED_CHAIN_ID ? (
+          {chainId !== `eip155:${REQUIRED_CHAIN_ID}` ? (
             <Button
               onClick={handleSwitchChain}
               className="text-white font-medium px-4 py-2"
