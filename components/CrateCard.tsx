@@ -2,7 +2,10 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
+import { useEnrichedUser, useSubscribeCrate } from "@/hooks/user-hooks";
+import { useAccount } from "wagmi";
+import toast from "react-hot-toast";
+import { usePrivyAuth } from "@/context/PrivyAuthContext";
 export type Crate = {
   name: string;
   description: string;
@@ -16,6 +19,38 @@ export type Crate = {
 };
 
 const CrateCard = ({ crate }: { crate: Crate }) => {
+
+  const {
+    mutate: subscribeCrate,
+    isPending,
+    isSuccess: subscribeSuccess,
+    isError,
+  } = useSubscribeCrate();
+
+  const { address, authenticated } = usePrivyAuth();
+  const { refetch: refetchUser } = useEnrichedUser(
+    address,
+    authenticated
+  );
+  const handleSubscribe = () => {
+    if (!address) {
+      toast.error("Please connect your wallet to subscribe.");
+      return;
+    }
+
+    subscribeCrate(
+      { wallet: address, crateId: crate?._id as string },
+      {
+        onSuccess: () => {
+          toast.success("Subscribed to crate successfully.");
+          refetchUser();
+          //todo refresh the page after subcribing
+        },
+      }
+    );
+
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -91,30 +126,32 @@ const CrateCard = ({ crate }: { crate: Crate }) => {
 
       {/* Buttons */}
       <div className="flex gap-4">
-        <Button
-          href={`/discover/${crate?._id?.toString()}`}
-          className="flex-1 font-semibold rounded-lg py-3 shadow-md hover:shadow-lg transition-all"
-          style={{
-            background: "linear-gradient(135deg, #2e2e2e, #3a3a3a)",
-            color: "white",
-          }}
-        >
-          Explore
-        </Button>
-        <Button
-          disabled={crate?.isSubscribed}
-          className="flex-1 font-semibold rounded-lg py-3 shadow-md hover:shadow-lg transition-all"
-          style={{
-            background: crate?.isSubscribed
-              ? "linear-gradient(135deg, #059669, #10B981)" // Green when subscribed
-              : "linear-gradient(135deg, #7B7B7B, #999999)", // Gray when not
-            color: crate?.isSubscribed ? "white" : "black",
-            cursor: crate?.isSubscribed ? "not-allowed" : "pointer",
-          }}
-        >
-          {crate?.isSubscribed ? "Subscribed" : "Subscribe"}
-        </Button>
+        {crate?.isSubscribed ? (
+          <Button
+            href={`/discover/${crate?._id?.toString()}`}
+            className="flex-1 font-semibold rounded-lg py-3 shadow-md hover:shadow-lg transition-all"
+            style={{
+              background: "linear-gradient(135deg, #2e2e2e, #3a3a3a)",
+              color: "white",
+            }}
+          >
+            Explore
+          </Button>
+        ) : (
+          <Button
+            className="w-full !font-bold bg-white text-black"
+            style={{
+              background:
+                "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+            }}
+            disabled={isPending}
+            onClick={handleSubscribe}
+          >
+            {isPending ? "Subscribing..." : "Subscribe"}
+          </Button>
+        )}
       </div>
+
     </motion.div>
   );
 };

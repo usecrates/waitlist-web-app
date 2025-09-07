@@ -2,7 +2,12 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
-import { useCreateKYCLink, useEnrichedUser, useFundWallet, useRegisterUser } from "@/hooks/user-hooks";
+import {
+  useCreateKYCLink,
+  useEnrichedUser,
+  useFundWallet,
+  useRegisterUser,
+} from "@/hooks/user-hooks";
 import Dinari from "@dinari/api-sdk";
 import { useSignMessage } from "wagmi";
 import { api } from "@/config";
@@ -11,29 +16,21 @@ import toast from "react-hot-toast";
 interface KycModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  crate?: {
-    name?: string;
-    meta?: string;
-    image?: string;
-    subscriptionAmount?: number;
-  };
 }
 
-export function KycModal({ open, onOpenChange, crate }: KycModalProps) {
-  const hasPaymentStep = !!crate?.subscriptionAmount && crate.subscriptionAmount > 0;
-  const steps = ["Register", "KYC", "Link Wallet"]
-    .concat(hasPaymentStep ? ["Payment", "Fund Wallet"] : []);
+export function KycModal({ open, onOpenChange }: KycModalProps) {
+  const steps = ["Register", "KYC", "Link Wallet", "Fund Wallet"];
 
   const [step, setStep] = useState(0);
-  const [duration, setDuration] = useState("3 Months");
-  const total = crate?.subscriptionAmount || 15;
-  const nextRenewal = "18th Oct 2025";
 
   const { mutate: fundWallet, isPending: fundingWallet } = useFundWallet();
   const { address, authenticated } = usePrivyAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const { data: userData, refetch: refetchUser } = useEnrichedUser(address, authenticated);
+  const { data: userData, refetch: refetchUser } = useEnrichedUser(
+    address,
+    authenticated
+  );
   const { mutate: registerUser, isPending: isRegistering } = useRegisterUser();
   const { mutate: kycMutate, isPending: kycPending } = useCreateKYCLink();
   const { signMessageAsync } = useSignMessage();
@@ -55,11 +52,8 @@ export function KycModal({ open, onOpenChange, crate }: KycModalProps) {
   useEffect(() => {
     if (step === 0 && hasRegistered) setStep(1);
     if (step === 1 && hasStartedKYC) setStep(2);
-    if (step === 2 && hasLinkedWallet) {
-      if (hasPaymentStep) setStep(3);
-      else onOpenChange(false);
-    }
-  }, [step, hasRegistered, hasStartedKYC, hasLinkedWallet, hasPaymentStep, onOpenChange]);
+    if (step === 2 && hasLinkedWallet) setStep(3);
+  }, [step, hasRegistered, hasStartedKYC, hasLinkedWallet]);
 
   // Register handler
   const handleRegister = useCallback(() => {
@@ -138,9 +132,7 @@ export function KycModal({ open, onOpenChange, crate }: KycModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md text-white w-full bg-[#181818] p-0 rounded-2xl font-chakra">
-        <DialogTitle>
-          {crate?.name ? `KYC for ${crate.name}` : "KYC Onboarding"}
-        </DialogTitle>
+        <DialogTitle>KYC Onboarding</DialogTitle>
 
         {/* Step Indicator */}
         <div className="flex justify-between items-center p-3 bg-[#121212]">
@@ -249,51 +241,7 @@ export function KycModal({ open, onOpenChange, crate }: KycModalProps) {
             </>
           )}
 
-          {step === 3 && hasPaymentStep && (
-            <>
-              <div className="text-lg font-semibold mb-4">Complete Payment</div>
-              <div className="flex items-center border gap-4 border-[#484848] bg-[#232323] rounded-md p-3 mb-4">
-                <img
-                  src={crate?.image}
-                  className="w-12 h-12 rounded-lg object-cover"
-                  alt="crate"
-                />
-                <div>
-                  <div className="text-lg font-semibold">{crate?.name}</div>
-                  <div className="text-xs text-[#A1A1A1]">{crate?.meta}</div>
-                </div>
-              </div>
-              <select
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                className="w-full bg-[#232323] border border-[#484848] text-white rounded px-4 py-3 mb-4"
-              >
-                <option value="3 Months">3 Months</option>
-                <option value="6 Months">6 Months</option>
-                <option value="12 Months">12 Months</option>
-              </select>
-              <div className="flex justify-between mb-1 text-base">
-                <span className="text-[#A1A1A1]">Total</span>
-                <span className="font-bold">${total}</span>
-              </div>
-              <div className="flex justify-between mb-6 text-base">
-                <span className="text-[#A1A1A1]">Next Renewal</span>
-                <span className="font-bold">{nextRenewal}</span>
-              </div>
-              <button
-                onClick={() => setStep(4)}
-                className="w-full py-3 rounded font-bold text-black mt-2"
-                style={{
-                  background:
-                    "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
-                }}
-              >
-                Pay & Subscribe
-              </button>
-            </>
-          )}
-
-          {step === 4 && hasPaymentStep && (
+          {step === 3 && (
             <>
               <div className="text-lg font-semibold mb-4">Fund Your Wallet</div>
               <p className="text-sm text-gray-400 mb-4">
