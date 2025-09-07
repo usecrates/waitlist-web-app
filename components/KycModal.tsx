@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
-import { useCreateKYCLink, useEnrichedUser, useRegisterUser } from "@/hooks/user-hooks";
+import { useCreateKYCLink, useEnrichedUser, useFundWallet, useRegisterUser } from "@/hooks/user-hooks";
 import Dinari from "@dinari/api-sdk";
 import { useSignMessage } from "wagmi";
 import { api } from "@/config";
@@ -21,19 +21,23 @@ interface KycModalProps {
 
 export function KycModal({ open, onOpenChange, crate }: KycModalProps) {
   const hasPaymentStep = !!crate?.subscriptionAmount && crate.subscriptionAmount > 0;
-  const steps = ["Register", "KYC", "Link Wallet"].concat(hasPaymentStep ? ["Payment"] : []);
+  const steps = ["Register", "KYC", "Link Wallet"]
+    .concat(hasPaymentStep ? ["Payment", "Fund Wallet"] : []);
+
   const [step, setStep] = useState(0);
   const [duration, setDuration] = useState("3 Months");
   const total = crate?.subscriptionAmount || 15;
   const nextRenewal = "18th Oct 2025";
 
+  const { mutate: fundWallet, isPending: fundingWallet } = useFundWallet();
   const { address, authenticated } = usePrivyAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const { data: userData, refetch: refetchUser } = useEnrichedUser(address, authenticated);
   const { mutate: registerUser, isPending: isRegistering } = useRegisterUser();
-  const { mutate: kycMutate, isPending: kycPending, isSuccess: kycSuccess, data: kycData } = useCreateKYCLink();
+  const { mutate: kycMutate, isPending: kycPending } = useCreateKYCLink();
   const { signMessageAsync } = useSignMessage();
+
   const [walletLinking, setWalletLinking] = useState(false);
   const [walletLinked, setWalletLinked] = useState(false);
   const [kycLink, setKycLink] = useState("");
@@ -43,7 +47,9 @@ export function KycModal({ open, onOpenChange, crate }: KycModalProps) {
   const hasLinkedWallet = !!userData?.is_dinari_wallet_link || walletLinked;
 
   // Reset step when modal closes
-  useEffect(() => { if (!open) setStep(0); }, [open]);
+  useEffect(() => {
+    if (!open) setStep(0);
+  }, [open]);
 
   // Auto advance steps
   useEffect(() => {
@@ -86,41 +92,74 @@ export function KycModal({ open, onOpenChange, crate }: KycModalProps) {
         apiSecretKey: process.env.NEXT_PUBLIC_DINARI_API_SECRET_KEY,
         environment: "sandbox",
       });
-      const nonceResp = await client.v2.accounts.wallet.external.getNonce(userData.dinari_account_id, {
-        wallet_address: address,
-        chain_id: "eip155:0",
-      });
+      const nonceResp = await client.v2.accounts.wallet.external.getNonce(
+        userData.dinari_account_id,
+        {
+          wallet_address: address,
+          chain_id: "eip155:0",
+        }
+      );
       const signature = await signMessageAsync({ message: nonceResp.message });
-      const linkWallet = await client.v2.accounts.wallet.external.connect(userData.dinari_account_id, {
-        chain_id: "eip155:0",
-        nonce: nonceResp.nonce,
-        signature,
-        wallet_address: address,
-      });
+      const linkWallet = await client.v2.accounts.wallet.external.connect(
+        userData.dinari_account_id,
+        {
+          chain_id: "eip155:0",
+          nonce: nonceResp.nonce,
+          signature,
+          wallet_address: address,
+        }
+      );
       if (linkWallet.address) {
         await api.post("/user/link-wallet", { wallet: address, flag: true });
         setWalletLinked(true);
         toast.success("Wallet linked successfully!");
         refetchUser();
       } else toast.error("Wallet linking failed.");
-    } finally { setWalletLinking(false); }
+    } finally {
+      setWalletLinking(false);
+    }
+  };
+
+  // Fund wallet handler
+  const handleFundWallet = () => {
+    if (!address) return toast.error("Wallet not connected");
+    fundWallet(
+      { wallet: address },
+      {
+        onSuccess: () => {
+          toast.success("Wallet funded successfully!");
+          onOpenChange(false);
+        },
+        onError: () => toast.error("Failed to fund wallet"),
+      }
+    );
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md text-white w-full bg-[#181818] p-0 rounded-2xl font-chakra">
-        <DialogTitle>{crate?.name ? `KYC for ${crate.name}` : 'KYC Onboarding'}</DialogTitle>
+        <DialogTitle>
+          {crate?.name ? `KYC for ${crate.name}` : "KYC Onboarding"}
+        </DialogTitle>
 
         {/* Step Indicator */}
         <div className="flex justify-between items-center p-3 bg-[#121212]">
           <div className="text-lg font-bold">Onboarding Steps</div>
-          <button className="text-gray-400 hover:text-white" onClick={() => onOpenChange(false)}>
+          <button
+            className="text-gray-400 hover:text-white"
+            onClick={() => onOpenChange(false)}
+          >
             <X size={20} />
           </button>
         </div>
         <div className="flex justify-between mt-2 px-3 mb-4 text-sm text-gray-400">
           {steps.map((s, idx) => (
-            <span key={s} className={`flex-1 text-center ${idx <= step ? "text-white font-semibold" : ""}`}>
+            <span
+              key={s}
+              className={`flex-1 text-center ${
+                idx <= step ? "text-white font-semibold" : ""
+              }`}
+            >
               {s}
             </span>
           ))}
@@ -131,13 +170,39 @@ export function KycModal({ open, onOpenChange, crate }: KycModalProps) {
           {step === 0 && (
             <>
               <div className="text-lg font-semibold mb-4">Register Account</div>
-              <input placeholder="Full Name" value={name} onChange={e => setName(e.target.value)}
-                className="w-full mb-3 px-3 py-2 rounded bg-[#2a2a2a] border border-gray-500 text-white" disabled={hasRegistered}/>
-              <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)}
-                className="w-full mb-3 px-3 py-2 rounded bg-[#2a2a2a] border border-gray-500 text-white" disabled={hasRegistered}/>
-              <input value={address || ""} disabled className="w-full mb-4 px-3 py-2 rounded bg-[#2a2a2a] border border-gray-500 text-white"/>
-              <button onClick={handleRegister} disabled={hasRegistered || isRegistering} className="w-full py-3 rounded font-bold text-black mt-2" style={{background:"linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)"}}>
-                {isRegistering ? "Creating..." : hasRegistered ? "Registered ✅" : "Create Entity ID"}
+              <input
+                placeholder="Full Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full mb-3 px-3 py-2 rounded bg-[#2a2a2a] border border-gray-500 text-white"
+                disabled={hasRegistered}
+              />
+              <input
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full mb-3 px-3 py-2 rounded bg-[#2a2a2a] border border-gray-500 text-white"
+                disabled={hasRegistered}
+              />
+              <input
+                value={address || ""}
+                disabled
+                className="w-full mb-4 px-3 py-2 rounded bg-[#2a2a2a] border border-gray-500 text-white"
+              />
+              <button
+                onClick={handleRegister}
+                disabled={hasRegistered || isRegistering}
+                className="w-full py-3 rounded font-bold text-black mt-2"
+                style={{
+                  background:
+                    "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                }}
+              >
+                {isRegistering
+                  ? "Creating..."
+                  : hasRegistered
+                  ? "Registered ✅"
+                  : "Create Entity ID"}
               </button>
             </>
           )}
@@ -145,8 +210,20 @@ export function KycModal({ open, onOpenChange, crate }: KycModalProps) {
           {step === 1 && (
             <>
               <div className="text-lg font-semibold mb-4">KYC Verification</div>
-              <button onClick={handleKYC} disabled={!hasRegistered || hasStartedKYC || kycPending} className="w-full py-3 rounded font-bold text-black mt-2" style={{background:"linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)"}}>
-                {kycPending ? "Loading..." : hasStartedKYC ? "KYC Complete ✅" : "Start KYC"}
+              <button
+                onClick={handleKYC}
+                disabled={!hasRegistered || hasStartedKYC || kycPending}
+                className="w-full py-3 rounded font-bold text-black mt-2"
+                style={{
+                  background:
+                    "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                }}
+              >
+                {kycPending
+                  ? "Loading..."
+                  : hasStartedKYC
+                  ? "KYC Complete ✅"
+                  : "Start KYC"}
               </button>
             </>
           )}
@@ -154,8 +231,20 @@ export function KycModal({ open, onOpenChange, crate }: KycModalProps) {
           {step === 2 && (
             <>
               <div className="text-lg font-semibold mb-4">Link Wallet</div>
-              <button onClick={handleLinkWallet} disabled={!hasStartedKYC || hasLinkedWallet || walletLinking} className="w-full py-3 rounded font-bold text-black mt-2" style={{background:"linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)"}}>
-                {walletLinking ? "Linking..." : hasLinkedWallet ? "Wallet Linked ✅" : "Link to Dinari"}
+              <button
+                onClick={handleLinkWallet}
+                disabled={!hasStartedKYC || hasLinkedWallet || walletLinking}
+                className="w-full py-3 rounded font-bold text-black mt-2"
+                style={{
+                  background:
+                    "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                }}
+              >
+                {walletLinking
+                  ? "Linking..."
+                  : hasLinkedWallet
+                  ? "Wallet Linked ✅"
+                  : "Link to Dinari"}
               </button>
             </>
           )}
@@ -164,20 +253,64 @@ export function KycModal({ open, onOpenChange, crate }: KycModalProps) {
             <>
               <div className="text-lg font-semibold mb-4">Complete Payment</div>
               <div className="flex items-center border gap-4 border-[#484848] bg-[#232323] rounded-md p-3 mb-4">
-                <img src={crate?.image} className="w-12 h-12 rounded-lg object-cover" alt="crate"/>
+                <img
+                  src={crate?.image}
+                  className="w-12 h-12 rounded-lg object-cover"
+                  alt="crate"
+                />
                 <div>
                   <div className="text-lg font-semibold">{crate?.name}</div>
                   <div className="text-xs text-[#A1A1A1]">{crate?.meta}</div>
                 </div>
               </div>
-              <select value={duration} onChange={e => setDuration(e.target.value)} className="w-full bg-[#232323] border border-[#484848] text-white rounded px-4 py-3 mb-4">
+              <select
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                className="w-full bg-[#232323] border border-[#484848] text-white rounded px-4 py-3 mb-4"
+              >
                 <option value="3 Months">3 Months</option>
                 <option value="6 Months">6 Months</option>
                 <option value="12 Months">12 Months</option>
               </select>
-              <div className="flex justify-between mb-1 text-base"><span className="text-[#A1A1A1]">Total</span><span className="font-bold">${total}</span></div>
-              <div className="flex justify-between mb-6 text-base"><span className="text-[#A1A1A1]">Next Renewal</span><span className="font-bold">{nextRenewal}</span></div>
-              <button onClick={() => onOpenChange(false)} className="w-full py-3 rounded font-bold text-black mt-2" style={{background:"linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)"}}>Pay & Subscribe</button>
+              <div className="flex justify-between mb-1 text-base">
+                <span className="text-[#A1A1A1]">Total</span>
+                <span className="font-bold">${total}</span>
+              </div>
+              <div className="flex justify-between mb-6 text-base">
+                <span className="text-[#A1A1A1]">Next Renewal</span>
+                <span className="font-bold">{nextRenewal}</span>
+              </div>
+              <button
+                onClick={() => setStep(4)}
+                className="w-full py-3 rounded font-bold text-black mt-2"
+                style={{
+                  background:
+                    "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                }}
+              >
+                Pay & Subscribe
+              </button>
+            </>
+          )}
+
+          {step === 4 && hasPaymentStep && (
+            <>
+              <div className="text-lg font-semibold mb-4">Fund Your Wallet</div>
+              <p className="text-sm text-gray-400 mb-4">
+                Add funds to your wallet to start investing and cover future
+                transactions.
+              </p>
+              <button
+                onClick={handleFundWallet}
+                disabled={fundingWallet}
+                className="w-full py-3 rounded font-bold text-black mt-2"
+                style={{
+                  background:
+                    "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
+                }}
+              >
+                {fundingWallet ? "Funding..." : "Fund Wallet"}
+              </button>
             </>
           )}
         </div>
