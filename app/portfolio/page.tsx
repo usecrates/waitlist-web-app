@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { RebalanceModal } from "@/components/RebalanceModal";
 import { useEnrichedUser, useGetAllCrates, useUserPortfolio } from "../../hooks/user-hooks";
 import { usePrivyAuth } from "../../context/PrivyAuthContext";
 import { Bug } from "lucide-react";
 import toast from 'react-hot-toast';
-import { getChainColor } from "@/utils/get_logo.ts";
+import { getChainColor } from "@/utils/get_logo";
 import Link from "next/link";
 import { useBalance } from "wagmi";
 export default function PortfolioPage() {
-
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const [activeTab, setActiveTab] = useState("Crates");
   const { address, authenticated } = usePrivyAuth();
   const { data: userPortfolio, isLoading, error } = useUserPortfolio(address, authenticated);
@@ -25,7 +26,6 @@ export default function PortfolioPage() {
     enabled: !!address, // prevents running if no wallet
   });
 
-  // ✅ ERC20 balance (mockUSD for example)
   const {
     data: tokenBalance,
     isLoading: tokenLoading,
@@ -58,7 +58,7 @@ export default function PortfolioPage() {
   const stocksData = userPortfolio?.portfolio?.assets?.map((asset: any) => {
 
     // Format token address with ellipsis
-    const tokenAddress = asset.token_address || '';
+    const tokenAddress = asset?.token_address || '';
     const shortAddress = tokenAddress ? `${tokenAddress.slice(0, 6)}...${tokenAddress.slice(-4)}` : '';
 
     return {
@@ -77,7 +77,9 @@ export default function PortfolioPage() {
   });
 
 
-
+  if (!mounted) {
+    return <div className="text-center text-gray-400">Loading portfolio...</div>;
+  }
 
 
   return (
@@ -88,10 +90,6 @@ export default function PortfolioPage() {
             <div className="flex flex-col items-center justify-center min-h-[60vh]">
               <Bug className="w-16 h-16 text-gray-400 mb-4" />
               <div className="text-2xl font-chakra text-center">Connect your wallet</div>
-            </div>
-          ) : isLoading ? (
-            <div className="flex flex-col items-center justify-center min-h-[60vh]">
-              <div className="text-2xl font-chakra text-center">Loading portfolio...</div>
             </div>
           ) : (
             <>
@@ -227,16 +225,16 @@ export default function PortfolioPage() {
                           <div className="flex flex-row items-end gap-2 absolute right-2 top-1/2 -translate-y-10">
                             <div className="flex gap-2">
                               <button
-                                disabled
+                                
                                 className="bg-[#FFDBAC1A] border border-[#595959] text-[#FFDBAC] px-4 py-[0.3rem] rounded text-xs font-medium transition"
                                 onClick={() => { setSelectedCrate(crate); setRebalanceModalOpen(true); }}
                               >
                                 Rebalance
                               </button>
-                              {/* <button disabled className="bg-[#232323]  text-white px-4 py-[0.3rem] rounded text-xs font-medium flex items-center gap-1  transition">
+                              <button className="bg-[#232323]  text-white px-4 py-[0.3rem] rounded text-xs font-medium flex items-center gap-1  transition">
                             Copy Trade
                             <CustomToggle isOn={copyTradeToggles[i]} onToggle={() => handleToggleCopyTrade(i)} />
-                          </button> */}
+                          </button>
                             </div>
                             <div className="text-gray-500 cursor-pointer text-lg ">&#8942;</div>
                           </div>
@@ -261,7 +259,7 @@ export default function PortfolioPage() {
                               <th className="py-3 px-2 font-medium">Price</th>
                               <th className="py-3 px-2 font-medium">Holdings</th>
                               <th className="py-3 px-2 font-medium">Owned</th>
-                              <th className="py-3 px-2 font-medium">Net gain</th>
+                              {/* <th className="py-3 px-2 font-medium">Net gain</th> */}
                               <th className="py-3 px-2 font-medium"></th>
                             </tr>
                           </thead>
@@ -307,7 +305,7 @@ export default function PortfolioPage() {
                                 <td className="py-3 px-2">{stock.price}</td>
                                 <td className="py-3 px-2">{stock.holdings}</td>
                                 <td className="py-3 px-2">{stock.owned}</td>
-                                <td className={`py-3 px-2 font-semibold ${stock.netGainColor}`}>{stock.netGain}</td>
+                                {/* <td className={`py-3 px-2 font-semibold ${stock.netGainColor}`}>{stock.netGain}</td> */}
                                 <td className="py-3 px-2">
 
                                   <img src="/assets/circle-info.svg" alt="info" className="w-4 h-4 opacity-70" />
@@ -342,11 +340,11 @@ export default function PortfolioPage() {
                       alt="main avatar"
                     />
                     <div className="bg-[#232323] text-white text-xs px-3 py-1 rounded-full mb-2">
-                      XsHt...vULr7
+                      {`${address?.slice(0, 4)}...${address?.slice(-4)}`}
                     </div>
-                    <div className="text-gray-400 text-center text-xs mb-4">
+                    {/* <div className="text-gray-400 text-center text-xs mb-4">
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-                    </div>
+                    </div> */}
                     <div className="flex gap-8 mb-2">
                       <div className="text-center">
                         <div className="text-green-400 font-bold text-base">+12.45%</div>
@@ -375,6 +373,8 @@ export default function PortfolioPage() {
                 open={rebalanceModalOpen}
                 onOpenChange={setRebalanceModalOpen}
                 crate={selectedCrate}
+                stocksData={stocksData}
+
               />
             </>
           )}

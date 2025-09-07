@@ -7,18 +7,22 @@ interface RebalanceModalProps {
   onOpenChange: (open: boolean) => void;
   crate?: {
     name?: string;
-    meta?: string;
+    description?: string;
     image?: string;
-    avatar?: string;
+    imageUrl?: string;
   };
+  stocksData:any;
 }
 
-export function RebalanceModal({ open, onOpenChange, crate }: RebalanceModalProps) {
+
+
+export function RebalanceModal({ open, onOpenChange, crate,stocksData }: RebalanceModalProps) {
   const [step, setStep] = useState<'review' | 'status' | 'success'>('review');
   const [orderStatus, setOrderStatus] = useState<'waiting' | 'completed' | 'error'>('waiting');
   const [batchFilled, setBatchFilled] = useState(0);
   const [batchTotal] = useState(5);
 
+  console.log(stocksData)
   // Mock review data
   const reviewRows = [
     { stock: 'AAPL', current: '0.12 $30', allocation: '0.12 $30', action: 'Buy' },
@@ -89,11 +93,11 @@ export function RebalanceModal({ open, onOpenChange, crate }: RebalanceModalProp
           {step !== 'success' && (
                 <div className="flex items-center gap-4 bg-[#232323] rounded-md p-3 mb-4 border border-[#484848]">
                 <div className="p-[2px] rounded-lg" style={{ background: "linear-gradient(180deg, #8B8B8B 0%, #E9E9E9 50%, #8B8B8B 100%)" }}>
-                  <img src={crate?.avatar} className="w-12 h-12 rounded-lg object-cover" alt="crate" />
+                  <img src={crate?.imageUrl} className="w-12 h-12 rounded-lg object-cover" alt="crate" />
                 </div>
                 <div>
                   <div className="text-lg font-semibold">{crate?.name}</div>
-                  <div className="text-xs text-[#A1A1A1]">{crate?.meta || 'Democrat/House/California'}</div>
+                  <div className="text-xs text-[#A1A1A1]">{crate?.description || 'Democrat/House/California'}</div>
                 </div>
               </div>
                 

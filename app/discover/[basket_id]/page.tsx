@@ -352,7 +352,7 @@ export default function SingleCrate() {
           </Tabs>
         </div>
         <div className="border w-1/3 border-gray-700 bg-[#111 h-fit p-6 rounded-xl space-y-4 shadow-md">
-          {isSubscribed ? (
+          {isSubscribed && address && isKyced ? (
             <div className="flex flex-col items-center justify-center h-full w-full">
               <div className="w-full max-w-xs rounded-xl shadow-md">
                 <div className="flex items-center mb-6">
@@ -434,18 +434,6 @@ export default function SingleCrate() {
                   >
                     Exit
                   </button>
-                  {/* <Button
-                    onClick={handleInvest}
-                    className="w-full !font-bold bg-white text-black"
-                    style={{
-                      background:
-                        "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
-                      backgroundBlendMode: "normal, normal",
-                    }}
-                    disabled={createBuyOrderLoading}
-                  >
-                    {createBuyOrderLoading ? "Processing..." : "Button"}
-                  </Button> */}
                 </div>
               </div>
             </div>
@@ -463,45 +451,48 @@ export default function SingleCrate() {
                 {crate.activeSubscribers} Subscribers
               </p>
               <p className="text-sm text-gray-400">
-                Follow Nancy Pelosi's crates and copy trade her automatically
+                Follow {crate.name} crates and copy trade automatically
               </p>
               <div className="flex gap-4">
-                {!isKyced ? (
-                  // Show KYC button if user is not KYC'd
+                {!address ? (
+                  <p
+                    className="text-red-400"
+                  >
+                    Connect your wallet first
+                  </p>
+                ) : !isKyced ? (
+                  // Step 2: Wallet connected but not KYC'd
                   <Button
                     className="w-full !font-bold bg-white text-black"
                     style={{
                       background:
                         "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
-                      backgroundBlendMode: "normal, normal",
                     }}
                     onClick={() => setKycModalOpen(true)}
                   >
                     Do Your KYC
                   </Button>
                 ) : !isSubscribed ? (
-                  // Show Subscribe button if KYC'd but not subscribed
+                  // Step 3: Wallet connected + KYC complete, but not subscribed
                   <Button
                     className="w-full !font-bold bg-white text-black"
                     style={{
                       background:
                         "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
-                      backgroundBlendMode: "normal, normal",
                     }}
                     disabled={isPending}
                     onClick={handleSubscribe}
                   >
-                    Subscribe
+                    {isPending ? "Subscribing..." : "Subscribe"}
                   </Button>
                 ) : (
-
+                  
                   <Button
                     onClick={handleInvest}
                     className="w-full !font-bold bg-white text-black"
                     style={{
                       background:
                         "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
-                      backgroundBlendMode: "normal, normal",
                     }}
                     disabled={createBuyOrderLoading}
                   >
@@ -509,6 +500,7 @@ export default function SingleCrate() {
                   </Button>
                 )}
               </div>
+
             </>
           )}
         </div>
