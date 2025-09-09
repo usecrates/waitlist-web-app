@@ -33,20 +33,19 @@ const Page = () => {
 
   const ordersData = userData?.transactions || [];
 
+  // pagination state
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 10;
+
   const filteredOrders = useMemo(() => {
     let result = [...ordersData];
 
-    // filter by transaction type
     if (transactionType) {
       result = result.filter(order => order.type?.toLowerCase() === transactionType.toLowerCase());
     }
-
-    // filter by crate type
     if (crateType && crateType !== 'all') {
       result = result.filter(order => order.crateType?.toLowerCase() === crateType.toLowerCase());
     }
-
-    // search filter
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(order =>
@@ -55,14 +54,19 @@ const Page = () => {
         order.txHash?.toLowerCase().includes(q)
       );
     }
-
-    // sort latest first
     if (latestFirst) {
       result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
 
     return result;
   }, [ordersData, transactionType, crateType, search, latestFirst]);
+
+  // pagination logic
+  const totalPages = Math.ceil(filteredOrders.length / rowsPerPage);
+  const paginatedOrders = filteredOrders.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
+  );
 
   const hasTransactions = filteredOrders.length > 0;
 
@@ -80,6 +84,7 @@ const Page = () => {
         </div>
       ) : (
         <>
+          {/* Filters */}
           <div className="flex flex-wrap gap-4 items-center mb-6">
             {/* Transaction Type Dropdown */}
             <Popover>
@@ -109,16 +114,6 @@ const Page = () => {
 
             {/* Crate Type Dropdown */}
             <Popover>
-              {/* <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-36 bg-[#232323] border-none text-white font-chakra justify-between flex items-center"
-                  type="button"
-                >
-                  <span>{crateType ? crateTypeOptions.find(o => o.value === crateType)?.label : 'Crate type'}</span>
-                  <ChevronDown className="ml-2 w-4 h-4 shrink-0" />
-                </Button>
-              </PopoverTrigger> */}
               <PopoverContent className="bg-[#232323] mt-2 text-white font-chakra w-44 p-2">
                 {crateTypeOptions.map(opt => (
                   <button
@@ -156,6 +151,7 @@ const Page = () => {
             </div>
           </div>
 
+          {/* Table */}
           {hasTransactions ? (
             <div className="overflow-x-auto rounded-xl border border-[#2A2A2A] shadow-lg">
               <table className="min-w-full text-sm font-chakra">
@@ -170,11 +166,38 @@ const Page = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#2A2A2A]">
-                  {filteredOrders.map((order: any, i: number) => (
+                  {paginatedOrders.map((order: any, i: number) => (
                     <OrderRow key={order._id || i} order={order} />
                   ))}
                 </tbody>
               </table>
+
+              {/* Pagination */}
+              <div className="flex justify-between items-center px-4 py-3 bg-[#1E1E1E] border-t border-[#2A2A2A]">
+                <span className="text-sm text-gray-400">
+                  Page {page} of {totalPages}
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page === 1}
+                    onClick={() => setPage(p => Math.max(p - 1, 1))}
+                    className="bg-[#232323] border-none text-white"
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page === totalPages}
+                    onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+                    className="bg-[#232323] border-none text-white"
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
