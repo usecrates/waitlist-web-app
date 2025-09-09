@@ -88,7 +88,7 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [] }: BuyCra
       },
       {
         onSuccess: () => {
-          // toast.success("Invested in crate successfully.");
+          toast.success("Invested in crate successfully.");
           refetchUser();
         },
       }

@@ -23,8 +23,10 @@ export default function PortfolioPage() {
     isLoading: nativeLoading,
   } = useBalance({
     address,
-    enabled: !!address, // prevents running if no wallet
+    enabled: !!address,
   });
+
+  console.log(cratesData,"cratesData")
 
   const {
     data: tokenBalance,
@@ -32,10 +34,10 @@ export default function PortfolioPage() {
   } = useBalance({
     address,
     token: "0x665b099132d79739462DfDe6874126AFe840F7a3" as `0x${string}`,
-    enabled: !!address, // same guard
+    enabled: !!address, 
   });
 
-
+ 
 
   const subscribedIds = new Set(
     userData?.subscribedCrates.map((c: any) => c.crateId)
@@ -225,16 +227,20 @@ export default function PortfolioPage() {
                           <div className="flex flex-row items-end gap-2 absolute right-2 top-1/2 -translate-y-10">
                             <div className="flex gap-2">
                               <button
-                                
+
                                 className="bg-[#FFDBAC1A] border border-[#595959] text-[#FFDBAC] px-4 py-[0.3rem] rounded text-xs font-medium transition"
-                                onClick={() => { setSelectedCrate(crate); setRebalanceModalOpen(true); }}
+                                onClick={() => { 
+                                  console.log(crate,"crate")
+                                  setSelectedCrate(crate); 
+                                  setRebalanceModalOpen(true); 
+                                }}
                               >
                                 Rebalance
                               </button>
-                              <button className="bg-[#232323]  text-white px-4 py-[0.3rem] rounded text-xs font-medium flex items-center gap-1  transition">
+                              {/* <button className="bg-[#232323]  text-white px-4 py-[0.3rem] rounded text-xs font-medium flex items-center gap-1  transition">
                             Copy Trade
-                            <CustomToggle isOn={copyTradeToggles[i]} onToggle={() => handleToggleCopyTrade(i)} />
-                          </button>
+                            <CustomToggle isOn={copyTradeToggles[i+1]} onToggle={() => handleToggleCopyTrade(i)} />
+                          </button> */}
                             </div>
                             <div className="text-gray-500 cursor-pointer text-lg ">&#8942;</div>
                           </div>
@@ -373,8 +379,6 @@ export default function PortfolioPage() {
                 open={rebalanceModalOpen}
                 onOpenChange={setRebalanceModalOpen}
                 crate={selectedCrate}
-                stocksData={stocksData}
-
               />
             </>
           )}
