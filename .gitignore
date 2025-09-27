@@ -36,3 +36,4 @@ next-env.d.ts
 .firebase/usecrates/functions
 firebase-debug.log
 .firebase/
+.env.local
