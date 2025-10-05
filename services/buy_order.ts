@@ -8,7 +8,9 @@ import {
     parseUnits,
 } from "viem";
 import orderProcessorData from "@/lib/sbt-deployments/v0.4.0/order_processor.json";
-import { useAccount, useWalletClient, usePublicClient } from "wagmi";
+import { usePublicClient } from "wagmi";
+import { useUniversalWalletClient } from "@/utils/universalWalletClient";
+import { useEnsureCorrectChain } from "@/utils/chainUtils";
 import { toast } from "sonner";
 import { api } from "@/config";
 
@@ -45,9 +47,9 @@ interface CreateBuyOrderArgs {
 }
 
 export function useBuyOrderMutation() {
-    const { address } = useAccount();
-    const { data: walletClient } = useWalletClient();
+    const { getWalletClient, address } = useUniversalWalletClient();
     const publicClient = usePublicClient();
+    const ensureCorrectChain = useEnsureCorrectChain();
 
     return useMutation({
         mutationFn: async ({
@@ -56,12 +58,24 @@ export function useBuyOrderMutation() {
             crateId,
             totalAmountToBeInvested,
         }: CreateBuyOrderArgs) => {
-            if (!walletClient || !address || !publicClient)
+            console.log('Buy order - address:', address);
+            console.log('Buy order - address type:', typeof address);
+            console.log('Buy order - address length:', address?.length);
+            
+            if (!address || !publicClient)
                 throw new Error("Wallet not connected");
             if (!accountId || !assets || assets.length === 0) {
                 toast.error("Invalid account ID or orders");
                 throw new Error("Invalid account ID or orders");
             }
+
+            // Ensure we're on the correct chain before proceeding
+            const chainIsCorrect = await ensureCorrectChain();
+            if (!chainIsCorrect) {
+                toast.error("Please switch to Sepolia testnet in your wallet to continue");
+                throw new Error("Incorrect chain - please switch to Sepolia testnet");
+            }
+
             let id = toast.loading("Buying...");
             console.log("button clicked")
 
@@ -216,6 +230,7 @@ export function useBuyOrderMutation() {
                 deadline,
             };
 
+            const walletClient = await getWalletClient();
             const permitSig = await walletClient.signTypedData({
                 domain: permitDomain,
                 types: permitTypes,
@@ -273,6 +288,7 @@ export function useBuyOrderMutation() {
                 functionName: "multicall",
                 args: [[selfPermitData, ...orderCalls]],
                 account: address,
+                chain: publicClient.chain,
             });
 
             const receipt = await publicClient.waitForTransactionReceipt({

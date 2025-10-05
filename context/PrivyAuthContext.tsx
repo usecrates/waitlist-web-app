@@ -7,7 +7,6 @@ interface AuthContextValue {
   authenticated: boolean;
   customizeLogin: () => Promise<void>;
   logout: () => Promise<void>;
-  loading: boolean;
 }
 const PrivyAuthContext = createContext<AuthContextValue | undefined>(undefined);
 export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) => {

@@ -6,6 +6,7 @@ import { usePrivyAuth } from "@/context/PrivyAuthContext";
 import { useEnrichedUser } from "@/hooks/user-hooks";
 import { useBuyOrderMutation } from "@/services/buy_order";
 import { useBalance, useChainId } from "wagmi";
+import { sepolia } from "viem/chains";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
@@ -21,7 +22,7 @@ interface BuyCrateModalProps {
   basket_id?: string;
 }
 function getTokenAddress(chainId: number, tokens: any) {
-  const entry = tokens.find(token => token.split(":")[1] === String(chainId));
+  const entry = tokens.find((token: string) => token.split(":")[1] === String(chainId));
   return entry ? entry.split(":")[2] : null;
 }
 
@@ -59,7 +60,7 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [] }: BuyCra
   }, [usdcBalance]);
 
   const getIsOnChain = (tokens:any)=>{
-    let val = tokens?.some(token =>
+    let val = tokens?.some((token: string) =>
       token.startsWith(`eip155:${chainId}:`)
     );
   
@@ -72,24 +73,56 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [] }: BuyCra
       toast.error("Please complete KYC to invest in crates.");
       return;
     }
+    
+    if (!amount || Number(amount) <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+    
+    if (Number(amount) > balance) {
+      toast.error("Insufficient balance");
+      return;
+    }
+
+    console.log({crate});
+    console.log('Current chainId:', chainId);
+
+    // Debug the asset mapping
+    const assets = stocks?.map((stockItem: { stock: { tokens: any; symbol: any; _id: any; dinari_id: any; }; weight: any; }) => {
+      const assetAddress = getTokenAddress(chainId, stockItem.stock.tokens);
+      const isOnchain = getIsOnChain(stockItem.stock.tokens);
+      
+      console.log('Stock:', stockItem.stock.symbol);
+      console.log('Available tokens:', stockItem.stock.tokens);
+      console.log('Asset address found:', assetAddress);
+      console.log('Is onchain:', isOnchain);
+      
+      return {
+        stockObjectId: stockItem.stock._id,
+        stockId: stockItem.stock.dinari_id,
+        assetAddress,
+        weightage: stockItem.weight,
+        isOnchain
+      };
+    });
+
+    console.log('Final assets:', assets);
 
     createBuyOrder(
       {
         crateId: crate?._id,
         accountId: userData?.dinari_account_id,
         totalAmountToBeInvested: amount,
-        assets: crate?.stocks.map((stockItem) => ({
-          stockObjectId: stockItem.stock._id,
-          stockId: stockItem.stock.dinari_id,
-          assetAddress: getTokenAddress(chainId, stockItem.stock.tokens),
-          weightage: stockItem.weight,
-          isOnchain : getIsOnChain(stockItem.stock.tokens)
-        })),
+        assets: assets || [],
       },
       {
         onSuccess: () => {
           toast.success("Invested in crate successfully.");
           refetchUser();
+        },
+        onError: (error) => {
+          console.error('Buy order error:', error);
+          toast.error("Failed to create buy order. Check console for details.");
         },
       }
     );
@@ -123,7 +156,8 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [] }: BuyCra
     }
   }, [open]);
 
-  const disabled = !amount || parseFloat(amount) <= 0;
+  const isCorrectChain = chainId === sepolia.id;
+  const disabled = !amount || parseFloat(amount) <= 0 || !isCorrectChain;
 
 
   return (
@@ -186,7 +220,7 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [] }: BuyCra
               </div>
               {/* Quick Select */}
               <div className="flex justify-center gap-4 mb-4">
-                <button className="bg-[#3D3D3D] text-white px-6 py-1 rounded" onClick={() => setAmount(50)}>Min</button>
+                <button className="bg-[#3D3D3D] text-white px-6 py-1 rounded" onClick={() => setAmount("50")}>Min</button>
                 <button className="bg-[#2C2C2C] text-white px-6 py-1 rounded" onClick={() => setAmount((balance * 0.25).toFixed(2))}>25%</button>
                 <button className="bg-[#2C2C2C] text-white px-6 py-1 rounded" onClick={() => setAmount((balance * 0.5).toFixed(2))}>50%</button>
                 <button className="bg-[#3D3D3D] text-white px-6 py-1 rounded" onClick={() => setAmount(balance.toFixed(2))}>Max</button>
@@ -229,7 +263,7 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [] }: BuyCra
                   </thead>
                   <tbody>
                     {stocks.map((stock, i) => {
-                      const isOnChain = stock?.stock?.tokens?.some(token =>
+                      const isOnChain = stock?.stock?.tokens?.some((token: string) =>
                         token.startsWith(`eip155:${chainId}:`)
                       );
 
@@ -279,6 +313,7 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [] }: BuyCra
                   <span className="text-[#A1A1A1]">Price Impact</span>
                   <span className="font-bold">{priceImpact}</span>
                 </div>
+                
                 <div className="flex items-center text-lg mt-2 justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-[#A1A1A1]">Total Spend:</span>

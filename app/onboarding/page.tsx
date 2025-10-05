@@ -3,11 +3,11 @@ import { useCallback, useState } from "react";
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
 import { useCreateKYCLink, useEnrichedUser, useHasMounted, useRegisterUser } from "@/hooks/user-hooks";
 import Dinari from "@dinari/api-sdk";
-import { useSignMessage } from "wagmi";
+import { useUniversalWallet } from "@/hooks/useUniversalWallet";
 import { api } from "@/config";
 
 export default function OnboardingPage() {
-    const { signMessageAsync } = useSignMessage();
+    const { signMessage } = useUniversalWallet();
     const { address, authenticated } = usePrivyAuth();
     const hasMounted = useHasMounted();
     const [name, setName] = useState("");
@@ -53,7 +53,7 @@ export default function OnboardingPage() {
             chain_id: "eip155:0",
         });
 
-        const signature = await signMessageAsync({ message: nonceResp.message });
+        const signature = await signMessage({ message: nonceResp.message });
 
         const linkWallet = await client.v2.accounts.wallet.external.connect(userData?.dinari_account_id, {
             chain_id: "eip155:0",
@@ -152,7 +152,7 @@ export default function OnboardingPage() {
                     <div className="mt-4 p-6 border border-gray-600 rounded-lg w-full bg-[#1a1a1a] shadow-md flex flex-col justify-center items-center gap-4 min-h-[200px]">
                         <h2 className="text-lg font-semibold">KYC Verification</h2>
                         <button
-                            onClick={() => handleClick(userData?.entity_id)}
+                            onClick={() => userData?.entity_id && handleClick(userData.entity_id)}
                             className="bg-green-500 text-black font-semibold py-2 px-4 rounded hover:bg-green-600 transition"
                             disabled={!hasRegistered || hasStartedKYC}
                         >

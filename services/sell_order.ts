@@ -3,6 +3,7 @@ import Dinari from "@dinari/api-sdk";
 import { encodeFunctionData, formatUnits, parseAbi, parseEventLogs, parseUnits } from "viem";
 import orderProcessorData from "@/lib/sbt-deployments/v0.4.0/order_processor.json";
 import { useAccount, useWalletClient, usePublicClient } from "wagmi";
+import { useEnsureCorrectChain } from "@/utils/chainUtils";
 import { toast } from "react-hot-toast";
 import { api } from "@/config";
 const tokenAbi = parseAbi([
@@ -38,10 +39,18 @@ export function useSellOrderMutation() {
     const { address } = useAccount();
     const { data: walletClient } = useWalletClient();
     const publicClient = usePublicClient();
+    const ensureCorrectChain = useEnsureCorrectChain();
 
     return useMutation({
         mutationFn: async ({ crateInvestmentData, accountId, crateId }: CreateSellOrderArgs) => {
             if (!walletClient || !address || !publicClient) throw new Error("Wallet not connected");
+
+            // Ensure we're on the correct chain before proceeding
+            const chainIsCorrect = await ensureCorrectChain();
+            if (!chainIsCorrect) {
+                toast.error("Please switch to Sepolia testnet in your wallet to continue");
+                throw new Error("Incorrect chain - please switch to Sepolia testnet");
+            }
 
             const id = toast.loading("Creating sell order...");
 

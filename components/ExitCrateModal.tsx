@@ -31,13 +31,13 @@ export function ExitCrateModal({ open, onOpenChange, crate, subscribeCrateData, 
     authenticated
   );
 
-  const price = units === 0 ? 0 : 1045;
+  const price = units === 0 ? 0 : (subscribeCrateData?.userInvestment?.currentValue || 0) * (units / 100);
   const percent = units === 0 ? 0 : 75; // Example
-  const currentValue = 200;
+  const currentValue = subscribeCrateData?.userInvestment?.currentValue || 0;
   console.log({ crate });
   const { mutate: createSellOrder, isPending: createSellOrderLoading, isSuccess: isSellOrderSuccess } = useSellOrderMutation();
   // Mock review data
-  const reviewRows = subscribeCrateData?.userInvestment?.stockHoldings?.map((item) => {
+  const reviewRows = subscribeCrateData?.userInvestment?.stockHoldings?.map((item: { stockId: { symbol: any; price: number; }; sharesOwned: number; }) => {
     const stock = item.stockId.symbol;
     const units = item.sharesOwned.toFixed(4); // round to 4 decimals
     const price = `$${item.stockId.price}`;
@@ -245,7 +245,7 @@ export function ExitCrateModal({ open, onOpenChange, crate, subscribeCrateData, 
                     </tr>
                   </thead>
                   <tbody>
-                    {reviewRows.map((row, i) => (
+                    {reviewRows.map((row: { stock: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; units: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; price: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; value: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }, i: React.Key | null | undefined) => (
                       <tr key={i} className="border-t border-[#232323] text-base">
                         <td className="py-2 px-2">{row.stock}</td>
                         <td className="py-2 px-2">{row.units}</td>
@@ -411,7 +411,7 @@ export function ExitCrateModal({ open, onOpenChange, crate, subscribeCrateData, 
                     </tr>
                   </thead>
                   <tbody>
-                    {reviewRows.map((row, i) => (
+                    {reviewRows.map((row: { stock: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; units: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; price: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; value: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }, i: React.Key | null | undefined) => (
                       <tr key={i} className="border-t border-[#232323] text-base">
                         <td className="py-2 px-2">{row.stock}</td>
                         <td className="py-2 px-2">{row.units}</td>

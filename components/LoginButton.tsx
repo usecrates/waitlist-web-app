@@ -4,11 +4,9 @@ import { usePrivyAuth } from "@/context/PrivyAuthContext";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
 
-import { useWallets } from "@privy-io/react-auth";
-import { Button } from "@/components/ui/button";
 
 export default function LoginButton() {
-  const { customizeLogin, logout, address, authenticated, loading } = usePrivyAuth();
+  const { customizeLogin, logout, address, authenticated } = usePrivyAuth();
   const shortAddress = address ? `${address.slice(0, 4)}...${address.slice(-4)}` : "";
  
 
@@ -41,10 +39,9 @@ export default function LoginButton() {
       ) : (
         <button
           onClick={customizeLogin}
-          disabled={loading}
-          className="bg-white font-ropa text-black font-chakra px-4 py-2 font-medium text-md"
+          className="bg-white font-ropa text-black px-4 py-2 font-medium text-md"
         >
-          {loading ? "Logging in..." : "Connect Wallet"}
+          Connect Wallet
         </button>
       )}
     </div>

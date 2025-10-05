@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { useGetOrderStatus } from "@/services/get_order_status";
-import { useAccount } from "wagmi";
+import { useUniversalWallet } from "@/hooks/useUniversalWallet";
 
 export default function OrderRow({ order }: { order: any }) {
-  const { address } = useAccount();
+  const { address } = useUniversalWallet();
   const { data: statusInfo, isLoading: statusLoading } = useGetOrderStatus(order?.orderIds);
   // Format date
   const orderDate = new Date(order.createdAt).toLocaleString("en-US", {

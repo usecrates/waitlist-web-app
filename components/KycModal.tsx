@@ -9,7 +9,7 @@ import {
   useRegisterUser,
 } from "@/hooks/user-hooks";
 import Dinari from "@dinari/api-sdk";
-import { useSignMessage } from "wagmi";
+import { useUniversalWallet } from "@/hooks/useUniversalWallet";
 import { api } from "@/config";
 import toast from "react-hot-toast";
 
@@ -33,7 +33,7 @@ export function KycModal({ open, onOpenChange }: KycModalProps) {
   );
   const { mutate: registerUser, isPending: isRegistering } = useRegisterUser();
   const { mutate: kycMutate, isPending: kycPending } = useCreateKYCLink();
-  const { signMessageAsync } = useSignMessage();
+  const { signMessage } = useUniversalWallet();
 
   const [walletLinking, setWalletLinking] = useState(false);
   const [walletLinked, setWalletLinked] = useState(false);
@@ -93,7 +93,8 @@ export function KycModal({ open, onOpenChange }: KycModalProps) {
           chain_id: "eip155:0",
         }
       );
-      const signature = await signMessageAsync({ message: nonceResp.message });
+      const signature = await signMessage({ message: nonceResp.message });
+      
       const linkWallet = await client.v2.accounts.wallet.external.connect(
         userData.dinari_account_id,
         {
@@ -104,7 +105,7 @@ export function KycModal({ open, onOpenChange }: KycModalProps) {
         }
       );
       if (linkWallet.address) {
-        await api.post("/user/link-wallet", { wallet: address, flag: true });
+        await api.post("/user/link-wallet", { wallet: address as `0x${string}`, flag: true });
         setWalletLinked(true);
         toast.success("Wallet linked successfully!");
         refetchUser();

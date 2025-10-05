@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEnrichedUser, useSubscribeCrate } from "@/hooks/user-hooks";
-import { useAccount } from "wagmi";
+import { useUniversalWallet } from "@/hooks/useUniversalWallet";
 import toast from "react-hot-toast";
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
 export type Crate = {

@@ -54,8 +54,11 @@ export default function SingleCrate() {
     (crate: any) => crate.crateId === basket_id
   );
 
+  // Get the user's investment data for this specific crate
+  const subscribeCrateData = userData?.subscribedCrates?.find((_c) => _c.crateId === crate._id);
+
   function getTokenAddress(chainId: number, tokens: any) {
-    const entry = tokens.find(token => token.split(":")[1] === String(chainId));
+    const entry = tokens.find((token: string) => token.split(":")[1] === String(chainId));
     return entry ? entry.split(":")[2] : null;
   }
 
@@ -91,7 +94,7 @@ export default function SingleCrate() {
         crateId: crate?._id,
         accountId: userData?.dinari_account_id,
         totalAmountToBeInvested: "5",
-        assets: crate?.stocks.map((stockItem) => ({
+        assets: crate?.stocks.map((stockItem: { stock: { _id: any; dinari_id: any; tokens: any; }; weight: any; }) => ({
           stockObjectId: stockItem.stock._id,
           stockId: stockItem.stock.dinari_id,
           assetAddress: getTokenAddress(chainId, stockItem.stock.tokens),
@@ -361,28 +364,31 @@ export default function SingleCrate() {
                 </div>
                 <div className="grid grid-cols-2 gap-y-6 gap-x-8 mb-6">
                   <div className="flex flex-col items-center">
-                    <span className="text-lg font-bold text-white">150$</span>
+                    <span className="text-lg font-bold text-white">${subscribeCrateData?.userInvestment?.investedAmount?.toFixed(2) || '0'}</span>
                     <span className="text-gray-400 text-sm mt-1">
                       Investment Amount
                     </span>
                   </div>
                   <div className="flex flex-col items-center">
-                    <span className="text-lg font-bold text-white">100$</span>
+                    <span className="text-lg font-bold text-white">${subscribeCrateData?.userInvestment?.currentValue?.toFixed(2) || '0'}</span>
                     <span className="text-gray-400 text-sm mt-1">
                       Current Amount
                     </span>
                   </div>
                   <div className="flex flex-col items-center">
-                    <span className="text-lg font-bold text-white">200$</span>
+                    <span className="text-lg font-bold text-white">${subscribeCrateData?.userInvestment?.investedAmount?.toFixed(2) || '0'}</span>
                     <span className="text-gray-400 text-sm mt-1">
                       Money Put in
                     </span>
                   </div>
                   <div className="flex flex-col items-center">
                     <span className="text-lg font-bold text-white">
-                      $120{" "}
-                      <span className="text-green-400 text-xs font-semibold align-bottom">
-                        +50%
+                      ${((subscribeCrateData?.userInvestment?.currentValue || 0) - (subscribeCrateData?.userInvestment?.investedAmount || 0)).toFixed(2)}{" "}
+                      <span className={`text-xs font-semibold align-bottom ${(subscribeCrateData?.userInvestment?.currentValue || 0) - (subscribeCrateData?.userInvestment?.investedAmount || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {subscribeCrateData?.userInvestment?.currentValue && subscribeCrateData?.userInvestment?.investedAmount 
+                          ? `${(((subscribeCrateData.userInvestment.currentValue - subscribeCrateData.userInvestment.investedAmount) / subscribeCrateData.userInvestment.investedAmount) * 100).toFixed(1)}%`
+                          : '+0%'
+                        }
                       </span>
                     </span>
                     <span className="text-gray-400 text-sm mt-1">
@@ -507,7 +513,7 @@ export default function SingleCrate() {
           onOpenChange={setExitModalOpen}
           crate={crate}
           userData={userData}
-          subscribeCrateData={userData?.subscribedCrates?.find((_c) => _c.crateId === crate._id)}
+          subscribeCrateData={subscribeCrateData}
         />
         <BuyCrateModal
           open={buyModalOpen}
@@ -519,12 +525,12 @@ export default function SingleCrate() {
         <KycModal
           open={kycModalOpen}
           onOpenChange={setKycModalOpen}
-          crate={{
-            name: crate?.name,
-            meta: crate?.description,
-            image: crate?.imageUrl,
-            subscriptionAmount: crate?.subscriptionAmount,
-          }}
+          //     crate={{
+          //       name: crate?.name,
+          //       meta: crate?.description,
+          //   image: crate?.imageUrl,
+          //   subscriptionAmount: crate?.subscriptionAmount,
+          // }}
         />
       </div>
     </main>
