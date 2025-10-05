@@ -116,32 +116,32 @@ export default function LaunchPage() {
   return (
     <>
       {/* Full-screen Overview Section */}
-      <section className="w-full h-[200px] mt-16 bg-[#141414] flex items-center justify-center">
-        <div className="w-full max-w-7xl flex flex-row gap-8 px-8">
-          <div className="flex-1 flex flex-col  rounded-lg p-8">
-            <span className="text-4xl font-chakra text-[#A0A0A0] font-bold">Overview</span>
+      <section className="w-full mt-16 bg-[#141414] flex items-center justify-center py-6 md:py-0">
+        <div className="w-full max-w-7xl flex flex-col md:flex-row gap-6 md:gap-8 px-4 md:px-8">
+          <div className="flex-1 flex flex-col rounded-lg p-4 md:p-8">
+            <span className="text-2xl md:text-4xl font-chakra text-[#A0A0A0] font-bold">Overview</span>
           </div>
-          <div className="flex-[2] flex flex-row gap-8">
-            <div className="flex-1 flex flex-col  rounded-lg p-8">
-              <span className="text-3xl font-chakra text-white font-bold">{stats?.totalTransactions}</span>
-              <span className="text-[#A1A1A1] font-chakra mt-2">Total Transactions</span>
+          <div className="flex-[2] grid grid-cols-3 gap-3 md:gap-8">
+            <div className="flex-1 flex flex-col rounded-lg p-2 md:p-8">
+              <span className="text-lg md:text-3xl font-chakra text-white font-bold">{stats?.totalTransactions}</span>
+              <span className="text-[10px] md:text-base text-[#A1A1A1] font-chakra mt-1 md:mt-2">Total Transactions</span>
             </div>
-            <div className="flex-1 flex flex-col  rounded-lg p-8">
-              <span className="text-3xl font-chakra text-white font-bold">{stats?.totalSubscribers}</span>
-              <span className="text-[#A1A1A1] font-chakra mt-2">Total Subscribers</span>
+            <div className="flex-1 flex flex-col rounded-lg p-2 md:p-8">
+              <span className="text-lg md:text-3xl font-chakra text-white font-bold">{stats?.totalSubscribers}</span>
+              <span className="text-[10px] md:text-base text-[#A1A1A1] font-chakra mt-1 md:mt-2">Total Subscribers</span>
             </div>
-            <div className="flex-1 flex flex-col  rounded-lg p-8">
-              <span className="text-3xl font-chakra text-white font-bold">${stats?.tvl.toFixed(2)}</span>
-              <span className="text-[#A1A1A1] font-chakra mt-2">Total Value Locked</span>
+            <div className="flex-1 flex flex-col rounded-lg p-2 md:p-8">
+              <span className="text-lg md:text-3xl font-chakra text-white font-bold">${stats?.tvl.toFixed(2)}</span>
+              <span className="text-[10px] md:text-base text-[#A1A1A1] font-chakra mt-1 md:mt-2">Total Value Locked</span>
             </div>
           </div>
         </div>
       </section>
       {" "}
       <section className="max-w-7xl mx-auto mt-10 px-4 font-chakra">
-        <div className="flex md:flex-row bg-[#191919] rounded-xs p-4 px-10 w-full justify-between gap-10">
-          <div className="w-1/2 flex flex-col justify-center">
-            <h1 className="text-2xl md:text-4xl font-chakra font-bold leading-tight mb-2">
+        <div className="flex flex-col md:flex-row bg-[#191919] rounded-xs p-4 md:px-10 w-full justify-between gap-6 md:gap-10">
+          <div className="w-full md:w-1/2 flex flex-col justify-center">
+            <h1 className="text-2xl md:text-4xl font-chakra font-bold leading-tight mb-2 break-words">
               <span
                 style={{
                   background:
@@ -165,7 +165,7 @@ export default function LaunchPage() {
           </div>
 
           <motion.div
-            className="rounded-xl bg-[#1a1a1a] py-3 px-4 relative overflow-hidden md:w-[40%]"
+            className="rounded-xl bg-[#1a1a1a] py-3 px-4 relative overflow-hidden md:w-[40%] w-full"
             style={{
               borderWidth: "3px",
               borderStyle: "solid",
@@ -194,7 +194,7 @@ export default function LaunchPage() {
               cheat code for Wall Street.
             </p>
 
-            <div className="flex flex-row gap-8 text-sm mb-4 font-chakra">
+            <div className="grid grid-cols-2 md:flex md:flex-row gap-4 md:gap-8 text-sm mb-4 font-chakra">
               <div>
                 <p className="text-green-400 font-semibold">+12.45%</p>
                 <p>Total Returns</p>
@@ -213,10 +213,10 @@ export default function LaunchPage() {
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col md:flex-row gap-3">
               <Button
                 href={"/discover/689090741310baca7450a37c"}
-                className="flex-1 text-white font-bold rounded-lg py-3 px-0 border-none shadow-none"
+                className="w-full md:flex-1 text-white font-bold rounded-lg py-3 px-0 border-none shadow-none"
                 style={{
                   background:
                     "linear-gradient(0deg, #232323, #232323), linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
@@ -227,7 +227,7 @@ export default function LaunchPage() {
               </Button>
               {!address ? (
                 <Button
-                  className="flex-1 text-black font-bold rounded-lg py-3 px-0 border-none shadow-none"
+                  className="w-full md:flex-1 text-black font-bold rounded-lg py-3 px-0 border-none shadow-none"
                   style={{
                     background:
                       "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
@@ -238,7 +238,7 @@ export default function LaunchPage() {
                 </Button>
               ) : userData?.is_kyc_complete && address ? (
                 <Button
-                  className="flex-1 text-black font-bold rounded-lg py-3 px-0 border-none shadow-none"
+                  className="w-full md:flex-1 text-black font-bold rounded-lg py-3 px-0 border-none shadow-none"
                   style={{
                     background:
                       "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
@@ -259,7 +259,7 @@ export default function LaunchPage() {
         </h2>
 
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {cratesWithSubscription?.length && cratesWithSubscription?.map((crate, i) => (
             <CrateCard key={i} crate={crate} />
           ))}
@@ -268,7 +268,7 @@ export default function LaunchPage() {
 
 
       <section className="max-w-7xl mx-auto mt-16 px-4 mb-10">
-        <div className="bg-[#191919] rounded-md p-8 flex flex-col md:flex-row items-center justify-between">
+        <div className="bg-[#191919] rounded-md p-6 md:p-8 flex flex-col md:flex-row items-center justify-between">
           <div>
             <h2 className="text-2xl font-chakra font-bold mb-4" style={{
               background:
@@ -288,7 +288,7 @@ export default function LaunchPage() {
           </div>
           <Button
             href={"/discover"}
-            className="mt-6 md:mt-0 px-8 py-3 text-md font-chakra text-black font-bold rounded-xl border-none shadow-none"
+            className="mt-6 md:mt-0 w-full md:w-auto px-8 py-3 text-md font-chakra text-black font-bold rounded-xl border-none shadow-none"
             style={{
               background:
                 "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
@@ -305,7 +305,7 @@ export default function LaunchPage() {
         <h2 className="text-3xl font-chakra font-bold mb-8">Investment Insights</h2>
         <div className="flex flex-col max-h-[300px] overflow-y-auto gap-6">
           {investmentInsights.map((insight, i) => (
-            <div key={i} className="flex items-center justify-between border-b border-[#272727]  px-6 py-2">
+            <div key={i} className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-[#272727] px-4 md:px-6 py-2 gap-3">
               <div className="flex items-center gap-2">
                 <img src={insight.image} className="w-10 h-10 rounded-xl object-cover" alt={insight.name} />
                 <div>
@@ -313,20 +313,20 @@ export default function LaunchPage() {
                   <p className="text-[#A1A1A1] text-sm font-chakra font-medium">{insight.party}</p>
                 </div>
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
                 <div className="flex items-center gap-2">
                   {insight.tag.icon}
                   <span className={`font-bold text-md font-chakra ${insight.tag.type === "popular" ? "text-green-400" : "text-yellow-400"}`}>{insight.tag.label}</span>
                 </div>
                 <div className="flex-1  text-[#A1A1A1] text-sm font-chakra">{insight.description}</div>
               </div>
-              <button className="ml-8 px-16 py-2 font-chakra bg-[#232323] text-white rounded-md font-medium">View Crate</button>
+              <button className="w-full md:w-auto md:ml-8 px-6 md:px-16 py-2 font-chakra bg-[#232323] text-white rounded-md font-medium">View Crate</button>
             </div>
           ))}
         </div>
       </section>
       <section className="max-w-7xl mx-auto mt-16 px-4 mb-10">
-        <div className="bg-[#191919] rounded-md p-8 flex flex-col md:flex-row items-center justify-between">
+        <div className="bg-[#191919] rounded-md p-6 md:p-8 flex flex-col md:flex-row items-center justify-between">
           <div>
             <h2 className="text-2xl font-chakra font-bold mb-4" style={{
               background:
@@ -345,7 +345,7 @@ export default function LaunchPage() {
             </p>
           </div>
           <Button
-            className="mt-6 md:mt-0 px-8 py-3 text-md font-chakra text-black font-bold rounded-xl border-none shadow-none"
+            className="mt-6 md:mt-0 w-full md:w-auto px-8 py-3 text-md font-chakra text-black font-bold rounded-xl border-none shadow-none"
             style={{
               background:
                 "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",

@@ -210,7 +210,7 @@ export function RebalanceModal({ open, onOpenChange, crate }: RebalanceModalProp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md text-white w-full bg-[#181818] p-0 rounded-2xl font-chakra">
+      <DialogContent className="w-full sm:max-w-md text-white bg-[#181818] p-0 rounded-2xl font-chakra max-h-[90vh] overflow-y-auto mx-4 my-6 sm:mx-0 sm:my-0">
         <div className="p-3">
           <div className="flex bg-[#121212] justify-between items-center p-2 ">
             <div className="text-2xl text-white font-bold">Rebalance</div>
@@ -373,10 +373,10 @@ export function RebalanceModal({ open, onOpenChange, crate }: RebalanceModalProp
                   }}
                 />
               </div>
-              <div className="flex gap-4">
-                <button className="flex-1 bg-[#232323] text-white py-3 rounded">View Portfolio</button>
+              <div className="flex flex-col md:flex-row gap-4">
+                <button className="w-full md:flex-1 bg-[#232323] text-white py-3 rounded">View Portfolio</button>
                 <button
-                  className={`flex-1 font-bold py-3 rounded text-lg`}
+                  className={`w-full md:flex-1 font-bold py-3 rounded text-lg`}
                   style={{
                     background: "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
                     backgroundBlendMode: "normal, normal",
@@ -448,14 +448,14 @@ export function RebalanceModal({ open, onOpenChange, crate }: RebalanceModalProp
                   </tbody>
                 </table>
               </div>
-              <div className="flex gap-4 mt-4">
+              <div className="flex flex-col md:flex-row gap-4 mt-4">
                 <button
-                  className="flex-1 font-bold py-3 bg-[#232323] text-white rounded text-lg"
+                  className="w-full md:flex-1 font-bold py-3 bg-[#232323] text-white rounded text-lg"
                 >
                   View Portfolio
                 </button>
                 <button
-                  className="flex-1 font-bold py-3 rounded text-lg"
+                  className="w-full md:flex-1 font-bold py-3 rounded text-lg"
                   style={{
                     background: "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
                     backgroundBlendMode: "normal, normal",

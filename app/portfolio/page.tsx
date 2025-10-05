@@ -85,7 +85,7 @@ export default function PortfolioPage() {
 
 
   return (
-    <div className="min-h-screen pt-32 max-w-6xl w-full mx-auto flex flex-col bg-[#0e0e0e] text-white font-chakra">
+    <div className="min-h-screen pt-24 md:pt-32 max-w-6xl w-full mx-auto flex flex-col bg-[#0e0e0e] text-white font-chakra">
       <main className="flex-1 flex flex-col items-center pb-16">
         <section className=" w-full">
           {!address ? (
@@ -100,12 +100,12 @@ export default function PortfolioPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8"
+                className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 md:gap-8"
               >
                 {/* Left Side - Tabs and Content */}
                 <div>
                   {/* Tabs */}
-                  <div className="flex gap-8 border-t pt-3 border-b border-[#232323] mb-0">
+                  <div className="flex gap-6 md:gap-8 border-t pt-3 border-b border-[#232323] mb-0 px-2 md:px-0">
                     <button
                       className={`px-2 pb-2 text-base border-b-2 transition-all ${activeTab === "Crates"
                         ? "border-white text-white"
@@ -127,28 +127,25 @@ export default function PortfolioPage() {
                   </div>
 
                   {/* Stats Bar */}
-                  <div className="flex border-b border-[#232323]">
-                    <div className="flex w-full">
+                  <div className="border-b border-[#232323]">
+                    <div className="grid grid-cols-3 w-full">
                       {/* Current Value */}
-                      <div className="w-1/2 flex flex-col items-start justify-center px-4">
-                        <div className="text-2xl font-bold">
+                      <div className="flex flex-col items-start justify-center px-3 py-3">
+                        <div className="text-base md:text-2xl font-bold">
                           {nativeLoading ? "Loading..." : `${Number(nativeBalance?.formatted || 0).toFixed(2)} ETH`}
                         </div>
-                        <div className="text-gray-400 text-sm mt-1">Native Balance</div>
+                        <div className="text-gray-400 text-[10px] md:text-sm mt-1">Native Balance</div>
                       </div>
-                      {/* Divider */}
-                      <div className="w-px bg-[#232323] h-20 self-center" />
                       {/* Total Invested */}
-                      <div className="w-1/2 flex flex-col items-start justify-center px-4">
-                        <div className="text-2xl font-bold">$501.29</div>
-                        <div className="text-gray-400 text-sm mt-1">Total Invested</div>
+                      <div className="flex flex-col items-start justify-center px-3 py-3 border-l border-[#232323]">
+                        <div className="text-base md:text-2xl font-bold">$501.29</div>
+                        <div className="text-gray-400 text-[10px] md:text-sm mt-1">Total Invested</div>
                       </div>
-                      <div className="w-px bg-[#232323] h-20 self-center" />
-                      <div className="w-1/2 flex flex-col items-start justify-center px-4">
-                        <div className="text-2xl font-bold">
+                      <div className="flex flex-col items-start justify-center px-3 py-3 border-l border-[#232323]">
+                        <div className="text-base md:text-2xl font-bold">
                           {tokenLoading ? "Loading..." : `$${Number(tokenBalance?.formatted || 0).toFixed(2)}`}
                         </div>
-                        <div className="text-gray-400 text-sm mt-1">mockUSD Holding</div>
+                        <div className="text-gray-400 text-[10px] md:text-sm mt-1">mockUSD Holding</div>
                       </div>
                     </div>
                   </div>
@@ -191,15 +188,15 @@ export default function PortfolioPage() {
                               />
                             </div>
                             {/* Info */}
-                            <div className="flex-1 min-w-0 mt-0.5">
-                              <div className="flex items-center gap-4 mb-0.5">
+                              <div className="flex-1 min-w-0 mt-0.5">
+                              <div className="flex items-center gap-2 md:gap-4 mb-0.5">
                                 <span className="font-semibold text-base truncate"><Link href={`/discover/${crate?._id?.toString()}`}>{crate.name}</Link></span>
                                 {/* {crate.notification && (
                               <span className="ml-2 w-2 h-2 rounded-full bg-orange-400 inline-block" title="Needs rebalance" />
                             )} */}
                               </div>
                               <div className="text-gray-400 text-xs mb-1 truncate">{crate.description.slice(0, 40)}...</div>
-                              <div className="flex gap-20 mt-5 text-sm">
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:flex md:gap-20 mt-4 text-xs md:text-sm">
                                 {/* <div>
                                   <div className="font-semibold text-xl">{crate.currentValue}</div>
                                   <div className="text-gray-400 text-xs">Current Value</div>
@@ -209,22 +206,22 @@ export default function PortfolioPage() {
                                   <div className="text-gray-400 text-xs">Total Invested</div>
                                 </div>
                                 <div>
-                                  <div className="text-green-400 font-semibold text-xl">{crate.activeSubscribers}</div>
+                                  <div className="text-green-400 font-semibold text-lg md:text-xl">{crate.activeSubscribers}</div>
                                   <div className="text-gray-400 text-xs">Active Subscribers</div>
                                 </div>
                                 <div>
-                                  <div className="text-green-400 font-semibold text-xl">{crate?.stocks?.length}</div>
+                                  <div className="text-green-400 font-semibold text-lg md:text-xl">{crate?.stocks?.length}</div>
                                   <div className="text-gray-400 text-xs">Stocks Holding</div>
                                 </div>
                                 <div>
-                                  <div className="text-green-400 font-semibold text-xl">{crate.monthlyReturnPercent}%</div>
+                                  <div className="text-green-400 font-semibold text-lg md:text-xl">{crate.monthlyReturnPercent}%</div>
                                   <div className="text-gray-400 text-xs">This month</div>
                                 </div>
                               </div>
                             </div>
                           </div>
                           {/* Right side: Rebalance + Copy Trade + menu */}
-                          <div className="flex flex-row items-end gap-2 absolute right-2 top-1/2 -translate-y-10">
+                          <div className="flex flex-row items-end gap-2 md:absolute md:right-2 md:top-1/2 md:-translate-y-10 mt-4 md:mt-0">
                             <div className="flex gap-2">
                               <button
 
@@ -256,39 +253,44 @@ export default function PortfolioPage() {
                   ) : (
                     <div>
                       <div className="overflow-x-auto rounded-lg ">
-                        <table className="w-full text-left text-white">
+                        <table className="w-full text-left text-white text-xs md:text-base table-auto">
                           <thead>
-                            <tr className="text-[#A1A1A1] text-sm">
+                            <tr className="text-[#A1A1A1] text-xs md:text-sm">
                               <th className="py-3 px-2 font-medium">Stock</th>
-                              <th className="py-3 px-2 font-medium">ChainId</th>
-                              <th className="py-3 px-2 font-medium">Token Address</th>
+                              <th className="py-3 px-2 font-medium hidden md:table-cell">ChainId</th>
+                              <th className="py-3 px-2 font-medium hidden md:table-cell">Token Address</th>
                               <th className="py-3 px-2 font-medium">Price</th>
                               <th className="py-3 px-2 font-medium">Holdings</th>
-                              <th className="py-3 px-2 font-medium">Owned</th>
+                              <th className="py-3 px-2 font-medium hidden md:table-cell">Owned</th>
                               {/* <th className="py-3 px-2 font-medium">Net gain</th> */}
                               <th className="py-3 px-2 font-medium"></th>
                             </tr>
                           </thead>
                           <tbody>
                             {stocksData?.map((stock: any, i: number) => (
-                              <tr key={i} className="border-t border-[#232323] text-base">
+                              <tr key={i} className="border-t border-[#232323]">
                                 <td className="py-3 px-2">
                                   <div className="flex items-center gap-3">
                                     <img src={stock.logo} alt={stock.symbol} className="w-8 h-8 rounded" />
-                                    <div>
-                                      <div className="font-semibold text-base">{stock.symbol}</div>
-                                      <div className="text-xs text-[#B6B6B6]">{stock.name}</div>
+                                    <div className="min-w-0">
+                                      <div className="font-semibold text-sm md:text-base">{stock.symbol}</div>
+                                      <div className="text-[10px] md:text-xs text-[#B6B6B6]">{stock.name}</div>
+                                      {/* Mobile-only extra info */}
+                                      <div className="md:hidden text-[10px] text-[#B6B6B6] truncate">
+                                        <span className="mr-2">{stock?.chain_id}</span>
+                                        <span className="truncate inline-block max-w-[120px] align-bottom">{stock.address}</span>
+                                      </div>
                                     </div>
                                   </div>
                                 </td>
-                                <td className="py-3 px-2">
+                                <td className="py-3 px-2 hidden md:table-cell">
                                   <div className={`flex items-center gap-2 ${getChainColor(stock?.chain_id)}`}>
                                     <span className="text-md text-white">{stock?.chain_id}</span>
                                   </div>
                                 </td>
-                                <td className="py-3 px-2">
+                                <td className="py-3 px-2 hidden md:table-cell">
                                   <div className="flex items-center gap-2">
-                                    <span>{stock.address}</span>
+                                    <span className="truncate max-w-[180px]">{stock.address}</span>
                                     {stock.fullAddress && (
                                       <button
                                         className="ml-1 hover:opacity-80 transition-opacity"
@@ -310,7 +312,7 @@ export default function PortfolioPage() {
                                 </td>
                                 <td className="py-3 px-2">{stock.price}</td>
                                 <td className="py-3 px-2">{stock.holdings}</td>
-                                <td className="py-3 px-2">{stock.owned}</td>
+                                <td className="py-3 px-2 hidden md:table-cell">{stock.owned}</td>
                                 {/* <td className={`py-3 px-2 font-semibold ${stock.netGainColor}`}>{stock.netGain}</td> */}
                                 <td className="py-3 px-2">
 

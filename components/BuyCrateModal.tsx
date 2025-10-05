@@ -162,7 +162,7 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [] }: BuyCra
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl text-white w-full bg-[#181818] p-0 rounded-2xl font-chakra">
+      <DialogContent className="w-full sm:max-w-xl text-white bg-[#181818] p-0 rounded-2xl font-chakra max-h-[90vh] overflow-y-auto mx-4 my-6 sm:mx-0 sm:my-0">
         <div className="p-3">
           <div className="flex bg-[#121212] justify-between items-center p-2 ">
             <div className="text-2xl text-white font-bold">Buy crate</div>
@@ -388,10 +388,10 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [] }: BuyCra
                   }}
                 />
               </div>
-              <div className="flex gap-4">
-                <button className="flex-1 bg-[#232323] text-white py-3 rounded" onClick={() => router.push('/portfolio')}>View Portfolio</button>
+              <div className="flex flex-col md:flex-row gap-4">
+                <button className="w-full md:flex-1 bg-[#232323] text-white py-3 rounded" onClick={() => router.push('/portfolio')}>View Portfolio</button>
                 <button
-                  className={`flex-1 font-bold py-3 rounded text-lg${disabled ? ' cursor-not-allowed' : ''}`}
+                  className={`w-full md:flex-1 font-bold py-3 rounded text-lg${disabled ? ' cursor-not-allowed' : ''}`}
                   style={disabled ? {
                     background: "linear-gradient(180deg, #444 0%, #888 100%)",
                     color: "#222",
@@ -464,10 +464,10 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [] }: BuyCra
                   </tbody>
                 </table>
               </div>
-              <div className="flex gap-4">
-                <button className="flex-1 bg-[#232323] text-white py-3 rounded" onClick={() => router.push('/portfolio')}>View Portfolio</button>
+              <div className="flex flex-col md:flex-row gap-4">
+                <button className="w-full md:flex-1 bg-[#232323] text-white py-3 rounded" onClick={() => router.push('/portfolio')}>View Portfolio</button>
                 <button
-                  className={`flex-1 font-bold py-3 rounded text-lg${disabled ? ' cursor-not-allowed' : ''}`}
+                  className={`w-full md:flex-1 font-bold py-3 rounded text-lg${disabled ? ' cursor-not-allowed' : ''}`}
                   style={disabled ? {
                     background: "linear-gradient(180deg, #444 0%, #888 100%)",
                     color: "#222",

@@ -144,7 +144,7 @@ export function ExitCrateModal({ open, onOpenChange, crate, subscribeCrateData, 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md text-white w-full bg-[#181818] p-0 rounded-2xl font-chakra">
+      <DialogContent className="w-full sm:max-w-md text-white bg-[#181818] p-0 rounded-2xl font-chakra max-h-[90vh] overflow-y-auto mx-4 my-6 sm:mx-0 sm:my-0">
         <div className="p-3">
           <div className="flex bg-[#121212] justify-between items-center p-2 ">
             <div className="text-2xl text-white font-bold">Exit crate</div>
@@ -187,11 +187,11 @@ export function ExitCrateModal({ open, onOpenChange, crate, subscribeCrateData, 
                 </Select>
               </div>
               <div className="text-center text-base font-medium my-6">How Much do you want to sell?</div>
-              <div className="flex w-3/4 mx-auto justify-between mb-1">
+              <div className="flex w-full md:w-3/4 mx-auto justify-between mb-1 px-2 md:px-0">
                 <span className="text-left text-[#898989] text-xs font-medium">Units</span>
 
               </div>
-              <div className="flex items-center w-3/4 mx-auto gap-2 mb-6">
+              <div className="flex items-center w-full md:w-3/4 mx-auto gap-2 mb-6 px-2 md:px-0">
                 <span className="text-right text-white text-lg font-ch">{units}</span>
                 <input
                   type="range"
@@ -204,10 +204,10 @@ export function ExitCrateModal({ open, onOpenChange, crate, subscribeCrateData, 
                 />
                 <span className="text-left text-white text-lg font-chakra">100</span>
               </div>
-              <div className="flex w-3/4 mx-auto mb-1">
+              <div className="flex w-full md:w-3/4 mx-auto mb-1 px-2 md:px-0">
                 <span className="text-left text-[#898989] w-full text-xs">Price</span>
               </div>
-              <div className="flex items-center bg-[#232323] w-3/4 mx-auto rounded px-4 py-2 mb-2">
+              <div className="flex items-center bg-[#232323] w-full md:w-3/4 mx-auto rounded px-4 py-2 mb-2">
                 <span className="text-2xl font-bold">${price.toLocaleString()}</span>
                 <span className="ml-auto text-white/25">{percent}%</span>
               </div>
@@ -278,7 +278,7 @@ export function ExitCrateModal({ open, onOpenChange, crate, subscribeCrateData, 
                     <span className="font-bold text-white">${totalReceivable}</span>
                   </div>
                   <button
-                    className={`w-1/2 mt-4 font-bold py-3 rounded text-lg${units === 0 ? ' cursor-not-allowed' : ''}`}
+                    className={`w-full md:w-1/2 mt-4 font-bold py-3 rounded text-lg${units === 0 ? ' cursor-not-allowed' : ''}`}
                     style={units === 0 ? {
                       background: "linear-gradient(180deg, #444 0%, #888 100%)",
                       color: "#222",
@@ -348,10 +348,10 @@ export function ExitCrateModal({ open, onOpenChange, crate, subscribeCrateData, 
                   }}
                 />
               </div>
-              <div className="flex gap-4">
-                <button className="flex-1 bg-[#232323] text-white py-3 rounded">View Portfolio</button>
+              <div className="flex flex-col md:flex-row gap-4">
+                <button className="w-full md:flex-1 bg-[#232323] text-white py-3 rounded">View Portfolio</button>
                 <button
-                  className={`flex-1 font-bold py-3 rounded text-lg${units === 0 ? ' cursor-not-allowed' : ''}`}
+                  className={`w-full md:flex-1 font-bold py-3 rounded text-lg${units === 0 ? ' cursor-not-allowed' : ''}`}
                   style={units === 0 ? {
                     background: "linear-gradient(180deg, #444 0%, #888 100%)",
                     color: "#222",

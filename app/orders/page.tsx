@@ -154,15 +154,15 @@ const Page = () => {
           {/* Table */}
           {hasTransactions ? (
             <div className="overflow-x-auto rounded-xl border border-[#2A2A2A] shadow-lg">
-              <table className="min-w-full text-sm font-chakra">
-                <thead className="bg-[#1E1E1E] text-[#A1A1A1] uppercase text-xs">
+              <table className="min-w-full text-xs md:text-sm font-chakra table-auto">
+                <thead className="bg-[#1E1E1E] text-[#A1A1A1] uppercase text-[10px] md:text-xs">
                   <tr>
-                    <th className="px-4 py-3 text-left">Date</th>
-                    <th className="px-4 py-3 text-left">Type</th>
-                    <th className="px-4 py-3 text-left">Tx Hash</th>
-                    <th className="px-4 py-3 text-left">Amount</th>
-                    <th className="px-4 py-3 text-left">Status</th>
-                    <th className="px-4 py-3 text-left">Percentage Order</th>
+                    <th className="px-3 md:px-4 py-2 md:py-3 text-left">Date</th>
+                    <th className="px-3 md:px-4 py-2 md:py-3 text-left">Type</th>
+                    <th className="px-3 md:px-4 py-2 md:py-3 text-left">Tx Hash</th>
+                    <th className="px-3 md:px-4 py-2 md:py-3 text-left">Amount</th>
+                    <th className="px-3 md:px-4 py-2 md:py-3 text-left">Status</th>
+                    <th className="px-3 md:px-4 py-2 md:py-3 text-left hidden md:table-cell">Percentage Order</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#2A2A2A]">

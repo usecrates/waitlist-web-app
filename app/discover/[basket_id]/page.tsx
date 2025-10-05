@@ -127,7 +127,7 @@ export default function SingleCrate() {
     );
   }
   return (
-    <main className="px-6 py-20 max-w-6xl mx-auto text-white space-y-10">
+    <main className="px-4 md:px-6 py-20 max-w-6xl mx-auto text-white space-y-10">
       <button
         className="mb-6 mt-4 flex items-center gap-2 text-gray-400 hover:text-white"
         onClick={() => window.history.back()}
@@ -136,7 +136,7 @@ export default function SingleCrate() {
         Back
       </button>
       <div className="flex flex-col md:flex-row justify-between gap-6">
-        <div className="flex gap-4 items-start w-1/2">
+        <div className="flex gap-4 items-start w-full md:w-1/2">
           <img
             src={
               crate.imageUrl ||
@@ -154,7 +154,7 @@ export default function SingleCrate() {
           </div>
         </div>
 
-        <div className="flex gap-6 items-center text-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 items-start text-sm">
           <div>
             <p
               className="text-green-400
@@ -186,8 +186,8 @@ export default function SingleCrate() {
           </div>
         </div>
       </div>
-      <div className="w-full flex gap-10 mt-0">
-        <div className="w-2/3 flex flex-col space-y-6">
+      <div className="w-full flex flex-col lg:flex-row gap-6 lg:gap-10 mt-0">
+        <div className="w-full lg:w-2/3 flex flex-col space-y-6">
           <Tabs defaultValue="Overview" className="bg-[#0e0e0e] w-full">
             <TabsList className="flex gap-8 border-t pt-3 border-b border-[#232323] mb-0 bg-transparent p-0 h-auto text-base justify-start items-start w-full">
               <TabsTrigger
@@ -205,7 +205,7 @@ export default function SingleCrate() {
             </TabsList>
 
             {/* Stats Bar */}
-            <div className=" border-b border-[#282828] p-4 mt-4  flex justify-between font-chakra">
+            <div className=" border-b border-[#282828] p-4 mt-4  grid grid-cols-2 md:flex md:justify-between font-chakra gap-4">
               <div>
                 <div className="text-white text-xl">{crate.stocks.length}</div>
                 <div className="text-[#898989] text-xs">Total No.of Stocks</div>
@@ -352,46 +352,46 @@ export default function SingleCrate() {
             </TabsContent>
           </Tabs>
         </div>
-        <div className="border w-1/3 border-gray-700 bg-[#111 h-fit p-6 rounded-xl space-y-4 shadow-md">
+        <div className="border w-full lg:w-1/3 border-gray-700 bg-[#111] h-fit p-4 md:p-6 rounded-xl space-y-4 shadow-md">
           {isSubscribed && address && isKyced ? (
             <div className="flex flex-col items-center justify-center h-full w-full">
-              <div className="w-full max-w-xs rounded-xl shadow-md">
+              <div className="w-full max-w-full md:max-w-xs rounded-xl shadow-md">
                 <div className="flex items-center mb-6">
                   <span className="text-white font-semibold text-sm">
                     Your Performance
                   </span>
                   <span className="flex-1 border-t border-[#383838] ml-4"></span>
                 </div>
-                <div className="grid grid-cols-2 gap-y-6 gap-x-8 mb-6">
+                <div className="grid grid-cols-2 gap-y-4 md:gap-y-6 gap-x-4 md:gap-x-8 mb-6">
                   <div className="flex flex-col items-center">
-                    <span className="text-lg font-bold text-white">${subscribeCrateData?.userInvestment?.investedAmount?.toFixed(2) || '0'}</span>
-                    <span className="text-gray-400 text-sm mt-1">
+                    <span className="text-base md:text-lg font-bold text-white">${subscribeCrateData?.userInvestment?.investedAmount?.toFixed(2) || '0'}</span>
+                    <span className="text-gray-400 text-xs md:text-sm mt-1">
                       Investment Amount
                     </span>
                   </div>
                   <div className="flex flex-col items-center">
-                    <span className="text-lg font-bold text-white">${subscribeCrateData?.userInvestment?.currentValue?.toFixed(2) || '0'}</span>
-                    <span className="text-gray-400 text-sm mt-1">
+                    <span className="text-base md:text-lg font-bold text-white">${subscribeCrateData?.userInvestment?.currentValue?.toFixed(2) || '0'}</span>
+                    <span className="text-gray-400 text-xs md:text-sm mt-1">
                       Current Amount
                     </span>
                   </div>
                   <div className="flex flex-col items-center">
-                    <span className="text-lg font-bold text-white">${subscribeCrateData?.userInvestment?.investedAmount?.toFixed(2) || '0'}</span>
-                    <span className="text-gray-400 text-sm mt-1">
+                    <span className="text-base md:text-lg font-bold text-white">${subscribeCrateData?.userInvestment?.investedAmount?.toFixed(2) || '0'}</span>
+                    <span className="text-gray-400 text-xs md:text-sm mt-1">
                       Money Put in
                     </span>
                   </div>
                   <div className="flex flex-col items-center">
-                    <span className="text-lg font-bold text-white">
+                    <span className="text-base md:text-lg font-bold text-white">
                       ${((subscribeCrateData?.userInvestment?.currentValue || 0) - (subscribeCrateData?.userInvestment?.investedAmount || 0)).toFixed(2)}{" "}
-                      <span className={`text-xs font-semibold align-bottom ${(subscribeCrateData?.userInvestment?.currentValue || 0) - (subscribeCrateData?.userInvestment?.investedAmount || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      <span className={`text-[10px] md:text-xs font-semibold align-bottom ${(subscribeCrateData?.userInvestment?.currentValue || 0) - (subscribeCrateData?.userInvestment?.investedAmount || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                         {subscribeCrateData?.userInvestment?.currentValue && subscribeCrateData?.userInvestment?.investedAmount 
                           ? `${(((subscribeCrateData.userInvestment.currentValue - subscribeCrateData.userInvestment.investedAmount) / subscribeCrateData.userInvestment.investedAmount) * 100).toFixed(1)}%`
                           : '+0%'
                         }
                       </span>
                     </span>
-                    <span className="text-gray-400 text-sm mt-1">
+                    <span className="text-gray-400 text-xs md:text-sm mt-1">
                       Total Returns
                     </span>
                   </div>
@@ -415,9 +415,9 @@ export default function SingleCrate() {
                     </span>
                   </div> */}
                 </div>
-                <div className="flex gap-4 mt-2">
+                <div className="flex gap-2 md:gap-4 mt-2">
                   <button
-                    className="w-full py-2 rounded-lg font-bold text-lg text-black"
+                    className="w-full py-2 rounded-lg font-bold text-base md:text-lg text-black"
                     style={{
                       background:
                         "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",
@@ -428,7 +428,7 @@ export default function SingleCrate() {
                     Invest More
                   </button>
                   <button
-                    className="w-full py-2 rounded-lg font-bold text-lg text-black"
+                    className="w-full py-2 rounded-lg font-bold text-base md:text-lg text-black"
                     style={{
                       background:
                         "linear-gradient(180deg, #7B7B7B 0%, #EBEBEB 27.19%, #999999 72.17%)",

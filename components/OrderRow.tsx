@@ -27,8 +27,8 @@ export default function OrderRow({ order }: { order: any }) {
 
   return (
     <tr className="hover:bg-[#121212] transition-colors">
-      <td className="px-4 py-3 text-[#A1A1A1]">{orderDate}</td>
-      <td className="px-4 py-3">
+      <td className="px-3 md:px-4 py-2 md:py-3 text-[#A1A1A1] text-xs md:text-sm align-middle leading-tight">{orderDate}</td>
+      <td className="px-3 md:px-4 py-2 md:py-3 align-middle">
         <span
           className={`px-2 py-1 rounded-md text-xs font-medium ${order.type === "buy"
               ? "bg-green-900/40 text-green-400"
@@ -39,7 +39,8 @@ export default function OrderRow({ order }: { order: any }) {
         </span>
       </td>
 
-      <td className="px-4 py-3 flex items-center gap-2">
+      <td className="px-3 md:px-4 py-2 md:py-3 align-middle">
+        <div className="flex items-center gap-2">
         <span className="text-blue-400">{shortTxHash}</span>
         {txHash && (
           <button
@@ -57,16 +58,17 @@ export default function OrderRow({ order }: { order: any }) {
             <Image src="/assets/copy.svg" alt="Copy" width={16} height={16} />
           </button>
         )}
+        </div>
       </td>
 
       <td
-        className={`px-4 py-3 font-medium ${order.type === "buy" ? "text-green-400" : "text-red-400"
+        className={`px-3 md:px-4 py-2 md:py-3 align-middle font-medium ${order.type === "buy" ? "text-green-400" : "text-red-400"
           }`}
       >
         {formattedAmount}
       </td>
 
-      <td className="px-4 py-3">
+      <td className="px-3 md:px-4 py-2 md:py-3 align-middle">
         {statusLoading ? (
           <span className="text-yellow-400">Loading...</span>
         ) : statusInfo ? (
@@ -85,7 +87,7 @@ export default function OrderRow({ order }: { order: any }) {
         )}
       </td>
 
-      <td className="px-4 py-3">
+      <td className="px-3 md:px-4 py-2 md:py-3 hidden md:table-cell align-middle">
         {statusLoading ? (
           <span className="text-yellow-400">Loading...</span>
         ) : statusInfo ? (

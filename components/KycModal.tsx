@@ -132,7 +132,7 @@ export function KycModal({ open, onOpenChange }: KycModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md text-white w-full bg-[#181818] p-0 rounded-2xl font-chakra">
+      <DialogContent className="w-full sm:max-w-md text-white bg-[#181818] p-0 rounded-2xl font-chakra max-h-[90vh] overflow-y-auto mx-4 my-6 sm:mx-0 sm:my-0">
         <DialogTitle>KYC Onboarding</DialogTitle>
 
         {/* Step Indicator */}
