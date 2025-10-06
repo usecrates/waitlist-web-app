@@ -1,14 +1,18 @@
 "use client";
 
+
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
+import { useUniversalWalletClient } from "@/utils/universalWalletClient";
+import { sepolia } from "viem/chains";
+
 
 
 export default function LoginButton() {
   const { customizeLogin, logout, address, authenticated } = usePrivyAuth();
+  const { chainId, isExternalWallet, getWalletClient } = useUniversalWalletClient();
   const shortAddress = address ? `${address.slice(0, 4)}...${address.slice(-4)}` : "";
- 
 
   const copyToClipboard = async () => {
     if (address) {
@@ -16,6 +20,18 @@ export default function LoginButton() {
       toast("Address Copied!", { className: "font-ropa", duration: 5000 });
     }
   };
+
+  const handleSwitchChain = async () => {
+    try {
+      const walletClient = await getWalletClient();
+      await walletClient.switchChain({ id: sepolia.id });
+      toast.success("Switched to Sepolia network");
+    } catch (err) {
+      toast.error("Failed to switch chain. Please switch manually.");
+    }
+  };
+
+  const isSepolia = chainId === sepolia.id;
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -35,6 +51,15 @@ export default function LoginButton() {
           >
             Logout
           </button>
+
+          {!isSepolia && (
+            <button
+              onClick={handleSwitchChain}
+              className="bg-yellow-500 font-ropa text-black px-4 py-2 font-medium text-md"
+            >
+              Switch to Sepolia
+            </button>
+          )}
         </div>
       ) : (
         <button
