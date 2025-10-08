@@ -1,5 +1,5 @@
 "use client";
-import { createContext, use, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useLogin, useLogout, usePrivy } from "@privy-io/react-auth";
 interface AuthContextValue {
   address: string;

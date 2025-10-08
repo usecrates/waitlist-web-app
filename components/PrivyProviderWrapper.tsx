@@ -22,10 +22,10 @@ export default function PrivyProviderWrapper({ children }: { children: ReactNode
         config={{
           appearance: {
             theme: "dark",
-            walletChainType: "ethereum-and-solana",
-            showWalletLoginFirst: true,
+            walletChainType: "ethereum-only",
+            showWalletLoginFirst: false,
           },
-          loginMethods: ["google", "passkey", "wallet", "twitter", "email"],
+          loginMethods: ["google", "passkey", "twitter", "email"],
         }}
       >
         <QueryClientProvider client={queryClient}>
