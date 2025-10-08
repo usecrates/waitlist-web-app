@@ -16,7 +16,9 @@ import {
   useGetCrateById,
   useSubscribeCrate,
 } from "@/hooks/user-hooks";
+
 import { useChainId } from "wagmi";
+import { sepolia } from "viem/chains";
 
 import { useBuyOrderMutation } from "@/services/buy_order";
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
@@ -27,7 +29,7 @@ export default function SingleCrate() {
   const { basket_id } = useParams();
   const { data: crate, isLoading } = useGetCrateById(basket_id as string);
   const { address, authenticated } = usePrivyAuth();
-  const chainId = useChainId()
+  const chainId = useChainId();
   const { data: userData, refetch: refetchUser } = useEnrichedUser(
     address,
     authenticated
@@ -55,7 +57,7 @@ export default function SingleCrate() {
   );
 
   // Get the user's investment data for this specific crate
-  const subscribeCrateData = userData?.subscribedCrates?.find((_c) => _c.crateId === crate._id);
+  const subscribeCrateData = userData?.subscribedCrates?.find((_c) => _c?.crateId === crate?._id);
 
   function getTokenAddress(chainId: number, tokens: any) {
     const entry = tokens.find((token: string) => token.split(":")[1] === String(chainId));
@@ -123,6 +125,15 @@ export default function SingleCrate() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         Crate not found
+      </div>
+    );
+  }
+  if (chainId && chainId !== sepolia.id) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <div className="text-xl text-red-400 font-bold">Wrong Network</div>
+        <div className="text-gray-300">Please switch your wallet to Sepolia network to continue.</div>
+        {/* You can add a button to trigger chain switch if you have logic for it */}
       </div>
     );
   }
