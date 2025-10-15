@@ -7,10 +7,9 @@ import { PrivyProvider } from "@privy-io/react-auth";
 import { ReactNode, StrictMode, useState } from "react";
 
 export const config = createConfig({
-  chains: [sepolia, mainnet],  // add any common chains
+  chains: [sepolia],  // add any common chains
   transports: {
-    [sepolia.id]: http(),
-    [mainnet.id]: http()
+    [sepolia.id]: http()
   },
 });
 export default function PrivyProviderWrapper({ children }: { children: ReactNode }) {

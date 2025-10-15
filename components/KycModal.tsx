@@ -48,6 +48,7 @@ export function KycModal({ open, onOpenChange }: KycModalProps) {
     if (!open) setStep(0);
   }, [open]);
 
+  console.log({hasLinkedWallet, walletLinked,hasStartedKYC,step,hasRegistered,userData});
   // Auto advance steps
   useEffect(() => {
     if (step === 0 && hasRegistered) setStep(1);
@@ -119,7 +120,7 @@ export function KycModal({ open, onOpenChange }: KycModalProps) {
   const handleFundWallet = () => {
     if (!address) return toast.error("Wallet not connected");
     fundWallet(
-      { wallet: address },
+      { wallet: address  as `0x${string}`, chain_id: 11155111 },
       {
         onSuccess: () => {
           toast.success("Wallet funded successfully!");

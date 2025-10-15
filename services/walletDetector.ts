@@ -18,19 +18,31 @@ export class WalletDetector {
     wagmiConnected: boolean,
     wagmiAddress?: string
   ): WalletType {
-    // Priority order: MetaMask > Privy Embedded > Others
-    if (wagmiConnected && wagmiAddress) {
+    // Prefer concrete linked accounts over generic wagmi connection
+    const hasMetaMaskLinked = linkedAccounts?.some(
+      (account) => account.type === "wallet" &&
+        account.walletClientType === "metamask" &&
+        account.chainType === "ethereum"
+    );
+    const hasPrivyLinked = linkedAccounts?.some(
+      (account) => account.type === "wallet" &&
+        account.walletClientType === "privy" &&
+        account.chainType === "ethereum"
+    );
+
+    // If MetaMask is explicitly linked and wagmi is connected, classify as MetaMask
+    if (hasMetaMaskLinked && wagmiConnected && wagmiAddress) {
       return WalletType.METAMASK;
     }
 
-    const privyWallet = linkedAccounts?.find(
-      (account) => account.type === "wallet" && 
-      account.walletClientType === "privy" && 
-      account.chainType === "ethereum"
-    );
-
-    if (privyWallet) {
+    // Otherwise, if a Privy wallet is linked, classify as Privy embedded
+    if (hasPrivyLinked) {
       return WalletType.PRIVY_EMBEDDED;
+    }
+
+    // Fallback: if wagmi is connected but no explicit linked account detected, assume external wallet
+    if (wagmiConnected && wagmiAddress) {
+      return WalletType.METAMASK;
     }
 
     return WalletType.UNKNOWN;
@@ -47,13 +59,21 @@ export class WalletDetector {
   ): WalletInfo | null {
     switch (walletType) {
       case WalletType.METAMASK:
-        if (!wagmiAddress) return null;
+        {
+          if (!wagmiAddress) return null;
+          const hasMetaMaskLinked = linkedAccounts?.some(
+            (account) => account.type === "wallet" &&
+              account.walletClientType === "metamask" &&
+              account.chainType === "ethereum"
+          );
+          if (!hasMetaMaskLinked) return null;
         return {
           address: wagmiAddress as `0x${string}`,
           type: WalletType.METAMASK,
           chainId: chainId || 1,
           isConnected: true,
         };
+        }
 
       case WalletType.PRIVY_EMBEDDED:
         const privyWallet = linkedAccounts?.find(
@@ -162,7 +182,12 @@ export class WalletDetector {
   ): WalletType[] {
     const available: WalletType[] = [];
 
-    if (wagmiConnected) {
+    const hasMetaMaskLinked = linkedAccounts?.some(
+      (account) => account.type === "wallet" && 
+        account.walletClientType === "metamask" && 
+        account.chainType === "ethereum"
+    );
+    if (wagmiConnected && hasMetaMaskLinked) {
       available.push(WalletType.METAMASK);
     }
 

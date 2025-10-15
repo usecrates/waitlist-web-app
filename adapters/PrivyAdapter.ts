@@ -20,6 +20,8 @@ export class PrivyAdapter implements WalletAdapter {
       throw this.createError(WalletErrorCode.WALLET_NOT_FOUND, 'Privy user not available');
     }
 
+    console.log(this.user);
+
     const privyWallet = this.user?.linkedAccounts?.find(
       (account: any) => account.type === "wallet" && 
       account.walletClientType === "privy" && 
@@ -33,7 +35,7 @@ export class PrivyAdapter implements WalletAdapter {
     this.walletInfo = {
       address: privyWallet.address as `0x${string}`,
       type: WalletType.PRIVY_EMBEDDED,
-      chainId: 1, // Privy handles chain switching internally
+      chainId: 11155111, // Reflect Sepolia as active chain for embedded wallet
       isConnected: true,
     };
 
@@ -59,7 +61,7 @@ export class PrivyAdapter implements WalletAdapter {
     return {
       address: privyWallet.address as `0x${string}`,
       type: WalletType.PRIVY_EMBEDDED,
-      chainId: 1,
+      chainId: 11155111,
       isConnected: true,
     };
   }

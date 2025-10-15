@@ -59,6 +59,7 @@ export class WalletManagerService implements WalletManager {
       this.wagmiHooks?.isConnected || false,
       this.wagmiHooks?.address
     );
+    console.log({primaryWalletType});
 
     const adapter = this.adapters.get(primaryWalletType);
     if (adapter && adapter.isAvailable()) {

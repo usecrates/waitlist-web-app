@@ -11,7 +11,7 @@ import { sepolia } from "viem/chains";
 
 export default function LoginButton() {
   const { customizeLogin, logout, address, authenticated } = usePrivyAuth();
-  const { chainId, isExternalWallet, getWalletClient } = useUniversalWalletClient();
+  const { chainId, isExternalWallet, isPrivyWallet, getWalletClient } = useUniversalWalletClient();
   const shortAddress = address ? `${address.slice(0, 4)}...${address.slice(-4)}` : "";
 
   const copyToClipboard = async () => {
@@ -23,6 +23,12 @@ export default function LoginButton() {
 
   const handleSwitchChain = async () => {
     try {
+      console.log(isPrivyWallet);
+      console.log(isExternalWallet);
+      if (isPrivyWallet) {
+        toast.info("Your Privy wallet auto-targets Sepolia in this app.");
+        return;
+      }
       const walletClient = await getWalletClient();
       await walletClient.switchChain({ id: sepolia.id });
       toast.success("Switched to Sepolia network");
