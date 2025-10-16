@@ -35,7 +35,7 @@ export class PrivyAdapter implements WalletAdapter {
     this.walletInfo = {
       address: privyWallet.address as `0x${string}`,
       type: WalletType.PRIVY_EMBEDDED,
-      chainId: 11155111, // Reflect Sepolia as active chain for embedded wallet
+      chainId: 84532, // Reflect Base Sepolia as active chain for embedded wallet
       isConnected: true,
     };
 
@@ -61,7 +61,7 @@ export class PrivyAdapter implements WalletAdapter {
     return {
       address: privyWallet.address as `0x${string}`,
       type: WalletType.PRIVY_EMBEDDED,
-      chainId: 11155111,
+      chainId: 84532,
       isConnected: true,
     };
   }

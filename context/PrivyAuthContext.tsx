@@ -20,7 +20,7 @@ export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) =
   const handleFundWallet = (useraddress :`0x${string}`) => {
       if (!useraddress) return toast.error("Wallet not connected");
       fundWallet(
-        { wallet: useraddress as `0x${string}` , chain_id: 11155111 },
+        { wallet: useraddress as `0x${string}` , chain_id: 84532 },
         {
           onSuccess: () => {
             toast.success("Wallet funded successfully!");
@@ -44,7 +44,7 @@ export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) =
       (account) => account.type === "wallet" && (account.walletClientType === "privy" || account.walletClientType === "metamask") && account.chainType === "ethereum"
     );
     setAddress((wallet as any)?.address || "");
-    handleFundWallet(wallet?.address as `0x${string}`);
+    handleFundWallet((wallet as any)?.address as `0x${string}`);
   }, [user]);
 
   const value = useMemo(

@@ -120,7 +120,7 @@ export function KycModal({ open, onOpenChange }: KycModalProps) {
   const handleFundWallet = () => {
     if (!address) return toast.error("Wallet not connected");
     fundWallet(
-      { wallet: address  as `0x${string}`, chain_id: 11155111 },
+      { wallet: address  as `0x${string}`, chain_id: 84532 },
       {
         onSuccess: () => {
           toast.success("Wallet funded successfully!");
