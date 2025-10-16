@@ -22,7 +22,6 @@ import { sepolia } from "viem/chains";
 
 import { useBuyOrderMutation } from "@/services/buy_order";
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
-
 import toast from "react-hot-toast";
 
 export default function SingleCrate() {
