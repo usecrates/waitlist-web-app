@@ -44,7 +44,7 @@ export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) =
       (account) => account.type === "wallet" && (account.walletClientType === "privy" || account.walletClientType === "metamask") && account.chainType === "ethereum"
     );
     setAddress((wallet as any)?.address || "");
-    handleFundWallet(wallet?.address as `0x${string}`);
+    // handleFundWallet(wallet?.address as `0x${string}`);
   }, [user]);
 
   const value = useMemo(
