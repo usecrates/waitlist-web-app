@@ -48,8 +48,8 @@ export function useSellOrderMutation() {
             // Ensure we're on the correct chain before proceeding
             const chainIsCorrect = await ensureCorrectChain();
             if (!chainIsCorrect) {
-                toast.error("Please switch to Base Sepolia testnet in your wallet to continue");
-                throw new Error("Incorrect chain - please switch to Base Sepolia testnet");
+                toast.error("Please switch to Sepolia testnet in your wallet to continue");
+                throw new Error("Incorrect chain - please switch to Sepolia testnet");
             }
 
             const id = toast.loading("Creating sell order...");

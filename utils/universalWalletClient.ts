@@ -4,7 +4,7 @@ import { createWalletClient, custom, WalletClient } from "viem";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { WalletManagerService } from "@/services/WalletManager";
 import { WalletType, WalletInfo, WalletError } from "@/types/wallet";
-import { baseSepolia } from "viem/chains"; // switched default to Base Sepolia
+import { sepolia } from "viem/chains"; // or whichever default you target
 
 export function useUniversalWalletClient() {
   const { data: wagmiWalletClient } = useWalletClient();
@@ -62,7 +62,7 @@ export function useUniversalWalletClient() {
           const metamaskProvider = (window as any).ethereum;
 
           // Switch chain if needed
-          const targetChainId = publicClient?.chain?.id || baseSepolia.id;
+          const targetChainId = publicClient?.chain?.id || sepolia.id;
           const currentChainId = await metamaskProvider.request({ method: "eth_chainId" });
           if (parseInt(currentChainId, 16) !== targetChainId) {
             try {
@@ -77,7 +77,7 @@ export function useUniversalWalletClient() {
 
           return createWalletClient({
             account: info.address,
-            chain: publicClient?.chain || baseSepolia,
+            chain: publicClient?.chain || sepolia,
             transport: custom(metamaskProvider),
           });
         }
@@ -100,7 +100,7 @@ export function useUniversalWalletClient() {
         if (!privyWallet) throw new Error("Privy wallet not found");
 
         // 🧩 Switch chain if needed
-        const targetChainId = publicClient?.chain?.id || baseSepolia.id;
+        const targetChainId = publicClient?.chain?.id || sepolia.id;
         const currentChainId = await privyWallet.getChainId?.();
         if (currentChainId !== targetChainId) {
           await privyWallet.switchChain(targetChainId);
@@ -112,7 +112,7 @@ export function useUniversalWalletClient() {
 
         return createWalletClient({
           account: info.address,
-          chain: publicClient?.chain || baseSepolia,
+          chain: publicClient?.chain || sepolia,
           transport: custom(provider),
         });
       }

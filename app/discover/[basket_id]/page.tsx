@@ -18,7 +18,7 @@ import {
 } from "@/hooks/user-hooks";
 
 import { useChainId } from "wagmi";
-import { baseSepolia } from "viem/chains";
+import { sepolia } from "viem/chains";
 
 import { useBuyOrderMutation } from "@/services/buy_order";
 import { usePrivyAuth } from "@/context/PrivyAuthContext";
@@ -128,11 +128,11 @@ export default function SingleCrate() {
       </div>
     );
   }
-  if (chainId && chainId !== baseSepolia.id) {
+  if (chainId && chainId !== sepolia.id) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <div className="text-xl text-red-400 font-bold">Wrong Network</div>
-        <div className="text-gray-300">Please switch your wallet to Base Sepolia network to continue.</div>
+        <div className="text-gray-300">Please switch your wallet to Sepolia network to continue.</div>
         {/* You can add a button to trigger chain switch if you have logic for it */}
       </div>
     );
