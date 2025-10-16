@@ -17,7 +17,6 @@ import { X } from "lucide-react";
 import { toast } from "sonner";
 import { useWaitlist } from "@/hooks/useWaitlist";
 import { useCheckWaitlist } from "@/hooks/useCheckWaitlist";
-import { useRouter } from "next/navigation";
 import { useRive, Layout, Fit, Alignment } from "@rive-app/react-canvas";
 
 // Animation variants

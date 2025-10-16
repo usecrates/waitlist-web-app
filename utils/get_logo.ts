@@ -27,6 +27,7 @@ export function getChainIcon(chainIdString: string): string {
       "1": "bg-green-500 text-black",        // Ethereum
       "42161": "bg-blue-500 text-white",     // Arbitrum
       "8453": "bg-indigo-500 text-white",    // Base
+      "84532": "bg-indigo-500 text-white",    // Base Sepolia
       "81457": "bg-yellow-500 text-black",   // Blast
       "7887": "bg-pink-500 text-white",      // Kinto
       "11155111": "bg-orange-500 text-black",// Sepolia

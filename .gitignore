@@ -23,6 +23,7 @@ package-lock.json
 # package-lock.json
 # env files
 .env*
+.env.*.local
 
 # vercel
 .vercel

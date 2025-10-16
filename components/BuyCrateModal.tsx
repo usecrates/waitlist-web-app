@@ -6,7 +6,7 @@ import { usePrivyAuth } from "@/context/PrivyAuthContext";
 import { useEnrichedUser } from "@/hooks/user-hooks";
 import { useBuyOrderMutation } from "@/services/buy_order";
 import { useBalance, useChainId } from "wagmi";
-import { sepolia } from "viem/chains";
+import { baseSepolia } from "viem/chains";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
@@ -156,7 +156,7 @@ export function BuyCrateModal({ open, onOpenChange, crate, stocks = [] }: BuyCra
     }
   }, [open]);
 
-  const isCorrectChain = chainId === sepolia.id;
+  const isCorrectChain = chainId === baseSepolia.id;
   const disabled = !amount || parseFloat(amount) <= 0 || !isCorrectChain;
 
 

@@ -1,8 +1,8 @@
-import { sepolia } from 'viem/chains';
+import { baseSepolia } from 'viem/chains';
 import { useUniversalWallet } from '@/hooks/useUniversalWallet';
 
 /**
- * Ensures the wallet is connected to the correct chain (Sepolia) before executing transactions.
+ * Ensures the wallet is connected to the correct chain (Base Sepolia) before executing transactions.
  * For external wallets (MetaMask), it will automatically switch chains.
  * For embedded wallets (Privy), it shows a message to switch manually.
  * 
@@ -14,7 +14,7 @@ export async function ensureCorrectChain(
   isExternalWallet: boolean,
   currentChainId?: number | null
 ): Promise<boolean> {
-  const targetChainId = sepolia.id;
+  const targetChainId = baseSepolia.id;
   
   // If already on correct chain, no action needed
   if (currentChainId === targetChainId) {

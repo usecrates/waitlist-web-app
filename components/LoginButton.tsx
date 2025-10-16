@@ -5,7 +5,7 @@ import { usePrivyAuth } from "@/context/PrivyAuthContext";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
 import { useUniversalWalletClient } from "@/utils/universalWalletClient";
-import { sepolia } from "viem/chains";
+import { baseSepolia } from "viem/chains";
 
 
 
@@ -26,18 +26,18 @@ export default function LoginButton() {
       console.log(isPrivyWallet);
       console.log(isExternalWallet);
       if (isPrivyWallet) {
-        toast.info("Your Privy wallet auto-targets Sepolia in this app.");
+        toast.info("Your Privy wallet auto-targets Base Sepolia in this app.");
         return;
       }
       const walletClient = await getWalletClient();
-      await walletClient.switchChain({ id: sepolia.id });
-      toast.success("Switched to Sepolia network");
+      await walletClient.switchChain({ id: baseSepolia.id });
+      toast.success("Switched to Base Sepolia network");
     } catch (err) {
       toast.error("Failed to switch chain. Please switch manually.");
     }
   };
 
-  const isSepolia = chainId === sepolia.id;
+  const isSepolia = chainId === baseSepolia.id;
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -63,7 +63,7 @@ export default function LoginButton() {
               onClick={handleSwitchChain}
               className="bg-yellow-500 font-ropa text-black px-4 py-2 font-medium text-md"
             >
-              Switch to Sepolia
+              Switch to Base Sepolia
             </button>
           )}
         </div>
