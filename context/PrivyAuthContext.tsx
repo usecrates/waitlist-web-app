@@ -1,8 +1,6 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useLogin, useLogout, usePrivy } from "@privy-io/react-auth";
-import { useFundWallet } from "@/hooks/user-hooks";
-import toast from "react-hot-toast";
 interface AuthContextValue {
   address: string;
   user: any;
@@ -13,22 +11,10 @@ interface AuthContextValue {
 const PrivyAuthContext = createContext<AuthContextValue | undefined>(undefined);
 export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { login } = useLogin();
-  const { mutate: fundWallet, isPending: fundingWallet } = useFundWallet();
   const { logout } = useLogout();
   const { user, authenticated } = usePrivy();
   const [address, setAddress] = useState("");
-  const handleFundWallet = (useraddress :`0x${string}`) => {
-      if (!useraddress) return toast.error("Wallet not connected");
-      fundWallet(
-        { wallet: useraddress as `0x${string}` , chain_id: 11155111 },
-        {
-          onSuccess: () => {
-            toast.success("Wallet funded successfully!");
-          },
-          onError: () => toast.error("Failed to fund wallet"),
-        }
-      );
-    };
+
   const customizeLogin = useCallback(async () => {
     try {
       await login();
@@ -44,7 +30,6 @@ export const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) =
       (account) => account.type === "wallet" && (account.walletClientType === "privy" || account.walletClientType === "metamask") && account.chainType === "ethereum"
     );
     setAddress((wallet as any)?.address || "");
-    // handleFundWallet(wallet?.address as `0x${string}`);
   }, [user]);
 
   const value = useMemo(

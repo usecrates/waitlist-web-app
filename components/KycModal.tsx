@@ -5,8 +5,8 @@ import { usePrivyAuth } from "@/context/PrivyAuthContext";
 import {
   useCreateKYCLink,
   useEnrichedUser,
-  useFundWallet,
   useRegisterUser,
+  useTreasuryFundWallet,
 } from "@/hooks/user-hooks";
 import Dinari from "@dinari/api-sdk";
 import { useUniversalWallet } from "@/hooks/useUniversalWallet";
@@ -23,7 +23,7 @@ export function KycModal({ open, onOpenChange }: KycModalProps) {
 
   const [step, setStep] = useState(0);
 
-  const { mutate: fundWallet, isPending: fundingWallet } = useFundWallet();
+  const { mutate: fundWallet, isPending: fundingWallet } = useTreasuryFundWallet();
   const { address, authenticated } = usePrivyAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -120,7 +120,7 @@ export function KycModal({ open, onOpenChange }: KycModalProps) {
   const handleFundWallet = () => {
     if (!address) return toast.error("Wallet not connected");
     fundWallet(
-      { wallet: address  as `0x${string}`, chain_id: 11155111 },
+      { wallet: address  as `0x${string}`},
       {
         onSuccess: () => {
           toast.success("Wallet funded successfully!");

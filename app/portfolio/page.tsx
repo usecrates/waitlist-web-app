@@ -32,12 +32,12 @@ export default function PortfolioPage() {
     data: tokenBalance,
     isLoading: tokenLoading,
   } = useBalance({
-    address,
-    token: "0x665b099132d79739462DfDe6874126AFe840F7a3" as `0x${string}`,
-    enabled: !!address, 
+    address: address as `0x${string}`,
+    token: "0x665b099132d79739462DfDe6874126AFe840F7a3",
   });
 
- 
+  console.log(tokenBalance,"tokenBalance")
+  console.log(address,"address")
 
   const subscribedIds = new Set(
     userData?.subscribedCrates.map((c: any) => c.crateId)

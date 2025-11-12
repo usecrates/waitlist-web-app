@@ -4,10 +4,41 @@ import LoginButton from "@/components/LoginButton";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { MobileMenu } from "@/components/mobile-menu";
-
+import { useBalance, useChainId } from "wagmi";
+import { usePrivyAuth } from "@/context/PrivyAuthContext";
+import {  useTreasuryFundWallet } from "@/hooks/user-hooks";
+import { Button } from "@/components/ui/button";
+import { DownloadIcon } from "lucide-react";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { address, authenticated } = usePrivyAuth();
+  const { mutate: fundWallet, isPending: isFunding } = useTreasuryFundWallet();
+  
+  // Mock USD token address (same as used in portfolio page)
+  const mockUsdTokenAddress = process.env.NEXT_PUBLIC_PAYMENTTOKEN || "0x665b099132d79739462DfDe6874126AFe840F7a3";
+  
+  // Check balance for mock USD token
+  const { data: tokenBalance, isLoading: balanceLoading } = useBalance({
+    address: authenticated && address ? (address as `0x${string}`) : undefined,
+    token: mockUsdTokenAddress as `0x${string}`,
+  });
+
+  const balance = tokenBalance ? Number(tokenBalance.formatted) : 0;
+  const showDripButton = authenticated && address && !balanceLoading && balance < 5;
+
+  const handleDrip = () => {
+    if (!address) return;
+    fundWallet(
+      { wallet: address as `0x${string}`},
+      {
+        onSuccess: () => {
+          // Balance will automatically refetch via useBalance
+        },
+      }
+    );
+  };
+
   return (
     <header className="fixed top-0 left-0 font-chakra right-0 z-50 bg-black border-b border-[#272727] py-4">
       <div className="max-w-6xl mx-auto px-4 md:px-0 flex items-center justify-between ">
@@ -43,6 +74,24 @@ export default function Navbar() {
             className="hidden md:flex items-center gap-4"
           >
             <Image src="/assets/bell.svg" alt="Notifications" height={24} width={24} />
+            {authenticated && address && (
+              <div className="flex items-center gap-2 text-white text-sm">
+                {balanceLoading ? (
+                  <span className="text-gray-400">Loading...</span>
+                ) : (
+                  <span className="font-medium">${balance.toFixed(2)} mockUSD</span>
+                )}
+              </div>
+            )}
+            {showDripButton && (
+              <Button
+                onClick={handleDrip}
+                disabled={isFunding}
+                className="text-xs p-0 bg-transparent border-none hover:bg-transparent"
+              >
+                {isFunding ? "Dripping..." : <DownloadIcon className="w-4 h-4" />}
+              </Button>
+            )}
             <LoginButton />
           </motion.div>
           {/* Mobile menu */}

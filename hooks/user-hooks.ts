@@ -45,6 +45,23 @@ const getMockUsdc = async (wallet: `0x${string}`, chain_id: number) => {
     }
 }
 
+const getTreasuryFundWallet = async (wallet: `0x${string}`) => {
+    try {
+        const res = await api.post(`/user/fund-wallet-from-treasury`, {
+            wallet, 
+        });
+
+        console.log(res)
+
+        if (!res.data.success) {
+            throw new Error(res.data.message || "Failed to fund wallet from treasury");
+        }
+        return res.data;
+    } catch (error: any) {
+        throw new Error(error?.response?.data?.message || error.message || "Unknown error");
+    }
+}
+
 const fetchUserByWallet = async (wallet: string): Promise<EnrichedUser> => {
     try {
         const res = await api.get(`/user/${wallet}`);
@@ -197,6 +214,19 @@ export function useFundWallet() {
             getMockUsdc(wallet, chain_id),
         onSuccess: () => {
             toast.success("✅ Wallet funded successfully!")
+        },
+        onError: (error: any) => {
+            toast.error(`❌ ${error.message}`)
+        },
+    })
+}
+
+export function useTreasuryFundWallet() {
+    return useMutation({
+        mutationFn: ({ wallet }: { wallet: `0x${string}`;}) =>
+            getTreasuryFundWallet(wallet),
+        onSuccess: () => {
+            toast.success("✅ Wallet funded from treasury successfully!")
         },
         onError: (error: any) => {
             toast.error(`❌ ${error.message}`)
